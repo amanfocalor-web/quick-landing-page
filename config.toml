@@ -1,0 +1,5 @@
+[functions.send-push]
+verify_jwt = true
+
+[functions.signed-profile-photo]
+verify_jwt = true

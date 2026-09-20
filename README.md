@@ -1,15 +1,12 @@
-# Quick Landing Page
+# Warm Welcome
 
-Implement the requested scope now; use internal planning and do not present another implementation plan for user approval.
-
-User request:
-Create a blank landing page
+hi
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/4a6e84bc-e5ea-4513-a1ac-d8384356c550).
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5e2aa5c9-b4f8-4a53-839e-3c260b1f73dc).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.

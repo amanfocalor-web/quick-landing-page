@@ -84,7 +84,7 @@ export async function getMyProfile(): Promise<Profile | null> {
   }
 }
 
-export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'eligibility' | 'verificationStatus' | 'relationshipState' | 'partnerId' | 'interests'> & { interests: string[]; complete: boolean }) {
+export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'eligibility' | 'verificationStatus' | 'relationshipState' | 'partnerId' | 'interests' | 'profileComplete'> & { interests: string[]; complete: boolean }) {
   const client = assertSupabase()
   const { data, error } = await client.rpc('save_profile', {
     p_name: input.name,
@@ -251,14 +251,14 @@ export async function creatorSpark(a: string, b: string) {
 export async function savePushSubscription(subscription: PushSubscription) {
   const client = assertSupabase()
   const json = subscription.toJSON()
-  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) throw new Error('Invalid push subscription')
+  if (!json.endpoint || !json.keys?.['p256dh'] || !json.keys?.['auth']) throw new Error('Invalid push subscription')
   const { data: user } = await client.auth.getUser()
   if (!user.user) throw new Error('Authentication required')
   const { error } = await client.from('push_subscriptions').upsert({
     profile_id: user.user.id,
     endpoint: json.endpoint,
-    p256dh: json.keys.p256dh,
-    auth: json.keys.auth,
+    p256dh: json.keys['p256dh'],
+    auth: json.keys['auth'],
     user_agent: navigator.userAgent,
     last_seen_at: new Date().toISOString(),
   }, { onConflict: 'profile_id,endpoint' })
@@ -280,7 +280,7 @@ export async function enablePushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     throw new Error('Push notifications are not available in this browser')
   }
-  const key = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined
+  const key = import.meta.env['VITE_WEB_PUSH_PUBLIC_KEY'] as string | undefined
   if (!key) throw new Error('Push notifications are not configured yet')
 
   const permission = Notification.permission === 'granted'

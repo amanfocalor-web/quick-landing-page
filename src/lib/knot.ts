@@ -251,7 +251,7 @@ export async function creatorSpark(a: string, b: string) {
 export async function savePushSubscription(subscription: PushSubscription) {
   const client = assertSupabase()
   const json = subscription.toJSON()
-  if (!json.endpoint || !json.keys?['p256dh'] || !json.keys?.auth) throw new Error('Invalid push subscription')
+  if (!json.endpoint || !json.keys?.['p256dh'] || !json.keys?.['auth']) throw new Error('Invalid push subscription')
   const { data: user } = await client.auth.getUser()
   if (!user.user) throw new Error('Authentication required')
   const { error } = await client.from('push_subscriptions').upsert({

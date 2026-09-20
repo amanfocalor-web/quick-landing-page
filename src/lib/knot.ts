@@ -84,7 +84,7 @@ export async function getMyProfile(): Promise<Profile | null> {
   }
 }
 
-export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'eligibility' | 'verificationStatus' | 'relationshipState' | 'partnerId' | 'interests'> & { interests: string[]; complete: boolean }) {
+export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'eligibility' | 'verificationStatus' | 'relationshipState' | 'partnerId' | 'interests' | 'profileComplete'> & { interests: string[]; complete: boolean }) {
   const client = assertSupabase()
   const { data, error } = await client.rpc('save_profile', {
     p_name: input.name,

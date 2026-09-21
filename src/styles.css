@@ -2346,3 +2346,38 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   border-color: rgba(128,105,183,.16);
   background: rgba(250,248,255,.78);
 }
+
+/* -------------------------------------------------------------------------
+   KNOT v15 — seamless, continuously flowing nebula streams.
+   Only the two side-streams are changed in this pass.
+   ------------------------------------------------------------------------- */
+.welcome.knot-welcome .welcome-nebula-left,
+.welcome.knot-welcome .welcome-nebula-right {
+  background-repeat: repeat-y !important;
+  background-size: 112% 100% !important;
+  will-change: background-position-y !important;
+  transform: none !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left {
+  animation: knot-v15-stream-left 22s linear infinite !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right {
+  animation: knot-v15-stream-right 24s linear infinite !important;
+}
+
+@keyframes knot-v15-stream-left {
+  from { background-position: 0% 0%; }
+  to   { background-position: 0% 100%; }
+}
+
+@keyframes knot-v15-stream-right {
+  from { background-position: 100% 0%; }
+  to   { background-position: 100% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .welcome-nebula-left,
+  .welcome.knot-welcome .welcome-nebula-right { animation: none !important; }
+}

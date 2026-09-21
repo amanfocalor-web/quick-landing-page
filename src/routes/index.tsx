@@ -54,7 +54,7 @@ function KnotApp() {
   if (screen === 'blocked') return <Blocked />
   if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
     {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} /></div>}
-    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => {}} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} />
+    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} />
   </div>
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
   if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setAuthMode('signup'); setScreen('auth') }} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
@@ -62,30 +62,46 @@ function KnotApp() {
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onBegin, onComplete, onSignIn }: { onBegin: () => void; onComplete: () => void; onSignIn: () => void }) {
+function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () => void }) {
   const [expanding, setExpanding] = useState(false)
   const begin = () => {
     if (expanding) return
     setExpanding(true)
     onBegin()
-    window.setTimeout(onComplete, 900)
+    window.setTimeout(onComplete, 1180)
   }
+
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
-    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
-    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true"/>
+    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true" />
+    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true" />
     <div className="star-field">{[[7,13],[16,29],[27,9],[39,21],[52,11],[66,17],[81,8],[92,25],[11,44],[23,58],[35,39],[48,49],[61,34],[74,54],[88,42],[96,67],[6,76],[19,87],[31,70],[44,82],[57,73],[69,91],[83,78],[94,88],[13,7],[30,31],[46,6],[63,27],[78,36],[89,14],[4,56],[17,72],[28,51],[41,64],[55,43],[68,61],[80,69],[91,53],[9,94],[25,80],[38,93],[50,60],[64,84],[76,75],[87,95],[98,46]].map(([left,top],i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
-    <header className="welcome-header">
-      <button className="welcome-brand" onClick={begin} aria-label="Knot home"><span>✦</span>Knot</button>
-      <button className="welcome-signin" onClick={onSignIn}>Sign In</button>
-    </header>
-    <div className="welcome-center">
-      <h1>You might be closer<br className="welcome-break"/> than you think<span className="title-dot">.</span></h1>
+
+    <main className="welcome-center">
+      <h1>You might be closer<br />than you think<span className="title-dot">.</span></h1>
       <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
-      <button className="welcome-star" onClick={begin} aria-label="Begin Knot"><span>✦</span></button>
-    </div>
+      <button className="welcome-star" onClick={begin} aria-label="Begin Knot">
+        <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="knotStarFill" cx="50%" cy="50%" r="58%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="16%" stopColor="#fffaff" />
+              <stop offset="38%" stopColor="#e9d5ff" />
+              <stop offset="66%" stopColor="#b98cff" />
+              <stop offset="84%" stopColor="#7e72ff" />
+              <stop offset="100%" stopColor="#e58cff" />
+            </radialGradient>
+            <filter id="knotStarGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="7" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          <path className="welcome-star-glow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" />
+          <path className="welcome-star-shape" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" />
+        </svg>
+      </button>
+    </main>
   </div>
 }
-
 
 function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,onDone }: any) {
   const submit = async (e: FormEvent) => {

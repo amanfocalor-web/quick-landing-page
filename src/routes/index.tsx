@@ -53,8 +53,14 @@ function KnotApp() {
   if (busy) return <div className="knot-loading"><div className="knot-logo">Knot</div><div className="loader-dot" /></div>
   if (screen === 'blocked') return <Blocked />
   if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
-    {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} /></div>}
-    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} showProfilePreview={welcomePreview} />
+    <div className="welcome-destination">
+      <ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError}
+        onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }}
+        onDone={async () => { setWelcomePreview(false); await load() }}
+        onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} />
+    </div>
+    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }}
+      onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} />
   </div>
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
   if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setAuthMode('signup'); setScreen('auth') }} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
@@ -62,24 +68,15 @@ function KnotApp() {
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onBegin, onComplete, onSignIn, showProfilePreview }: { onBegin: () => void; onComplete: () => void; onSignIn: () => void; showProfilePreview: boolean }) {
+function Welcome({ onBegin, onComplete, onSignIn }: { onBegin: () => void; onComplete: () => void; onSignIn: () => void }) {
   const [expanding, setExpanding] = useState(false)
   const begin = () => {
     if (expanding) return
     setExpanding(true)
     onBegin()
-    window.setTimeout(onComplete, 820)
+    window.setTimeout(onComplete, 760)
   }
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
-    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
-    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true"/>
-    <div className="star-field">{[
-      [3,13,0],[8,31,1],[13,20,0],[18,40,2],[22,8,0],[27,29,1],[31,17,0],[35,44,0],[39,11,3],[43,25,1],
-      [47,7,0],[51,18,2],[55,33,0],[59,12,1],[63,27,0],[67,8,3],[71,22,0],[75,37,1],[79,14,0],[84,29,2],
-      [89,10,0],[94,24,1],[5,55,0],[11,68,2],[17,50,0],[24,78,1],[30,61,0],[36,88,0],[42,70,3],[48,56,0],
-      [54,82,1],[60,64,0],[66,91,2],[72,74,0],[78,57,1],[85,69,0],[91,52,3],[96,79,0],[14,91,1],[33,73,0],
-      [57,48,0],[69,51,1],[81,89,0],[92,65,2],[2,84,0],[45,93,1]
-    ].map(([left,top,type],i)=><span key={i} className={`tiny-star star-${type}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
     <header className="welcome-header">
       <button className="welcome-brand" onClick={begin} aria-label="Knot home"><span>✦</span>Knot</button>
       <button className="welcome-signin" onClick={onSignIn}>Sign In</button>
@@ -87,21 +84,10 @@ function Welcome({ onBegin, onComplete, onSignIn, showProfilePreview }: { onBegi
     <div className="welcome-center">
       <h1>You might be closer<br className="welcome-break"/> than you think<span className="title-dot">.</span></h1>
       <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
-      <button className="welcome-star" onClick={begin} aria-label="Begin Knot"><span>✦</span></button>
+      <button className="welcome-star" onClick={begin} aria-label="Begin Knot">
+        <span aria-hidden="true"/>
+      </button>
     </div>
-    {showProfilePreview && <div className="star-profile-preview" aria-hidden="true">
-      <div className="preview-star-wash"><span>✦</span></div>
-      <div className="preview-profile-card">
-        <div className="preview-spark">✦</div>
-        <div className="preview-eyebrow">Profile setup</div>
-        <h2>Let’s set up your profile</h2>
-        <p>Tell us a bit about you</p>
-        <div className="preview-avatar">◯<span>+</span></div>
-        <div className="preview-field">Name</div>
-        <div className="preview-field">Date of Birth</div>
-        <div className="preview-field">City</div>
-      </div>
-    </div>}
   </div>
 }
 

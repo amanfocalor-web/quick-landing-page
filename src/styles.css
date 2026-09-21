@@ -1836,3 +1836,124 @@ body,#root,button,input,textarea,select{font-family:"M PLUS Rounded 1c",ui-sans-
 .tiny-star.star-2{--star-size:6px;--star-opacity:.96;--star-color:#fff3ff;--star-duration:6.3s}
 .tiny-star.star-3{--star-size:4px;--star-opacity:.84;--star-color:#cbd9ff;--star-duration:5.1s}
 @keyframes knot-twinkle-random{0%,100%{opacity:calc(var(--star-opacity)*.58);transform:translate(-50%,-50%) scale(.82)}42%{opacity:var(--star-opacity);transform:translate(-50%,-50%) scale(1)}55%{opacity:calc(var(--star-opacity)*1.08);transform:translate(-50%,-50%) scale(1.18)}72%{opacity:calc(var(--star-opacity)*.72);transform:translate(-50%,-50%) scale(.9)}}
+
+
+/* FINAL COSMIC REPAIR v9
+   The reference artwork is used only as the cleaned cosmic artwork layer.
+   UI text, logo and the clickable star remain live DOM elements, so nothing
+   from the reference is duplicated. */
+:root{
+  --knot-font:"Modern Love","M PLUS Rounded 1c",ui-sans-serif,system-ui,sans-serif;
+}
+body,#root,button,input,textarea,select,
+.welcome,.welcome h1,.welcome-kicker,.welcome-brand,.welcome-signin,
+.profile-page,.setup-card{
+  font-family:var(--knot-font);
+}
+
+/* One clean reference artwork layer — no generated star grid and no stream
+   divs carrying copied text from the reference. */
+.welcome.knot-welcome{
+  background:#020615 url('/cosmic-reference-clean.png') center top / cover no-repeat;
+  isolation:isolate;
+}
+.welcome.knot-welcome::before{display:none!important}
+.welcome-nebula,.star-field,.star-profile-preview{display:none!important}
+
+/* Keep the real header above the artwork. */
+.welcome-header{z-index:5}
+.welcome-center{z-index:5}
+
+/* Exact reference star artwork, extracted as a transparent asset. */
+.welcome-star{
+  width:clamp(124px,12vw,142px);
+  height:clamp(124px,12vw,142px);
+  margin-top:clamp(36px,5.5vh,54px);
+  border:0;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  animation:knot-star-breathe 3.2s ease-in-out infinite;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+}
+.welcome-star::before,.welcome-star::after{display:none!important}
+.welcome-star span{
+  position:absolute;
+  inset:-10px;
+  display:block;
+  background:url('/cosmic-star-reference.png') center/contain no-repeat;
+  filter:drop-shadow(0 0 12px rgba(210,165,255,.65));
+  transform:translateZ(0);
+  will-change:transform,opacity;
+}
+@keyframes knot-star-breathe{
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  50%{transform:translate(-50%,-50%) scale(1.018)}
+}
+
+/* Fast portal: animate only the GPU-friendly transform. No animated
+   drop-shadow/filter and no second preview screen. */
+.welcome.welcome-expanding .welcome-star{
+  animation:knot-star-portal .76s cubic-bezier(.72,0,.18,1) forwards;
+  z-index:40;
+}
+.welcome.welcome-expanding .welcome-star span{
+  animation:knot-star-asset-portal .76s cubic-bezier(.72,0,.18,1) forwards;
+}
+.welcome.welcome-expanding .welcome-center h1,
+.welcome.welcome-expanding .welcome-center .welcome-kicker,
+.welcome.welcome-expanding .welcome-header{
+  animation:knot-welcome-fade .20s ease-out forwards;
+}
+@keyframes knot-star-portal{
+  0%{transform:translate(-50%,-50%) scale(1)}
+  100%{transform:translate(-50%,-50%) scale(13)}
+}
+@keyframes knot-star-asset-portal{
+  0%{transform:scale(1);opacity:1}
+  55%{transform:scale(1.05);opacity:1}
+  100%{transform:scale(1.12);opacity:1}
+}
+@keyframes knot-welcome-fade{
+  to{opacity:0}
+}
+
+/* Destination is already mounted before the click, eliminating React mount
+   work during the portal animation. */
+.welcome-stage{position:relative;min-height:100svh;overflow:hidden;background:#030613}
+.welcome-destination{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  will-change:opacity;
+}
+.welcome-stage.transitioning .welcome-destination{
+  visibility:visible;
+  animation:knot-destination-reveal-v9 .76s ease-out forwards;
+  pointer-events:auto;
+}
+.welcome-stage.transitioning .welcome{z-index:10}
+.welcome.welcome-expanding{animation:none}
+.welcome-destination .setup-card{animation:none!important}
+@keyframes knot-destination-reveal-v9{
+  0%,45%{opacity:0}
+  72%{opacity:.72}
+  100%{opacity:1}
+}
+
+/* Do not let the setup page's older cosmic pseudo-elements compete with the
+   reference artwork during the transition. */
+.welcome-destination .profile-page::before,
+.welcome-destination .profile-page::after{animation:none!important}
+
+@media(max-width:700px){
+  .welcome.knot-welcome{background-size:auto 100%;background-position:center top}
+}
+@media(prefers-reduced-motion:reduce){
+  .welcome-star,.welcome.welcome-expanding .welcome-star,
+  .welcome.welcome-expanding .welcome-star span{animation:none!important}
+}

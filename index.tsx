@@ -72,8 +72,34 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
-    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true" />
-    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true" />
+    <svg className="nebula-motion-filters" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="knot-nebula-flow-left" x="-18%" y="-4%" width="136%" height="108%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.022" numOctaves="2" seed="11" result="noise">
+            <animate attributeName="baseFrequency" values="0.006 0.022;0.009 0.016;0.005 0.025;0.006 0.022" dur="18s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G">
+            <animate attributeName="scale" values="2;8;4;7;2" dur="18s" repeatCount="indefinite" />
+          </feDisplacementMap>
+        </filter>
+        <filter id="knot-nebula-flow-right" x="-18%" y="-4%" width="136%" height="108%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.020" numOctaves="2" seed="27" result="noise">
+            <animate attributeName="baseFrequency" values="0.005 0.020;0.008 0.015;0.004 0.023;0.005 0.020" dur="21s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G">
+            <animate attributeName="scale" values="2;7;4;8;2" dur="21s" repeatCount="indefinite" />
+          </feDisplacementMap>
+        </filter>
+      </defs>
+    </svg>
+    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true">
+      <img className="nebula-tile nebula-tile-a" src="/cosmic-stream-left.png" alt="" />
+      <img className="nebula-tile nebula-tile-b" src="/cosmic-stream-left.png" alt="" />
+    </div>
+    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true">
+      <img className="nebula-tile nebula-tile-a" src="/cosmic-stream-right.png" alt="" />
+      <img className="nebula-tile nebula-tile-b" src="/cosmic-stream-right.png" alt="" />
+    </div>
     <div className="star-field">{[[7,13],[16,29],[27,9],[39,21],[52,11],[66,17],[81,8],[92,25],[11,44],[23,58],[35,39],[48,49],[61,34],[74,54],[88,42],[96,67],[6,76],[19,87],[31,70],[44,82],[57,73],[69,91],[83,78],[94,88],[13,7],[30,31],[46,6],[63,27],[78,36],[89,14],[4,56],[17,72],[28,51],[41,64],[55,43],[68,61],[80,69],[91,53],[9,94],[25,80],[38,93],[50,60],[64,84],[76,75],[87,95],[98,46]].map(([left,top],i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
 
     <main className="welcome-center">

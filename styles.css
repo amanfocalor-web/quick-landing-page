@@ -2411,3 +2411,183 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   from { background-position: 100% 0%; }
   to   { background-position: 100% 100%; }
 }
+
+/* KNOT v17 — actual continuous stream motion.
+   Use two identical moving tiles per side. One tile follows the other, so the
+   stream visibly travels through the viewport and the loop has no restart seam.
+   No other welcome elements are changed. */
+.welcome.knot-welcome .welcome-nebula-left,
+.welcome.knot-welcome .welcome-nebula-right {
+  background: none !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  will-change: auto !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left::before,
+.welcome.knot-welcome .welcome-nebula-left::after,
+.welcome.knot-welcome .welcome-nebula-right::before,
+.welcome.knot-welcome .welcome-nebula-right::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto 0 auto 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-size: 100% 100% !important;
+  pointer-events: none !important;
+  will-change: transform !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left::before,
+.welcome.knot-welcome .welcome-nebula-left::after {
+  background-image: url('/cosmic-stream-left.png') !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right::before,
+.welcome.knot-welcome .welcome-nebula-right::after {
+  background-image: url('/cosmic-stream-right.png') !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left::before,
+.welcome.knot-welcome .welcome-nebula-right::before {
+  top: 0 !important;
+  animation: knot-v17-stream-a 18s linear infinite !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left::after,
+.welcome.knot-welcome .welcome-nebula-right::after {
+  top: 100% !important;
+  animation: knot-v17-stream-b 18s linear infinite !important;
+}
+
+@keyframes knot-v17-stream-a {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -100%, 0); }
+}
+
+@keyframes knot-v17-stream-b {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -100%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .welcome-nebula-left::before,
+  .welcome.knot-welcome .welcome-nebula-left::after,
+  .welcome.knot-welcome .welcome-nebula-right::before,
+  .welcome.knot-welcome .welcome-nebula-right::after {
+    animation: none !important;
+  }
+}
+
+/* KNOT v18 — direct DOM stream tiles. The nebula artwork itself moves; no
+   background-position tricks or pseudo-elements are involved. Two identical
+   tiles chase each other vertically forever, with a seamless handoff. */
+.welcome.knot-welcome .welcome-nebula-left,
+.welcome.knot-welcome .welcome-nebula-right {
+  overflow: hidden !important;
+  background: transparent !important;
+  isolation: isolate !important;
+}
+
+.welcome.knot-welcome .nebula-tile {
+  position: absolute !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: fill !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  display: block !important;
+  will-change: transform !important;
+}
+
+.welcome.knot-welcome .nebula-tile-a {
+  top: 0 !important;
+  animation: knot-v18-stream-flow 16s linear infinite !important;
+}
+
+.welcome.knot-welcome .nebula-tile-b {
+  top: 100% !important;
+  animation: knot-v18-stream-flow 16s linear infinite !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right .nebula-tile-a,
+.welcome.knot-welcome .welcome-nebula-right .nebula-tile-b {
+  animation-duration: 17s !important;
+}
+
+@keyframes knot-v18-stream-flow {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -100%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .nebula-tile-a,
+  .welcome.knot-welcome .nebula-tile-b {
+    animation: none !important;
+  }
+}
+
+
+/* KNOT v19 — organic nebula motion. The artwork itself subtly breathes and
+   warps instead of simply sliding along its pre-drawn silhouette. The motion
+   is intentionally small and irregular so it reads as living cosmic flow. */
+.nebula-motion-filters {
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.welcome.knot-welcome .welcome-nebula {
+  transform-origin: 50% 50% !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left .nebula-tile,
+.welcome.knot-welcome .welcome-nebula-right .nebula-tile {
+  transform-origin: 50% 50% !important;
+  backface-visibility: hidden !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left .nebula-tile {
+  filter: url(#knot-nebula-flow-left) !important;
+  animation: knot-v19-nebula-left 17s ease-in-out infinite alternate !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right .nebula-tile {
+  filter: url(#knot-nebula-flow-right) !important;
+  animation: knot-v19-nebula-right 19s ease-in-out infinite alternate !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left .nebula-tile-b,
+.welcome.knot-welcome .welcome-nebula-right .nebula-tile-b {
+  animation-delay: -8.5s !important;
+}
+
+@keyframes knot-v19-nebula-left {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  28%  { transform: translate3d(1.2%, -0.4%, 0) scaleX(1.035) scaleY(1.008); }
+  52%  { transform: translate3d(-0.7%, 0.8%, 0) scaleX(1.055) scaleY(1.014); }
+  72%  { transform: translate3d(0.8%, 0.2%, 0) scaleX(1.025) scaleY(1.006); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes knot-v19-nebula-right {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  24%  { transform: translate3d(-1.0%, 0.5%, 0) scaleX(1.03) scaleY(1.007); }
+  49%  { transform: translate3d(0.9%, -0.7%, 0) scaleX(1.06) scaleY(1.016); }
+  73%  { transform: translate3d(-0.6%, 0.3%, 0) scaleX(1.028) scaleY(1.005); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .welcome-nebula-left .nebula-tile,
+  .welcome.knot-welcome .welcome-nebula-right .nebula-tile {
+    animation: none !important;
+    filter: none !important;
+  }
+}

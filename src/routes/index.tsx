@@ -51,20 +51,27 @@ function KnotApp() {
 
   if (busy) return <div className="knot-loading"><div className="knot-logo">Knot</div><div className="loader-dot" /></div>
   if (screen === 'blocked') return <Blocked />
-  if (screen === 'welcome') return <Welcome onStart={() => setScreen('auth')} />
+  if (screen === 'welcome') return <Welcome onStart={() => { setAuthMode('signup'); setScreen('auth') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} />
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
   if (screen === 'profile') return <ProfileSetup existing={profile} error={error} setError={setError} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onStart }: { onStart: () => void }) {
+function Welcome({ onStart, onSignIn }: { onStart: () => void; onSignIn: () => void }) {
   return <div className="welcome knot-welcome">
-    <div className="star-field">{Array.from({length: 34}).map((_,i)=><span key={i} className="tiny-star" style={{left:`${(i*29)%97}%`,top:`${(i*47)%92}%`,animationDelay:`${(i%7)*.45}s`}}>✦</span>)}</div>
+    <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
+    <div className="welcome-nebula welcome-nebula-right" aria-hidden="true"/>
+    <div className="star-field">{Array.from({length: 46}).map((_,i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${(i*29)%97}%`,top:`${(i*47)%92}%`,animationDelay:`${(i%7)*.45}s`}}>✦</span>)}</div>
+    <header className="welcome-header">
+      <button className="welcome-brand" onClick={onStart} aria-label="Knot home"><span>✦</span>Knot</button>
+      <button className="welcome-signin" onClick={onSignIn}>Sign In</button>
+    </header>
     <div className="welcome-center">
-      <div className="welcome-kicker">Welcome to Knot</div>
-      <h1>You might be closer than you think</h1>
+      <h1>You might be closer<br className="welcome-break"/> than you think<span className="title-dot">.</span></h1>
+      <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
       <button className="welcome-star" onClick={onStart} aria-label="Begin Knot"><span>✦</span></button>
+      <button className="welcome-prompt" onClick={onStart}>Tap the star to begin<span>⌄</span></button>
     </div>
   </div>
 }

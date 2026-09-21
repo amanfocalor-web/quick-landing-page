@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type PointerEvent, type ReactNode } from 'react'
 import { ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
 import {
   acceptExclusive, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
@@ -70,7 +70,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
 }
 
 function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,onDone }: any) {
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault(); setError(''); setMessage('')
     try {
       const result = mode==='signup' ? await signUp(email,password) : await signIn(email,password)
@@ -178,7 +178,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   </div>
 }
 
-function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:React.ReactNode;label:string}){return <button className={active?'nav-item active':'nav-item'} onClick={onClick}>{icon}<span>{label}</span></button>}
+function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){return <button className={active?'nav-item active':'nav-item'} onClick={onClick}>{icon}<span>{label}</span></button>}
 
 function Matches({matches,refresh}:{matches:any[];refresh:()=>Promise<void>}){const [busy,setBusy]=useState('');return <section className="normal-section"><div className="section-heading"><div><span>Your connections</span><h1>Matches</h1></div></div>{matches.length===0?<div className="empty-state"><div>♥</div><h2>Nothing mutual yet</h2><p>When interest meets interest, your trial chat appears here</p></div>:<div className="list-grid">{matches.map(m=><div className="person-row" key={m.match_id}><Avatar path={m.other_photo_path}/><div><strong>{m.other_name}</strong><span>{m.state==='trial'?'Trial chat':'Coupled'}</span></div>{m.state==='trial'&&<button className="small-btn" disabled={busy===m.match_id} onClick={async()=>{setBusy(m.match_id);await requestExclusive(m.match_id);await refresh();setBusy('')}}>Go Exclusive</button>}</div>)}</div>}</section>}
 
@@ -251,7 +251,56 @@ function ProfileView({profile,onRefresh,onLogout}:{profile:Profile;onRefresh:()=
     </div>
   </section>
 }
-function CreatorCenter({onBack}:{onBack:()=>void}){const [overview,setOverview]=useState<any>(null);const [users,setUsers]=useState<any[]>([]);const [q,setQ]=useState('');const [selected,setSelected]=useState<any>(null);const [selectedA,setSelectedA]=useState<any>(null);const [selectedB,setSelectedB]=useState<any>(null);const [notice,setNotice]=useState('');const load=async()=>{setOverview(await creatorOverview());setUsers(await creatorUsers(q))};useEffect(()=>{void load()},[]);return <div className="creator-shell"><header className="creator-header"><button className="creator-back" onClick={onBack}><ArrowLeft/> Knot</button><div><span>Creator Command Center</span><h1>Cupid</h1></div><div className="creator-lock"><Shield size={16}/> Protected</div></header><main className="creator-main">{notice&&<div className="creator-notice">{notice}</div>}<div className="metric-grid">{[['Users',overview?.users],['Eligible',overview?.eligible],['Active',overview?.active],['Trial matches',overview?.trial_matches],['Couples',overview?.couples],['Open reports',overview?.open_reports],['Banned',overview?.banned]].map(([a,b])=><div className="metric" key={a as string}><span>{a}</span><strong>{b??'—'}</strong></div>)}</div><div className="creator-grid"><section className="creator-panel"><div className="panel-head"><div><span>Account controls</span><h2>Users</h2></div><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void load()}} placeholder="Search name or city"/></div><div className="admin-list">{users.map(u=><div className="admin-user" key={u.id}><div><strong>{u.name||'Unnamed'}</strong><span>{u.city||'No city'} · {u.relationship_state} · {u.eligibility}</span></div><div className="admin-actions"><button onClick={()=>setSelected(u)}>Open</button><button onClick={()=>setSelectedA(u)} className={selectedA?.id===u.id?'selected-admin':''}>A</button><button onClick={()=>setSelectedB(u)} className={selectedB?.id===u.id?'selected-admin':''}>B</button><button onClick={async()=>{await creatorBanUser(u.id,'temporary',24,'Safety review','Creator action');setNotice('Temporary ban applied');await load()}} className="ban-btn">Ban 24h</button>{u.relationship_state==='banned'&&<button onClick={async()=>{await creatorUnbanUser(u.id);setNotice('User restored');await load()}}>Restore</button>}</div></div>)}</div></section><section className="creator-panel"><div className="panel-head"><div><span>Founder powers</span><h2>Quiet Cupid tools</h2></div></div><div className="creator-tool"><Zap/><div><strong>Cupid Spark</strong><p>Give a pair a gentle discovery nudge without forcing a match or revealing private interest</p></div>{selectedA&&selectedB&&selectedA.id!==selectedB.id&&<button onClick={async()=>{await creatorSpark(selectedA.id,selectedB.id);setNotice('Spark queued');}}>Spark selected pair</button>}</div><div className="creator-tool"><Shield/><div><strong>Privacy boundary</strong><p>Secret Crush records and private chat bodies are not available in this command center</p></div><Check/></div></section></div>{selected&&<div className="creator-drawer"><button onClick={()=>setSelected(null)}><X/></button><h2>{selected.name||'User'}</h2><p>{selected.city}</p><div className="drawer-facts"><span>{selected.eligibility}</span><span>{selected.relationship_state}</span><span>{selected.verification_status}</span></div></div>}</main></div>}
+function CreatorCenter({onBack}:{onBack:()=>void}){
+  const [overview,setOverview]=useState<any>(null)
+  const [users,setUsers]=useState<any[]>([])
+  const [q,setQ]=useState('')
+  const [selected,setSelected]=useState<any>(null)
+  const [selectedA,setSelectedA]=useState<any>(null)
+  const [selectedB,setSelectedB]=useState<any>(null)
+  const [notice,setNotice]=useState('')
+  const [loading,setLoading]=useState(true)
+  const [loadError,setLoadError]=useState('')
+
+  const load=async()=>{
+    setLoading(true)
+    setLoadError('')
+    try{
+      const [nextOverview,nextUsers]=await Promise.all([creatorOverview(),creatorUsers(q)])
+      setOverview(nextOverview)
+      setUsers(nextUsers)
+    }catch(e:any){
+      setLoadError(e?.message||'Creator data could not be loaded')
+    }finally{setLoading(false)}
+  }
+
+  useEffect(()=>{void load()},[])
+
+  return <div className="creator-shell">
+    <header className="creator-header">
+      <button className="creator-back" onClick={onBack}><ArrowLeft/> Knot</button>
+      <div><span>Creator Command Center</span><h1>Cupid</h1></div>
+      <div className="creator-lock"><Shield size={16}/> Protected</div>
+    </header>
+    <main className="creator-main">
+      {notice&&<div className="creator-notice">{notice}</div>}
+      {loadError&&<div className="error-box">{loadError}</div>}
+      <div className="metric-grid">{[['Users',overview?.users],['Eligible',overview?.eligible],['Active',overview?.active],['Trial matches',overview?.trial_matches],['Couples',overview?.couples],['Open reports',overview?.open_reports],['Banned',overview?.banned]].map(([a,b])=><div className="metric" key={a as string}><span>{a}</span><strong>{b??'—'}</strong></div>)}</div>
+      <div className="creator-grid">
+        <section className="creator-panel">
+          <div className="panel-head"><div><span>Account controls</span><h2>Users</h2></div><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void load()}} placeholder="Search name or city"/></div>
+          {loading?<div className="empty-state compact"><div className="loader-dot"/><p>Loading creator data…</p></div>:<div className="admin-list">{users.map(u=><div className="admin-user" key={u.id}><div><strong>{u.name||'Unnamed'}</strong><span>{u.city||'No city'} · {u.relationship_state} · {u.eligibility}</span></div><div className="admin-actions"><button onClick={()=>setSelected(u)}>Open</button><button onClick={()=>setSelectedA(u)} className={selectedA?.id===u.id?'selected-admin':''}>A</button><button onClick={()=>setSelectedB(u)} className={selectedB?.id===u.id?'selected-admin':''}>B</button><button onClick={async()=>{await creatorBanUser(u.id,'temporary',24,'Safety review','Creator action');setNotice('Temporary ban applied');await load()}} className="ban-btn">Ban 24h</button>{u.relationship_state==='banned'&&<button onClick={async()=>{await creatorUnbanUser(u.id);setNotice('User restored');await load()}}>Restore</button>}</div></div>)}</div>}
+        </section>
+        <section className="creator-panel">
+          <div className="panel-head"><div><span>Founder powers</span><h2>Quiet Cupid tools</h2></div></div>
+          <div className="creator-tool"><Zap/><div><strong>Cupid Spark</strong><p>Give a pair a gentle discovery nudge without forcing a match or revealing private interest</p></div>{selectedA&&selectedB&&selectedA.id!==selectedB.id&&<button onClick={async()=>{await creatorSpark(selectedA.id,selectedB.id);setNotice('Spark queued')}}>Spark selected pair</button>}</div>
+          <div className="creator-tool"><Shield/><div><strong>Privacy boundary</strong><p>Secret Crush records and private chat bodies are not available in this command center</p></div><Check/></div>
+        </section>
+      </div>
+      {selected&&<div className="creator-drawer"><button onClick={()=>setSelected(null)} aria-label="Close user details"><X/></button><h2>{selected.name||'User'}</h2><p>{selected.city}</p><div className="drawer-facts"><span>{selected.eligibility}</span><span>{selected.relationship_state}</span><span>{selected.verification_status}</span></div></div>}
+    </main>
+  </div>
+}
 
 function Avatar({path}:{path:string|null}){const [url,setUrl]=useState<string|null>(null);useEffect(()=>{if(path)void getPhotoUrl(path).then(setUrl)},[path]);return <div className="avatar">{url?<img src={url} alt=""/>:<UserRound size={20}/>}</div>}
 function Blocked(){return <div className="blocked-page knot-welcome"><div className="blocked-card"><div className="blocked-star">✦</div><h1>Sorry, Knot isn’t available for you yet</h1><p>Knot is currently available only to people aged 18 through 21</p><Shield size={18}/></div></div>}

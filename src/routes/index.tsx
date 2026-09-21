@@ -52,9 +52,12 @@ function KnotApp() {
 
   if (busy) return <div className="knot-loading"><div className="knot-logo">Knot</div><div className="loader-dot" /></div>
   if (screen === 'blocked') return <Blocked />
-  if (screen === 'welcome') return <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} showProfilePreview={welcomePreview} />
+  if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
+    {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} /></div>}
+    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} showProfilePreview={welcomePreview} />
+  </div>
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
-  if (screen === 'profile') return <ProfileSetup existing={profile} error={error} setError={setError} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
+  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setAuthMode('signup'); setScreen('auth') }} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
@@ -65,12 +68,18 @@ function Welcome({ onBegin, onComplete, onSignIn, showProfilePreview }: { onBegi
     if (expanding) return
     setExpanding(true)
     onBegin()
-    window.setTimeout(onComplete, 1450)
+    window.setTimeout(onComplete, 820)
   }
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
     <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
     <div className="welcome-nebula welcome-nebula-right" aria-hidden="true"/>
-    <div className="star-field">{Array.from({length: 46}).map((_,i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${(i*29)%97}%`,top:`${(i*47)%92}%`,animationDelay:`${(i%7)*.45}s`}}>✦</span>)}</div>
+    <div className="star-field">{[
+      [3,13,0],[8,31,1],[13,20,0],[18,40,2],[22,8,0],[27,29,1],[31,17,0],[35,44,0],[39,11,3],[43,25,1],
+      [47,7,0],[51,18,2],[55,33,0],[59,12,1],[63,27,0],[67,8,3],[71,22,0],[75,37,1],[79,14,0],[84,29,2],
+      [89,10,0],[94,24,1],[5,55,0],[11,68,2],[17,50,0],[24,78,1],[30,61,0],[36,88,0],[42,70,3],[48,56,0],
+      [54,82,1],[60,64,0],[66,91,2],[72,74,0],[78,57,1],[85,69,0],[91,52,3],[96,79,0],[14,91,1],[33,73,0],
+      [57,48,0],[69,51,1],[81,89,0],[92,65,2],[2,84,0],[45,93,1]
+    ].map(([left,top,type],i)=><span key={i} className={`tiny-star star-${type}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
     <header className="welcome-header">
       <button className="welcome-brand" onClick={begin} aria-label="Knot home"><span>✦</span>Knot</button>
       <button className="welcome-signin" onClick={onSignIn}>Sign In</button>
@@ -121,23 +130,24 @@ function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,
   </div></div>
 }
 
-function ProfileSetup({ existing,error,setError,onDone,onLogout }: any) {
+function ProfileSetup({ existing,preAuth=false,error,setError,onDone,onLogout,onAuthNeeded }: any) {
   const [step,setStep]=useState(1)
   const [finishing,setFinishing]=useState(false)
-  const [name,setName]=useState(existing?.name||'')
+  const draft = (() => { if (existing || typeof window === 'undefined') return null; try { return JSON.parse(window.sessionStorage.getItem('knot_profile_draft') || 'null') } catch { return null } })()
+  const [name,setName]=useState(existing?.name||draft?.name||'')
   const [photoPath,setPhotoPath]=useState<string|null>(existing?.photoPath||null)
   const [photoUrl,setPhotoUrl]=useState<string|null>(null)
-  const [dob,setDob]=useState(existing?.dob||'')
-  const [city,setCity]=useState(existing?.city||'Chennai')
-  const [bio,setBio]=useState(existing?.bio||'')
-  const [interests,setInterests]=useState<string[]>(existing?.interests||[])
-  const [intent,setIntent]=useState(existing?.intent||'')
-  const [preference,setPreference]=useState(existing?.preference||'')
-  const [ageMin,setAgeMin]=useState(existing?.ageMin||18)
-  const [ageMax,setAgeMax]=useState(existing?.ageMax||21)
-  const [theme,setTheme]=useState<'light'|'dark'>(existing?.theme||'dark')
-  const [starColor,setStarColor]=useState(existing?.starColor||'#c084fc')
-  const [incognito,setIncognito]=useState(existing?.incognito||false)
+  const [dob,setDob]=useState(existing?.dob||draft?.dob||'')
+  const [city,setCity]=useState(existing?.city||draft?.city||'Chennai')
+  const [bio,setBio]=useState(existing?.bio||draft?.bio||'')
+  const [interests,setInterests]=useState<string[]>(existing?.interests||draft?.interests||[])
+  const [intent,setIntent]=useState(existing?.intent||draft?.intent||'')
+  const [preference,setPreference]=useState(existing?.preference||draft?.preference||'')
+  const [ageMin,setAgeMin]=useState(existing?.ageMin||draft?.ageMin||18)
+  const [ageMax,setAgeMax]=useState(existing?.ageMax||draft?.ageMax||21)
+  const [theme,setTheme]=useState<'light'|'dark'>(existing?.theme||draft?.theme||'dark')
+  const [starColor,setStarColor]=useState(existing?.starColor||draft?.starColor||'#c084fc')
+  const [incognito,setIncognito]=useState(existing?.incognito||draft?.incognito||false)
   const [saving,setSaving]=useState(false)
   const fileRef=useRef<HTMLInputElement>(null)
   const videoRef=useRef<HTMLVideoElement>(null)
@@ -148,10 +158,10 @@ function ProfileSetup({ existing,error,setError,onDone,onLogout }: any) {
   useEffect(()=>{ if(photoPath) void getPhotoUrl(photoPath).then(setPhotoUrl) },[photoPath])
   useEffect(()=>()=>streamRef.current?.getTracks().forEach(t=>t.stop()),[])
 
-  const chooseFile=async(file?:File)=>{ if(!file)return; try{const p=await uploadProfilePhoto(file);setPhotoPath(p);setError('')}catch(e:any){setError(e?.message||'Photo upload failed')} }
+  const chooseFile=async(file?:File)=>{ if(!file)return; try{ if(preAuth){setPhotoPath(null);setPhotoUrl(URL.createObjectURL(file));setError('');return} const p=await uploadProfilePhoto(file);setPhotoPath(p);setError('') }catch(e:any){setError(e?.message||'Photo upload failed')} }
   const startCamera=async()=>{try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});streamRef.current=stream;if(videoRef.current){videoRef.current.srcObject=stream;await videoRef.current.play()}setCamera(true)}catch{setError('Camera permission was not granted') }}
-  const capture=async()=>{const video=videoRef.current;if(!video)return;const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){setCameraImage(canvas.toDataURL('image/jpeg'));await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}streamRef.current?.getTracks().forEach(t=>t.stop());setCamera(false)}
-  const finish=async()=>{setSaving(true);setError('');try{const saved=await saveProfile({name,photoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),1250)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
+  const capture=async()=>{const video=videoRef.current;if(!video)return;const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){setCameraImage(canvas.toDataURL('image/jpeg'));if(preAuth){setPhotoPath(null);setPhotoUrl(canvas.toDataURL('image/jpeg'))}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());setCamera(false)}
+  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito}));onAuthNeeded?.();return}const saved=await saveProfile({name,photoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
   const next=()=>setStep(s=>Math.min(7,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 

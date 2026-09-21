@@ -2116,3 +2116,233 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   .welcome-kicker { font-size: 1.08rem !important; }
   .welcome-star { width: 112px !important; height: 112px !important; margin-top: 42px !important; }
 }
+
+/* -------------------------------------------------------------------------
+   KNOT v14 — motion + light profile refinement
+   Preserve the v13 star, twinkle field and Pacifico typography exactly.
+   ------------------------------------------------------------------------- */
+
+/* The reference streams remain the visual base; these transparent extracted
+   stream layers add slow internal movement without replacing the artwork. */
+.welcome.knot-welcome .welcome-nebula {
+  display: block !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  opacity: .34 !important;
+  filter: blur(.15px) saturate(112%) !important;
+  will-change: background-position, transform !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left {
+  left: -1.5% !important;
+  right: auto !important;
+  width: 45% !important;
+  background-image: url('/cosmic-stream-left.png') !important;
+  background-size: 112% 122% !important;
+  background-position: 0% 0% !important;
+  animation: knot-v14-stream-left 18s ease-in-out infinite alternate !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right {
+  left: auto !important;
+  right: -1.5% !important;
+  width: 45% !important;
+  background-image: url('/cosmic-stream-right.png') !important;
+  background-size: 112% 122% !important;
+  background-position: 100% 0% !important;
+  animation: knot-v14-stream-right 19s ease-in-out infinite alternate !important;
+}
+
+@keyframes knot-v14-stream-left {
+  0%   { background-position: 0% 0%; transform: translate3d(0,0,0) scale(1); }
+  100% { background-position: 5% 100%; transform: translate3d(1.5%,0,0) scale(1.018); }
+}
+
+@keyframes knot-v14-stream-right {
+  0%   { background-position: 100% 0%; transform: translate3d(0,0,0) scale(1); }
+  100% { background-position: 95% 100%; transform: translate3d(-1.5%,0,0) scale(1.018); }
+}
+
+/* Give the two welcome lines enough breathing room to remain visually
+   separate while preserving their existing typography. */
+.welcome.knot-welcome .welcome-kicker {
+  margin-top: clamp(30px, 3.2vh, 40px) !important;
+}
+
+/* -------------------------------------------------------------------------
+   Light profile setup — based on the supplied reference composition:
+   pale lavender/blue cosmic field, white glass card, centered hierarchy.
+   ------------------------------------------------------------------------- */
+.profile-page.light {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  color: #202052 !important;
+  background:
+    radial-gradient(ellipse 48% 72% at 9% 43%, rgba(173,145,255,.30), transparent 68%),
+    radial-gradient(ellipse 44% 70% at 93% 35%, rgba(120,193,255,.27), transparent 68%),
+    radial-gradient(ellipse 48% 45% at 50% 100%, rgba(255,185,226,.26), transparent 72%),
+    linear-gradient(145deg, #f8f5ff 0%, #f4f0ff 48%, #eef7ff 100%) !important;
+}
+
+.profile-page.light::before,
+.profile-page.light::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  width: 62vw !important;
+  height: 115vh !important;
+  top: -7vh !important;
+  border-radius: 50% !important;
+  filter: blur(48px) !important;
+  opacity: .48 !important;
+}
+
+.profile-page.light::before {
+  left: -32vw !important;
+  background: radial-gradient(ellipse at center, rgba(161,128,255,.42), rgba(213,195,255,.16) 42%, transparent 72%) !important;
+  transform: rotate(-16deg) !important;
+}
+
+.profile-page.light::after {
+  right: -32vw !important;
+  background: radial-gradient(ellipse at center, rgba(115,188,255,.40), rgba(221,208,255,.14) 42%, transparent 72%) !important;
+  transform: rotate(16deg) !important;
+}
+
+.profile-page.light .setup-header {
+  position: relative !important;
+  z-index: 2 !important;
+  color: rgba(32,32,82,.55) !important;
+}
+
+.profile-page.light .setup-wrap {
+  position: relative !important;
+  z-index: 2 !important;
+  width: min(760px, calc(100% - 36px)) !important;
+  margin-top: 4vh !important;
+}
+
+.profile-page.light .setup-progress {
+  width: min(500px, 100%) !important;
+  margin: 0 auto 24px !important;
+  height: 4px !important;
+  background: rgba(79,66,145,.10) !important;
+}
+
+.profile-page.light .setup-progress span {
+  background: linear-gradient(90deg, #a995ff, #c89cff) !important;
+  box-shadow: 0 0 14px rgba(163,132,255,.34) !important;
+}
+
+.profile-page.light .setup-card {
+  width: min(540px, 100%) !important;
+  margin: 0 auto !important;
+  padding: clamp(28px, 5vw, 44px) !important;
+  border: 1px solid rgba(133,111,190,.14) !important;
+  border-radius: 28px !important;
+  background: rgba(255,253,255,.78) !important;
+  box-shadow: 0 26px 80px rgba(103,87,157,.13), 0 4px 20px rgba(255,255,255,.7) inset !important;
+  backdrop-filter: blur(22px) saturate(120%) !important;
+}
+
+.profile-page.light .setup-eyebrow {
+  color: #a278d4 !important;
+}
+
+.profile-page.light .setup-card > h1 {
+  color: #202052 !important;
+  margin-bottom: 28px !important;
+}
+
+.profile-page.light .setup-content label,
+.profile-page.light .setup-content > div > strong,
+.profile-page.light .photo-picker strong {
+  color: #38366b !important;
+}
+
+.profile-page.light .setup-content input,
+.profile-page.light .setup-content select,
+.profile-page.light .setup-content textarea {
+  color: #34325f !important;
+  border-color: rgba(120,101,175,.16) !important;
+  background: rgba(255,255,255,.66) !important;
+  box-shadow: 0 2px 10px rgba(91,76,145,.035) inset !important;
+}
+
+.profile-page.light .setup-content input::placeholder,
+.profile-page.light .setup-content textarea::placeholder {
+  color: rgba(67,61,111,.42) !important;
+}
+
+.profile-page.light .photo-picker {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.profile-page.light .avatar-preview {
+  border-color: rgba(166,133,255,.55) !important;
+  background: linear-gradient(145deg, rgba(247,242,255,.9), rgba(235,231,251,.72)) !important;
+  box-shadow: 0 0 28px rgba(152,120,255,.18) !important;
+}
+
+.profile-page.light .photo-picker p,
+.profile-page.light .setup-content small {
+  color: rgba(56,54,107,.52) !important;
+}
+
+.profile-page.light .setup-actions .primary-btn {
+  background: linear-gradient(90deg, #9b87f5, #b18cf5 52%, #9b72e9) !important;
+  box-shadow: 0 12px 28px rgba(136,105,228,.20) !important;
+}
+
+.profile-page.light .secondary-btn {
+  color: #5d5685 !important;
+  border-color: rgba(92,82,143,.16) !important;
+  background: rgba(255,255,255,.55) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .welcome-nebula-left,
+  .welcome.knot-welcome .welcome-nebula-right { animation: none !important; }
+}
+
+/* v14 profile-reference details */
+.profile-page.light .setup-reference-star {
+  width: 28px;
+  height: 28px;
+  margin: -2px auto 8px;
+  display: grid;
+  place-items: center;
+  color: #a78bfa;
+  font-size: 1.5rem;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(167,139,250,.45);
+}
+
+.profile-page.light .setup-subtitle {
+  margin: -14px 0 28px;
+  text-align: center;
+  color: rgba(47,46,91,.62);
+  font-size: .98rem;
+  line-height: 1.45;
+}
+
+.profile-page.light .photo-picker {
+  gap: 12px;
+  padding: 0 0 4px;
+}
+
+.profile-page.light .photo-picker .inline-actions {
+  margin-top: 4px;
+}
+
+.profile-page.light .photo-picker .secondary-btn {
+  color: #7162a4;
+  border-color: rgba(128,105,183,.16);
+  background: rgba(250,248,255,.78);
+}

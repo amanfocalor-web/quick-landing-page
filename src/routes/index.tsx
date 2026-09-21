@@ -59,19 +59,25 @@ function KnotApp() {
 }
 
 function Welcome({ onStart, onSignIn }: { onStart: () => void; onSignIn: () => void }) {
-  return <div className="welcome knot-welcome">
+  const [expanding, setExpanding] = useState(false)
+  const begin = () => {
+    if (expanding) return
+    setExpanding(true)
+    window.setTimeout(onStart, 920)
+  }
+  return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
     <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
     <div className="welcome-nebula welcome-nebula-right" aria-hidden="true"/>
     <div className="star-field">{Array.from({length: 46}).map((_,i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${(i*29)%97}%`,top:`${(i*47)%92}%`,animationDelay:`${(i%7)*.45}s`}}>✦</span>)}</div>
     <header className="welcome-header">
-      <button className="welcome-brand" onClick={onStart} aria-label="Knot home"><span>✦</span>Knot</button>
+      <button className="welcome-brand" onClick={begin} aria-label="Knot home"><span>✦</span>Knot</button>
       <button className="welcome-signin" onClick={onSignIn}>Sign In</button>
     </header>
     <div className="welcome-center">
       <h1>You might be closer<br className="welcome-break"/> than you think<span className="title-dot">.</span></h1>
       <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
-      <button className="welcome-star" onClick={onStart} aria-label="Begin Knot"><span>✦</span></button>
-      <button className="welcome-prompt" onClick={onStart}>Tap the star to begin<span>⌄</span></button>
+      <button className="welcome-star" onClick={begin} aria-label="Begin Knot"><span>✦</span></button>
+      <button className="welcome-prompt" onClick={begin}>Tap the star to begin<span>⌄</span></button>
     </div>
   </div>
 }

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -359,7 +359,7 @@ html { min-height: 100%; background: var(--knot-bg); }
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -395,7 +395,7 @@ textarea:focus-visible {
 
 .knot-logo,
 .knot-word {
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-weight: 600;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-weight: 600;
   letter-spacing: -.02em;
 }
 
@@ -493,7 +493,7 @@ textarea:focus-visible {
   max-width: 680px;
   margin: 0;
   color: #fff;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2.25rem, 6vw, 5.2rem);
   line-height: .98;
   font-weight: 600;
@@ -523,14 +523,14 @@ textarea:focus-visible {
 
 .welcome-star span {
   display: block;
-  width: clamp(62px, 7vw, 92px);
-  height: clamp(62px, 7vw, 92px);
+  width: clamp(108px, 12vw, 148px);
+  height: clamp(86px, 9vw, 116px);
   font-size: 0;
   line-height: 1;
   background: linear-gradient(145deg, #ffffff 0%, #f3e7ff 17%, #d7b7ff 35%, #a58bff 53%, #69aaff 73%, #ff9bd8 100%);
-  clip-path: polygon(50% 0%, 61% 37%, 100% 50%, 61% 63%, 50% 100%, 39% 63%, 0% 50%, 39% 37%);
+  clip-path: polygon(50% 0%, 63% 34%, 100% 50%, 63% 66%, 50% 100%, 37% 66%, 0% 50%, 37% 34%);
   filter: drop-shadow(0 0 9px rgba(255,255,255,.95)) drop-shadow(0 0 22px rgba(202,155,255,.95)) drop-shadow(0 0 48px rgba(96,137,255,.68));
-  transform: scaleX(1.02);
+  transform: scaleX(1.16) scaleY(.94);
 }
 
 .welcome-star:hover { transform: scale(1.08); filter: brightness(1.08); }
@@ -543,7 +543,8 @@ textarea:focus-visible {
 
 /* The star is the doorway into onboarding. It expands over the welcome screen,
    then reveals the next screen instead of making an abrupt page cut. */
-.welcome.welcome-expanding .welcome-center,
+.welcome.welcome-expanding .welcome-center h1,
+.welcome.welcome-expanding .welcome-center .welcome-kicker,
 .welcome.welcome-expanding .welcome-header,
 .welcome.welcome-expanding .star-field,
 .welcome.welcome-expanding .welcome-nebula {
@@ -586,7 +587,7 @@ textarea:focus-visible {
     radial-gradient(ellipse at 54% 105%, rgba(105,88,255,.24), transparent 36%),
     linear-gradient(145deg, #071128 0%, #0d1740 45%, #130d31 100%);
   color: #fff;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
 }
 
 .profile-page::before {
@@ -632,7 +633,7 @@ textarea:focus-visible {
 .profile-page .setup-eyebrow,
 .profile-page .setup-card > h1,
 .profile-page .setup-content,
-.profile-page .setup-actions { font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; }
+.profile-page .setup-actions { font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; }
 
 .profile-page .setup-card input,
 .profile-page .setup-card select,
@@ -640,7 +641,7 @@ textarea:focus-visible {
 .profile-page .secondary-btn,
 .profile-page .primary-btn,
 .profile-page .chip,
-.profile-page .theme-choice { font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; }
+.profile-page .theme-choice { font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; }
 
 .profile-page .setup-card > h1 { font-weight: 600; letter-spacing: -.04em; }
 .profile-page .setup-content label { font-weight: 500; }
@@ -687,7 +688,7 @@ textarea:focus-visible {
   padding: 0;
   color: rgba(255,255,255,.75);
   background: transparent;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-weight: 600;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-weight: 600;
   font-size: 1.2rem;
   cursor: pointer;
 }
@@ -708,7 +709,7 @@ textarea:focus-visible {
 .auth-card h1,
 .blocked-card h1 {
   margin: 0;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2rem, 5vw, 3rem);
   letter-spacing: -.045em;
 }
@@ -884,7 +885,7 @@ textarea:focus-visible {
 
 .setup-eyebrow { margin-bottom: 8px; color: #d8b4fe; font-size: .78rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
 .light .setup-eyebrow { color: #8b5ca6; }
-.setup-card > h1 { margin: 0 0 30px; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 5vw, 3.3rem); letter-spacing: -.05em; }
+.setup-card > h1 { margin: 0 0 30px; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 5vw, 3.3rem); letter-spacing: -.05em; }
 
 .setup-content { display: grid; gap: 24px; }
 .setup-content.two-col { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -975,7 +976,7 @@ textarea:focus-visible {
 
 .ready-state { display: grid; justify-items: center; padding: 26px 0 12px; text-align: center; }
 .ready-star { font-size: clamp(6rem, 18vw, 10rem); line-height: .8; text-shadow: 0 0 35px currentColor, 0 0 90px currentColor; animation: knot-star-glow 3s ease-in-out infinite; }
-.ready-state h2 { margin: 28px 0 8px; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 2rem; letter-spacing: -.04em; }
+.ready-state h2 { margin: 28px 0 8px; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 2rem; letter-spacing: -.04em; }
 .ready-state p { max-width: 470px; margin: 0; color: rgba(255,255,255,.58); line-height: 1.6; }
 
 .setup-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.08); }
@@ -1033,7 +1034,7 @@ textarea:focus-visible {
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
 .section-heading > div:first-child span { color: #c7b6e9; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .app-shell.light .section-heading > div:first-child span { color: #896ca1; }
-.section-heading h1 { margin: 5px 0 0; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1; letter-spacing: -.05em; }
+.section-heading h1 { margin: 5px 0 0; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1; letter-spacing: -.05em; }
 .privacy-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.1); border-radius: 99px; color: rgba(255,255,255,.62); background: rgba(255,255,255,.045); font-size: .78rem; white-space: nowrap; }
 .app-shell.light .privacy-chip { border-color: rgba(36,32,59,.1); color: rgba(36,32,59,.6); background: rgba(255,255,255,.55); }
 
@@ -1046,11 +1047,11 @@ textarea:focus-visible {
 .card-front { background: #12142c; }
 .card-front > img { width: 100%; height: 100%; object-fit: cover; }
 .photo-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,6,20,.88) 0%, rgba(4,6,20,.1) 48%, rgba(4,6,20,.04) 100%); }
-.card-name { position: absolute; left: 26px; right: 26px; bottom: 24px; color: #fff; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 600; letter-spacing: -.05em; }
+.card-name { position: absolute; left: 26px; right: 26px; bottom: 24px; color: #fff; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 600; letter-spacing: -.05em; }
 .card-name span { margin-left: 10px; color: rgba(255,255,255,.7); font-size: .52em; font-weight: 500; letter-spacing: 0; }
 .card-back { display: flex; flex-direction: column; padding: 25px; box-sizing: border-box; color: #f8f7ff; background: linear-gradient(155deg, #24204e, #121832 80%); transform: rotateY(180deg); }
 .back-top { display: flex; align-items: center; gap: 12px; }
-.back-top strong { display: block; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.55rem; }
+.back-top strong { display: block; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.55rem; }
 .back-top span { color: rgba(255,255,255,.55); }
 .mini-avatar { width: 54px; height: 54px; overflow: hidden; display: grid; place-items: center; border-radius: 18px; color: rgba(255,255,255,.6); background: rgba(255,255,255,.08); }
 .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -1069,7 +1070,7 @@ textarea:focus-visible {
 .empty-state { min-height: 340px; display: grid; place-items: center; align-content: center; gap: 10px; padding: 34px; border: 1px dashed rgba(255,255,255,.1); border-radius: 28px; color: rgba(255,255,255,.55); background: rgba(255,255,255,.025); text-align: center; }
 .app-shell.light .empty-state { border-color: rgba(36,32,59,.1); color: rgba(36,32,59,.58); background: rgba(255,255,255,.38); }
 .empty-state > div:first-child { color: #d8b4fe; font-size: 2.6rem; }
-.empty-state h2 { margin: 0; color: currentColor; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.55rem; }
+.empty-state h2 { margin: 0; color: currentColor; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.55rem; }
 .empty-state p { max-width: 420px; margin: 0; line-height: 1.5; }
 .empty-state.compact { min-height: 180px; }
 
@@ -1112,7 +1113,7 @@ button.notification-row { cursor: pointer; }
 .app-shell.light .profile-card { border-color: rgba(36,32,59,.1); background: rgba(255,255,255,.55); }
 .profile-hero { min-height: 360px; display: grid; align-content: end; padding: 28px; background: radial-gradient(circle at 50% 0%, rgba(216,180,254,.2), transparent 45%), linear-gradient(155deg, rgba(216,180,254,.08), rgba(255,255,255,.01)); }
 .profile-hero .avatar { width: 100px; height: 100px; border-radius: 30px; margin-bottom: 16px; }
-.profile-hero h2 { margin: 0; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 2.3rem; letter-spacing: -.04em; }
+.profile-hero h2 { margin: 0; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 2.3rem; letter-spacing: -.04em; }
 .profile-hero p { margin: 4px 0 0; color: rgba(255,255,255,.5); }
 .profile-fields { display: grid; align-content: start; gap: 18px; padding: 28px; }
 .profile-meta { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1147,11 +1148,11 @@ button.notification-row { cursor: pointer; }
 .blocked-card svg { color: #d8b4fe; }
 
 /* Creator Command Center */
-.creator-shell { min-height: 100vh; color: #e9e8f5; background: #0c0d16; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; }
+.creator-shell { min-height: 100vh; color: #e9e8f5; background: #0c0d16; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; }
 .creator-header { position: sticky; top: 0; z-index: 20; min-height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 0 28px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(12,13,22,.9); backdrop-filter: blur(18px); }
 .creator-header > div:nth-child(2) { text-align: center; }
 .creator-header span { color: rgba(233,232,245,.48); font-size: .72rem; text-transform: uppercase; letter-spacing: .13em; }
-.creator-header h1 { margin: 2px 0 0; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.5rem; letter-spacing: -.03em; }
+.creator-header h1 { margin: 2px 0 0; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.5rem; letter-spacing: -.03em; }
 .creator-back { justify-self: start; display: inline-flex; align-items: center; gap: 8px; border: 0; color: rgba(233,232,245,.72); background: transparent; cursor: pointer; }
 .creator-back svg { width: 17px; }
 .creator-lock { justify-self: end; display: inline-flex; align-items: center; gap: 6px; color: #a7f3d0; font-size: .78rem; }
@@ -1160,12 +1161,12 @@ button.notification-row { cursor: pointer; }
 .metric-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 9px; margin-bottom: 20px; }
 .metric { padding: 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 15px; background: rgba(255,255,255,.025); }
 .metric span { display: block; color: rgba(233,232,245,.42); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
-.metric strong { display: block; margin-top: 8px; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.45rem; }
+.metric strong { display: block; margin-top: 8px; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.45rem; }
 .creator-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; }
 .creator-panel { border: 1px solid rgba(255,255,255,.08); border-radius: 18px; background: rgba(255,255,255,.025); overflow: hidden; }
 .panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
 .panel-head span { color: rgba(233,232,245,.4); font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; }
-.panel-head h2 { margin: 3px 0 0; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.4rem; }
+.panel-head h2 { margin: 3px 0 0; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.4rem; }
 .panel-head input { max-width: 260px; padding: 10px 11px; border-radius: 10px; background: rgba(255,255,255,.045); }
 .admin-list { display: grid; }
 .admin-user { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,.06); }
@@ -1187,7 +1188,7 @@ button.notification-row { cursor: pointer; }
 .creator-tool button { padding: 8px 10px; border: 1px solid rgba(216,180,254,.18); color: #eadcff; background: rgba(216,180,254,.07); font-size: .72rem; white-space: nowrap; }
 .creator-drawer { position: fixed; right: 22px; bottom: 22px; z-index: 50; width: min(360px, calc(100% - 44px)); padding: 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(19,20,33,.96); box-shadow: 0 25px 70px rgba(0,0,0,.4); backdrop-filter: blur(18px); }
 .creator-drawer > button { float: right; border: 0; color: rgba(255,255,255,.55); background: transparent; cursor: pointer; }
-.creator-drawer h2 { margin: 0; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; }
+.creator-drawer h2 { margin: 0; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; }
 .creator-drawer p { margin: 4px 0 16px; color: rgba(233,232,245,.46); }
 .drawer-facts { display: flex; flex-wrap: wrap; gap: 7px; }
 .drawer-facts span { padding: 7px 9px; border-radius: 99px; color: rgba(233,232,245,.62); background: rgba(255,255,255,.06); font-size: .72rem; }
@@ -1260,8 +1261,10 @@ button.notification-row { cursor: pointer; }
 }
 
 @keyframes cosmic-star-pulse {
-  0%, 100% { opacity: .28; transform: scale(.72); }
-  50% { opacity: 1; transform: scale(1.18); }
+  0%, 100% { opacity: .22; transform: scale(.72); }
+  45% { opacity: .62; transform: scale(.92); }
+  55% { opacity: 1; transform: scale(1.22); }
+  68% { opacity: .72; transform: scale(1); }
 }
 
 @keyframes cosmic-star-glow {
@@ -1298,84 +1301,80 @@ button.notification-row { cursor: pointer; }
   mix-blend-mode: screen;
 }
 
+/* Flowing cosmic streams: tall, asymmetric ribbons instead of oval blobs. */
 .welcome-nebula {
   position: absolute;
   z-index: -1;
-  width: 64vw;
-  height: 132vh;
-  top: -17vh;
+  width: 46vw;
+  height: 145vh;
+  top: -22vh;
   pointer-events: none;
-  opacity: .94;
+  opacity: .9;
   filter: saturate(135%);
-  border-radius: 50%;
   will-change: transform;
 }
 
-/* Each nebula is made from several overlapping, soft-edged ribbons rather than
-   a single radial blob. Their long paths move downward so the background feels
-   like a living current of colour. */
 .welcome-nebula::before,
 .welcome-nebula::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
   pointer-events: none;
-}
-
-.welcome-nebula::before {
-  inset: 4% 20%;
-  filter: blur(16px);
-  background:
-    radial-gradient(ellipse at 50% 16%, rgba(92,171,255,.78) 0 7%, transparent 23%),
-    radial-gradient(ellipse at 32% 36%, rgba(40,133,255,.72) 0 8%, transparent 25%),
-    radial-gradient(ellipse at 62% 55%, rgba(65,151,255,.64) 0 8%, transparent 26%),
-    radial-gradient(ellipse at 38% 76%, rgba(37,111,239,.55) 0 7%, transparent 25%),
-    radial-gradient(ellipse at 57% 94%, rgba(100,108,255,.38) 0 8%, transparent 27%);
-  transform: rotate(-15deg) skewY(-8deg) scaleX(.78);
+  width: 58%;
+  height: 122%;
+  top: -10%;
+  border-radius: 48% 52% 46% 54% / 15% 18% 82% 85%;
+  filter: blur(15px);
+  opacity: .9;
+  background: linear-gradient(180deg, rgba(83,166,255,.88), rgba(55,130,255,.72) 28%, rgba(74,119,255,.58) 55%, rgba(127,92,255,.4) 82%, transparent 100%);
+  clip-path: polygon(54% 0, 75% 7%, 63% 16%, 40% 25%, 27% 35%, 34% 45%, 60% 55%, 73% 65%, 62% 76%, 39% 86%, 47% 100%, 0 100%, 0 91%, 25% 83%, 43% 73%, 51% 64%, 41% 57%, 16% 48%, 8% 38%, 20% 27%, 42% 17%);
+  transform: rotate(-8deg) skewY(-4deg);
 }
 
 .welcome-nebula::after {
-  inset: 2% 8%;
+  width: 44%;
+  height: 128%;
+  left: 22%;
+  top: -12%;
   filter: blur(34px);
-  opacity: .72;
-  background:
-    radial-gradient(ellipse at 54% 18%, rgba(74,155,255,.44), transparent 30%),
-    radial-gradient(ellipse at 34% 42%, rgba(35,106,255,.5), transparent 31%),
-    radial-gradient(ellipse at 66% 67%, rgba(67,125,255,.46), transparent 33%),
-    radial-gradient(ellipse at 43% 91%, rgba(83,102,255,.35), transparent 28%);
-  transform: rotate(-12deg) skewY(-7deg) scaleX(.82);
+  opacity: .56;
+  background: linear-gradient(180deg, rgba(116,190,255,.62), rgba(53,117,255,.52) 40%, rgba(108,101,255,.42) 72%, transparent 100%);
+  transform: rotate(-4deg) skewY(-3deg) scale(1.08);
 }
 
 .welcome-nebula-left {
-  left: -28vw;
-  background: radial-gradient(ellipse at 58% 45%, rgba(48,126,255,.26), transparent 55%);
-  animation: cosmic-drift-left 20s linear infinite;
+  left: -10vw;
+  animation: cosmic-stream-left 18s ease-in-out infinite;
 }
 
 .welcome-nebula-right {
-  right: -28vw;
-  background: radial-gradient(ellipse at 42% 46%, rgba(239,67,207,.25), transparent 55%);
-  animation: cosmic-drift-right 21s linear infinite;
+  right: -10vw;
+  animation: cosmic-stream-right 19s ease-in-out infinite;
 }
 
 .welcome-nebula-right::before {
-  background:
-    radial-gradient(ellipse at 50% 15%, rgba(255,153,229,.76) 0 7%, transparent 23%),
-    radial-gradient(ellipse at 68% 35%, rgba(244,83,211,.72) 0 8%, transparent 25%),
-    radial-gradient(ellipse at 38% 55%, rgba(223,67,205,.64) 0 8%, transparent 26%),
-    radial-gradient(ellipse at 62% 76%, rgba(206,67,219,.56) 0 7%, transparent 25%),
-    radial-gradient(ellipse at 43% 95%, rgba(142,92,255,.4) 0 8%, transparent 27%);
-  transform: rotate(15deg) skewY(8deg) scaleX(.78);
+  background: linear-gradient(180deg, rgba(255,153,229,.9), rgba(246,88,211,.76) 28%, rgba(226,69,207,.62) 56%, rgba(154,91,255,.48) 82%, transparent 100%);
+  transform: rotate(8deg) skewY(4deg) scaleX(-1);
 }
 
 .welcome-nebula-right::after {
-  background:
-    radial-gradient(ellipse at 46% 18%, rgba(255,126,222,.46), transparent 30%),
-    radial-gradient(ellipse at 66% 42%, rgba(245,67,211,.5), transparent 31%),
-    radial-gradient(ellipse at 34% 66%, rgba(219,65,215,.46), transparent 33%),
-    radial-gradient(ellipse at 58% 92%, rgba(159,83,255,.35), transparent 28%);
-  transform: rotate(12deg) skewY(7deg) scaleX(.82);
+  background: linear-gradient(180deg, rgba(255,173,235,.58), rgba(245,88,215,.5) 42%, rgba(160,96,255,.4) 78%, transparent 100%);
+  transform: rotate(4deg) skewY(3deg) scaleX(-1.08);
+}
+
+@keyframes cosmic-stream-left {
+  0% { transform: translate3d(-2%, -2%, 0) rotate(-4deg) scale(1); }
+  25% { transform: translate3d(3%, 6%, 0) rotate(-1deg) scale(1.03); }
+  50% { transform: translate3d(-1%, 15%, 0) rotate(3deg) scale(1.06); }
+  75% { transform: translate3d(4%, 25%, 0) rotate(-1deg) scale(1.03); }
+  100% { transform: translate3d(-2%, 36%, 0) rotate(-4deg) scale(1); }
+}
+
+@keyframes cosmic-stream-right {
+  0% { transform: translate3d(2%, -3%, 0) rotate(4deg) scale(1); }
+  25% { transform: translate3d(-3%, 7%, 0) rotate(1deg) scale(1.03); }
+  50% { transform: translate3d(1%, 16%, 0) rotate(-3deg) scale(1.06); }
+  75% { transform: translate3d(-4%, 27%, 0) rotate(1deg) scale(1.03); }
+  100% { transform: translate3d(2%, 37%, 0) rotate(4deg) scale(1); }
 }
 
 .star-field { z-index: 0; opacity: .9; }
@@ -1410,7 +1409,7 @@ button.notification-row { cursor: pointer; }
   align-items: center;
   gap: 10px;
   color: #faf5ff;
-  font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(1.45rem, 2.4vw, 2rem);
   font-weight: 650;
   letter-spacing: -.04em;
@@ -1517,7 +1516,8 @@ button.notification-row { cursor: pointer; }
   font-size: clamp(.9rem, 1.5vw, 1.05rem);
 }
 
-.welcome-prompt span { color: #d4aaff; font-size: 1.25rem; line-height: .7; }
+.welcome-prompt { display: none !important; }
+.welcome-prompt span { display: none; }
 
 /* Cosmic profile setup */
 .profile-page {
@@ -1565,7 +1565,7 @@ button.notification-row { cursor: pointer; }
   color: rgba(245,239,255,.68);
 }
 
-.setup-header .knot-word { color: #f3e9ff; font-family: "Comfortaa", ui-sans-serif, system-ui, sans-serif; font-size: 1.6rem; font-weight: 650; }
+.setup-header .knot-word { color: #f3e9ff; font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif; font-size: 1.6rem; font-weight: 650; }
 
 .setup-wrap { width: min(900px, calc(100% - 36px)); margin: 5vh auto 60px; }
 .setup-progress { width: min(520px, 100%); height: 3px; margin: 0 auto 24px; background: rgba(255,255,255,.09); }
@@ -1665,3 +1665,72 @@ button.notification-row { cursor: pointer; }
   .profile-page::before,
   .profile-page::after { animation: none !important; }
 }
+
+/* Final cosmic star tuning */
+.star-field .tiny-star:nth-child(3n) { animation-duration: 3.7s; }
+.star-field .tiny-star:nth-child(4n) { animation-duration: 5.8s; }
+.star-field .tiny-star:nth-child(5n) { animation-duration: 4.2s; }
+
+/* The profile setup emerges after the star has become the transition portal. */
+.star-profile-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.preview-star-wash {
+  position: absolute;
+  width: 16vmin;
+  height: 16vmin;
+  display: grid;
+  place-items: center;
+  border-radius: 0;
+  background: linear-gradient(145deg, #fff 0%, #ead9ff 22%, #bca1ff 46%, #78aaff 72%, #ff9bd8 100%);
+  clip-path: polygon(50% 0%, 63% 36%, 100% 50%, 63% 64%, 50% 100%, 37% 64%, 0 50%, 37% 36%);
+  filter: drop-shadow(0 0 20px rgba(255,255,255,.95)) drop-shadow(0 0 80px rgba(145,106,255,.95));
+  animation: preview-star-expand 1.05s cubic-bezier(.72,0,.18,1) forwards;
+}
+
+.preview-star-wash span { display: none; }
+
+.preview-profile-card {
+  position: relative;
+  width: min(470px, calc(100% - 42px));
+  padding: 34px 34px 30px;
+  border: 1px solid rgba(226,201,255,.22);
+  border-radius: 30px;
+  background: linear-gradient(145deg, rgba(13,10,35,.9), rgba(9,8,27,.8));
+  box-shadow: 0 30px 100px rgba(0,0,0,.42), 0 0 70px rgba(131,83,255,.18);
+  backdrop-filter: blur(24px);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(18px) scale(.96);
+  animation: preview-card-in .58s .78s cubic-bezier(.2,.8,.2,1) forwards;
+  font-family: "Fredoka", ui-sans-serif, system-ui, sans-serif;
+}
+
+.preview-spark { color: #c995ff; font-size: 1.5rem; margin-bottom: 4px; }
+.preview-eyebrow { color: #c995ff; font-size: .9rem; font-weight: 500; }
+.preview-profile-card h2 { margin: 5px 0 5px; color: #f7f2ff; font-size: clamp(1.6rem, 4vw, 2.25rem); }
+.preview-profile-card p { margin: 0 0 20px; color: rgba(245,238,255,.58); }
+.preview-avatar { position: relative; width: 92px; height: 92px; margin: 0 auto 20px; display: grid; place-items: center; border: 1px solid rgba(194,145,255,.7); border-radius: 50%; color: rgba(225,211,255,.45); font-size: 3.1rem; background: rgba(255,255,255,.035); }
+.preview-avatar span { position: absolute; right: -3px; bottom: 0; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(135deg,#a977ff,#d16cff); font-size: 1.25rem; }
+.preview-field { margin-top: 9px; padding: 12px 14px; border: 1px solid rgba(214,183,255,.16); border-radius: 13px; color: rgba(245,238,255,.5); background: rgba(255,255,255,.035); text-align: left; }
+
+@keyframes preview-star-expand {
+  0% { transform: scale(.9); opacity: 1; }
+  55% { transform: scale(5.5); opacity: 1; }
+  100% { transform: scale(24); opacity: .72; }
+}
+
+@keyframes preview-card-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Make the actual setup screen continue the same reveal instead of popping in. */
+.profile-page:not(.profile-finishing) .setup-card { animation: setup-reveal .72s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes setup-reveal { from { opacity: 0; transform: translateY(22px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }

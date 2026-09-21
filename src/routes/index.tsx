@@ -31,6 +31,7 @@ function KnotApp() {
   const [busy, setBusy] = useState(true)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [welcomePreview, setWelcomePreview] = useState(false)
 
   const load = async () => {
     setBusy(true); setError('')
@@ -51,19 +52,20 @@ function KnotApp() {
 
   if (busy) return <div className="knot-loading"><div className="knot-logo">Knot</div><div className="loader-dot" /></div>
   if (screen === 'blocked') return <Blocked />
-  if (screen === 'welcome') return <Welcome onStart={() => { setAuthMode('signup'); setScreen('auth') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} />
+  if (screen === 'welcome') return <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onSignIn={() => { setAuthMode('signin'); setScreen('auth') }} showProfilePreview={welcomePreview} />
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
   if (screen === 'profile') return <ProfileSetup existing={profile} error={error} setError={setError} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onStart, onSignIn }: { onStart: () => void; onSignIn: () => void }) {
+function Welcome({ onBegin, onComplete, onSignIn, showProfilePreview }: { onBegin: () => void; onComplete: () => void; onSignIn: () => void; showProfilePreview: boolean }) {
   const [expanding, setExpanding] = useState(false)
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    window.setTimeout(onStart, 920)
+    onBegin()
+    window.setTimeout(onComplete, 1450)
   }
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
     <div className="welcome-nebula welcome-nebula-left" aria-hidden="true"/>
@@ -77,8 +79,20 @@ function Welcome({ onStart, onSignIn }: { onStart: () => void; onSignIn: () => v
       <h1>You might be closer<br className="welcome-break"/> than you think<span className="title-dot">.</span></h1>
       <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
       <button className="welcome-star" onClick={begin} aria-label="Begin Knot"><span>✦</span></button>
-      <button className="welcome-prompt" onClick={begin}>Tap the star to begin<span>⌄</span></button>
     </div>
+    {showProfilePreview && <div className="star-profile-preview" aria-hidden="true">
+      <div className="preview-star-wash"><span>✦</span></div>
+      <div className="preview-profile-card">
+        <div className="preview-spark">✦</div>
+        <div className="preview-eyebrow">Profile setup</div>
+        <h2>Let’s set up your profile</h2>
+        <p>Tell us a bit about you</p>
+        <div className="preview-avatar">◯<span>+</span></div>
+        <div className="preview-field">Name</div>
+        <div className="preview-field">Date of Birth</div>
+        <div className="preview-field">City</div>
+      </div>
+    </div>}
   </div>
 }
 

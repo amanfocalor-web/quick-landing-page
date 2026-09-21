@@ -2381,3 +2381,33 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   .welcome.knot-welcome .welcome-nebula-left,
   .welcome.knot-welcome .welcome-nebula-right { animation: none !important; }
 }
+
+/* KNOT v16 — fix actual stream motion.
+   v15 used 100% background height, which makes percentage background-position
+   resolve to the same rendered position at 0% and 100%. Use a taller tile so
+   the artwork physically travels through the viewport. Everything else stays
+   untouched. */
+.welcome.knot-welcome .welcome-nebula-left,
+.welcome.knot-welcome .welcome-nebula-right {
+  background-repeat: repeat-y !important;
+  background-size: 112% 200% !important;
+  will-change: background-position !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-left {
+  animation: knot-v16-stream-left 20s linear infinite !important;
+}
+
+.welcome.knot-welcome .welcome-nebula-right {
+  animation: knot-v16-stream-right 22s linear infinite !important;
+}
+
+@keyframes knot-v16-stream-left {
+  from { background-position: 0% 0%; }
+  to   { background-position: 0% 100%; }
+}
+
+@keyframes knot-v16-stream-right {
+  from { background-position: 100% 0%; }
+  to   { background-position: 100% 100%; }
+}

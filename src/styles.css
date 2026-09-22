@@ -1667,9 +1667,6 @@ button.notification-row { cursor: pointer; }
 }
 
 /* Final cosmic star tuning */
-.star-field .tiny-star:nth-child(3n) { animation-duration: 3.7s; }
-.star-field .tiny-star:nth-child(4n) { animation-duration: 5.8s; }
-.star-field .tiny-star:nth-child(5n) { animation-duration: 4.2s; }
 
 /* The profile setup emerges after the star has become the transition portal. */
 .star-profile-preview {
@@ -1755,7 +1752,52 @@ body,#root,button,input,textarea,select{font-family:"Pacifico",ui-sans-serif,sys
 .welcome-nebula-left{left:-29vw;transform:rotate(-9deg) skewY(-5deg);animation:knot-stream-sweep-left 24s ease-in-out infinite alternate}
 .welcome-nebula-right{right:-29vw;transform:scaleX(-1) rotate(-9deg) skewY(-5deg);animation:knot-stream-sweep-right 25s ease-in-out infinite alternate}
 .welcome-nebula-right::before,.welcome-nebula-right::after{filter:hue-rotate(72deg) saturate(120%)}
-.tiny-star{animation:knot-twinkle 4.8s ease-in-out infinite;will-change:opacity,transform}.tiny-star.star-1{animation-duration:6.1s}.tiny-star.star-2{animation-duration:3.7s}.tiny-star.star-3{animation-duration:5.4s}.tiny-star.star-4{animation-duration:4.2s}
+.tiny-star{
+  color:#fff !important;
+  text-shadow:0 0 5px rgba(255,255,255,.82),0 0 13px rgba(255,255,255,.52);
+  animation:knot-random-star-glow 7.2s ease-in-out infinite;
+  will-change:opacity,transform,color,text-shadow,filter;
+}
+.tiny-star.star-1,.tiny-star.star-2,.tiny-star.star-3,.tiny-star.star-4{color:#fff !important}
+.star-field .tiny-star:nth-child(3n){animation-duration:6.1s}
+.star-field .tiny-star:nth-child(4n){animation-duration:8.3s}
+.star-field .tiny-star:nth-child(5n){animation-duration:5.7s}
+.star-field .tiny-star:nth-child(7n){animation-duration:9.1s}
+.star-field .tiny-star:nth-child(11n){animation-duration:7.8s}
+.star-field .tiny-star:nth-child(13n){animation-duration:6.7s}
+@keyframes knot-random-star-glow{
+  0%,54%,100%{
+    color:#fff;
+    opacity:.55;
+    transform:scale(.88);
+    text-shadow:0 0 5px rgba(255,255,255,.82),0 0 13px rgba(255,255,255,.52);
+    filter:none;
+  }
+  62%{
+    color:#fff;
+    opacity:1;
+    transform:scale(1.08);
+    text-shadow:0 0 7px rgba(255,255,255,1),0 0 20px rgba(255,255,255,.8),0 0 34px rgba(255,255,255,.35);
+  }
+  69%{
+    color:#ff9bd8;
+    opacity:.96;
+    transform:scale(1.16);
+    text-shadow:0 0 7px rgba(255,178,224,1),0 0 21px rgba(255,110,202,.9),0 0 38px rgba(207,86,255,.55);
+  }
+  76%{
+    color:#8eaaff;
+    opacity:.9;
+    transform:scale(1.05);
+    text-shadow:0 0 7px rgba(172,194,255,1),0 0 22px rgba(87,116,255,.9),0 0 40px rgba(35,54,150,.55);
+  }
+  84%{
+    color:#fff;
+    opacity:.82;
+    transform:scale(.98);
+    text-shadow:0 0 6px rgba(255,255,255,.95),0 0 17px rgba(255,255,255,.65);
+  }
+}
 .welcome-center{top:47%;width:min(900px,calc(100% - 40px));transform:translate(-50%,-50%)}
 .welcome-center h1{font-family:"Pacifico",ui-sans-serif,system-ui,sans-serif;font-weight:500;letter-spacing:-.045em}.welcome-kicker{font-family:"Pacifico",ui-sans-serif,system-ui,sans-serif}
 .welcome-star{width:clamp(108px,9.4vw,132px);height:clamp(108px,9.4vw,132px);margin-top:clamp(42px,6vh,62px);animation:knot-star-idle 3.4s ease-in-out infinite;transform:translate(-50%,-50%);will-change:transform}

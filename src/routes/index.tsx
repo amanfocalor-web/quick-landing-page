@@ -64,6 +64,26 @@ function KnotApp() {
 
 function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () => void }) {
   const [expanding, setExpanding] = useState(false)
+  const [starGlows, setStarGlows] = useState<Record<number, 'white' | 'pink' | 'navy'>>({})
+
+  useEffect(() => {
+    const chooseGlows = () => {
+      const count = 5 + Math.floor(Math.random() * 3)
+      const next: Record<number, 'white' | 'pink' | 'navy'> = {}
+      const used = new Set<number>()
+      while (used.size < count) used.add(Math.floor(Math.random() * 47))
+      used.forEach((index) => {
+        const roll = Math.random()
+        next[index] = roll < 0.68 ? 'white' : roll < 0.86 ? 'pink' : 'navy'
+      })
+      setStarGlows(next)
+    }
+
+    chooseGlows()
+    const timer = window.setInterval(chooseGlows, 1350)
+    return () => window.clearInterval(timer)
+  }, [])
+
   const begin = () => {
     if (expanding) return
     setExpanding(true)
@@ -72,7 +92,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
-    <div className="star-field">{[[7,13],[16,29],[27,9],[39,21],[52,11],[66,17],[81,8],[92,25],[11,44],[23,58],[35,39],[48,49],[61,34],[74,54],[88,42],[96,67],[6,76],[19,87],[31,70],[44,82],[57,73],[69,91],[83,78],[94,88],[13,7],[30,31],[46,6],[63,27],[78,36],[89,14],[4,56],[17,72],[28,51],[41,64],[55,43],[68,61],[80,69],[91,53],[9,94],[25,80],[38,93],[50,60],[64,84],[76,75],[87,95],[98,46]].map(([left,top],i)=><span key={i} className={`tiny-star star-${i%5}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
+    <div className="star-field">{[[7,13],[16,29],[27,9],[39,21],[52,11],[66,17],[81,8],[92,25],[11,44],[23,58],[35,39],[48,49],[61,34],[74,54],[88,42],[96,67],[6,76],[19,87],[31,70],[44,82],[57,73],[69,91],[83,78],[94,88],[13,7],[30,31],[46,6],[63,27],[78,36],[89,14],[4,56],[17,72],[28,51],[41,64],[55,43],[68,61],[80,69],[91,53],[9,94],[25,80],[38,93],[50,60],[64,84],[76,75],[87,95],[98,46],[72,12]].map(([left,top],i)=><span key={i} className={`tiny-star star-${i%5} glow-${starGlows[i] || 'none'}`} style={{left:`${left}%`,top:`${top}%`,animationDelay:`${(i%9)*.37}s`}}>✦</span>)}</div>
 
     <main className="welcome-center">
       <h1>You might be closer<br />than you think<span className="title-dot">.</span></h1>

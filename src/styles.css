@@ -2633,3 +2633,48 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
     filter: none !important;
   }
 }
+
+
+/* KNOT v19 correction — remove the nebula streams completely. The welcome
+   scene keeps the same cosmic palette, typography, starfield, and central star. */
+.welcome.knot-welcome {
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(61,39,132,.28), transparent 36%),
+    radial-gradient(circle at 18% 22%, rgba(27,58,130,.20), transparent 28%),
+    radial-gradient(circle at 82% 24%, rgba(73,34,105,.18), transparent 30%),
+    linear-gradient(180deg, #030718 0%, #070b21 48%, #050817 100%) !important;
+}
+.welcome.knot-welcome .welcome-nebula,
+.welcome.knot-welcome .welcome-nebula::before,
+.welcome.knot-welcome .welcome-nebula::after,
+.welcome.knot-welcome .welcome-nebula-left,
+.welcome.knot-welcome .welcome-nebula-right,
+.welcome.knot-welcome .nebula-tile {
+  display: none !important;
+  background: none !important;
+  animation: none !important;
+}
+
+/* Every star can take every glow colour. Only a random subset is active at
+   once; React reshuffles the active stars so no star has a permanent colour. */
+.welcome.knot-welcome .tiny-star {
+  color: rgba(255,255,255,.78) !important;
+  text-shadow: 0 0 10px rgba(255,255,255,.55);
+  transition: color .35s ease, text-shadow .35s ease, filter .35s ease;
+}
+.welcome.knot-welcome .tiny-star.glow-white {
+  color: #ffffff !important;
+  text-shadow: 0 0 8px rgba(255,255,255,.9), 0 0 22px rgba(255,255,255,.72), 0 0 38px rgba(214,225,255,.38);
+}
+.welcome.knot-welcome .tiny-star.glow-pink {
+  color: #ffd7f3 !important;
+  text-shadow: 0 0 8px rgba(255,205,240,.95), 0 0 24px rgba(246,99,203,.82), 0 0 42px rgba(191,75,255,.48);
+}
+.welcome.knot-welcome .tiny-star.glow-navy {
+  color: #9bbcff !important;
+  text-shadow: 0 0 8px rgba(157,195,255,.95), 0 0 23px rgba(58,112,255,.82), 0 0 42px rgba(25,58,160,.60);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome.knot-welcome .tiny-star { transition: none !important; }
+}

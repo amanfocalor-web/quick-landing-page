@@ -44,7 +44,13 @@ function KnotApp() {
       setCreator(await isCreator())
       setScreen(me?.profileComplete ? 'home' : 'profile')
     } catch (e: any) {
-      setError(e?.message || 'Knot could not load right now')
+      const message = e?.message || ''
+      if (message.includes('Supabase is not configured')) {
+        setError('')
+        setScreen('welcome')
+      } else {
+        setError(message || 'Knot could not load right now')
+      }
     } finally { setBusy(false) }
   }
 
@@ -74,7 +80,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
       while (used.size < count) used.add(Math.floor(Math.random() * 47))
       used.forEach((index) => {
         const roll = Math.random()
-        next[index] = roll < 0.68 ? 'white' : roll < 0.86 ? 'pink' : 'navy'
+        next[index] = roll < 0.34 ? 'white' : roll < 0.67 ? 'pink' : 'navy'
       })
       setStarGlows(next)
     }
@@ -87,7 +93,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    onBegin()
+    window.requestAnimationFrame(() => onBegin())
     window.setTimeout(onComplete, 1180)
   }
 

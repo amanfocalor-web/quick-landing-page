@@ -401,18 +401,25 @@ textarea:focus-visible {
 
 .knot-logo { font-size: clamp(3rem, 9vw, 5.5rem); }
 
-.loader-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: #e9d5ff;
-  box-shadow: 0 0 24px rgba(216,180,254,.9);
-  animation: knot-loader 1.2s ease-in-out infinite;
+.loader-heart {
+  width: 24px;
+  height: 24px;
+  color: #f3d8ff;
+  fill: rgba(216,180,254,.22);
+  filter: drop-shadow(0 0 18px rgba(216,180,254,.9));
+  animation: knot-loader-heart 1.2s ease-in-out infinite;
 }
+
+.loader-dot { display: none; }
 
 @keyframes knot-loader {
   0%,100% { transform: scale(.72); opacity: .45; }
   50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes knot-loader-heart {
+  0%,100% { transform: scale(.86); opacity: .55; }
+  50% { transform: scale(1.12); opacity: 1; }
 }
 
 /* Welcome */
@@ -2678,3 +2685,7 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 @media (prefers-reduced-motion: reduce) {
   .welcome.knot-welcome .tiny-star { transition: none !important; }
 }
+
+/* KNOT v22 refinement: the final setup star is a clean floating glyph, never a boxed element. */
+.profile-page .ready-star { border: 0 !important; outline: 0 !important; background-color: transparent !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+.profile-page .ready-state { border: 0 !important; outline: 0 !important; }

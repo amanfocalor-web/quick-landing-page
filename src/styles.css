@@ -2878,3 +2878,16 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 }
 
 .profile-page.light .ready-state p { color: rgba(56,54,107,.62) !important; }
+
+/* KNOT v26 — reliable camera mounting, removable photos, and clearer photo controls */
+.camera-box video {
+  min-height: 220px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+.profile-page.light .photo-remove-btn {
+  color: #8b3f61 !important;
+  border-color: rgba(139,63,97,.18) !important;
+  background: rgba(255,245,249,.82) !important;
+}

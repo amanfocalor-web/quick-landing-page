@@ -158,20 +158,22 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const [step,setStep]=useState(initialStep)
   const [finishing,setFinishing]=useState(false)
   const draft = (() => { if (existing || typeof window === 'undefined') return null; try { return JSON.parse(window.sessionStorage.getItem('knot_profile_draft') || 'null') } catch { return null } })()
-  const [name,setName]=useState(existing?.name||draft?.name||'')
-  const [photoPath,setPhotoPath]=useState<string|null>(existing?.photoPath||null)
-  const [photoUrl,setPhotoUrl]=useState<string|null>(null)
-  const [dob,setDob]=useState(existing?.dob||draft?.dob||'')
-  const [city,setCity]=useState(existing?.city||draft?.city||'Chennai')
-  const [bio,setBio]=useState(existing?.bio||draft?.bio||'')
-  const [interests,setInterests]=useState<string[]>(existing?.interests||draft?.interests||[])
-  const [intent,setIntent]=useState(existing?.intent||draft?.intent||'')
-  const [preference,setPreference]=useState(existing?.preference||draft?.preference||'')
-  const [ageMin,setAgeMin]=useState(existing?.ageMin||draft?.ageMin||18)
-  const [ageMax,setAgeMax]=useState(existing?.ageMax||draft?.ageMax||21)
-  const [theme,setTheme]=useState<'light'|'dark'>(existing?.theme||draft?.theme||'light')
-  const [starColor,setStarColor]=useState(existing?.starColor||draft?.starColor||'#c084fc')
-  const [incognito,setIncognito]=useState(existing?.incognito||draft?.incognito||false)
+  const hasDraft = !!draft
+  const value = <T,>(key: string, fallback: T): T => hasDraft && Object.prototype.hasOwnProperty.call(draft, key) ? (draft[key] as T) : fallback
+  const [name,setName]=useState(value('name', existing?.name ?? ''))
+  const [photoPath,setPhotoPath]=useState<string|null>(value('photoPath', existing?.photoPath ?? null))
+  const [photoUrl,setPhotoUrl]=useState<string|null>(value('photoDataUrl', null))
+  const [dob,setDob]=useState(value('dob', existing?.dob ?? ''))
+  const [city,setCity]=useState(value('city', existing?.city ?? ''))
+  const [bio,setBio]=useState(value('bio', existing?.bio ?? ''))
+  const [interests,setInterests]=useState<string[]>(value('interests', existing?.interests ?? []))
+  const [intent,setIntent]=useState(value('intent', existing?.intent ?? ''))
+  const [preference,setPreference]=useState(value('preference', existing?.preference ?? ''))
+  const [ageMin,setAgeMin]=useState(value('ageMin', existing?.ageMin ?? 18))
+  const [ageMax,setAgeMax]=useState(value('ageMax', existing?.ageMax ?? 21))
+  const [theme,setTheme]=useState<'light'|'dark'>(value('theme', existing?.theme ?? 'light'))
+  const [starColor,setStarColor]=useState(value('starColor', existing?.starColor ?? '#c084fc'))
+  const [incognito,setIncognito]=useState(value('incognito', existing?.incognito ?? false))
   const [saving,setSaving]=useState(false)
   const fileRef=useRef<HTMLInputElement>(null)
   const videoRef=useRef<HTMLVideoElement>(null)
@@ -181,11 +183,22 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
 
   useEffect(()=>{ if(photoPath) void getPhotoUrl(photoPath).then(setPhotoUrl) },[photoPath])
   useEffect(()=>()=>streamRef.current?.getTracks().forEach(t=>t.stop()),[])
+  useEffect(()=>{
+    if(!camera || !streamRef.current || !videoRef.current) return
+    const video=videoRef.current
+    video.srcObject=streamRef.current
+    const play=()=>video.play().catch(()=>{})
+    if(video.readyState>=1) play(); else video.onloadedmetadata=play
+    return ()=>{ video.onloadedmetadata=null }
+  },[camera])
 
-  const chooseFile=async(file?:File)=>{ if(!file)return; try{ if(preAuth){setPhotoPath(null);setPhotoUrl(URL.createObjectURL(file));setError('');return} const p=await uploadProfilePhoto(file);setPhotoPath(p);setError('') }catch(e:any){setError(e?.message||'Photo upload failed')} }
-  const startCamera=async()=>{try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});streamRef.current=stream;if(videoRef.current){videoRef.current.srcObject=stream;await videoRef.current.play()}setCamera(true)}catch{setError('Camera permission was not granted') }}
-  const capture=async()=>{const video=videoRef.current;if(!video)return;const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){setCameraImage(canvas.toDataURL('image/jpeg'));if(preAuth){setPhotoPath(null);setPhotoUrl(canvas.toDataURL('image/jpeg'))}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());setCamera(false)}
-  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito}));onAuthNeeded?.(theme);return}const saved=await saveProfile({name,photoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
+  const fileToDataUrl=async(file:File)=>await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(file)})
+  const dataUrlToFile=(dataUrl:string)=>{const [meta,data]=dataUrl.split(',');const mime=meta.match(/data:(.*?);base64/)?.[1]||'image/jpeg';const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));return new File([bytes],'profile.jpg',{type:mime})}
+  const chooseFile=async(file?:File)=>{ if(!file)return; try{ const dataUrl=await fileToDataUrl(file); if(preAuth){setPhotoPath(null);setPhotoUrl(dataUrl);setCameraImage(null);setError('');return} const p=await uploadProfilePhoto(file);setPhotoPath(p);setPhotoUrl(dataUrl);setError('') }catch(e:any){setError(e?.message||'Photo upload failed')} }
+  const removePhoto=()=>{streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false);setCameraImage(null);setPhotoPath(null);setPhotoUrl(null);setError('')}
+  const startCamera=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera is not supported in this browser');const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:720}},audio:false});streamRef.current=stream;setCamera(true);setError('')}catch(e:any){setError(e?.message||'Camera permission was not granted') }}
+  const capture=async()=>{const video=videoRef.current;if(!video||video.readyState<2||!video.videoWidth){setError('Camera is still starting. Please try Capture again.');return}const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){const dataUrl=canvas.toDataURL('image/jpeg');setCameraImage(dataUrl);if(preAuth){setPhotoPath(null);setPhotoUrl(dataUrl)}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false)}
+  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito,photoPath:null,photoDataUrl:photoUrl}));onAuthNeeded?.(theme);return}let finalPhotoPath=photoPath;if(!finalPhotoPath&&photoUrl?.startsWith('data:')) finalPhotoPath=await uploadProfilePhoto(dataUrlToFile(photoUrl));const saved=await saveProfile({name,photoPath:finalPhotoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
   const next=()=>setStep(s=>Math.min(7,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 
@@ -195,7 +208,7 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
     {finishing&&<div className="profile-complete-transition" aria-hidden="true"><div className="transition-star" style={{color:starColor}}>✦</div></div>}
     <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/7</span></header>
     <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/7)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
-      {step===1&&<div className="setup-content"><div className="photo-picker"><div className="avatar-preview">{photoUrl?<img src={photoUrl} alt="Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Profile photo</strong><p>Choose one from your device or use your camera</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>fileRef.current?.click()}>Upload</button><button className="secondary-btn" onClick={startCamera}><Camera size={17}/> Camera</button></div></div><input ref={fileRef} hidden type="file" accept="image/*" onChange={e=>chooseFile(e.target.files?.[0])}/></div><label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="What should people call you?"/></label>{camera&&<div className="camera-box"><video ref={videoRef} muted playsInline/><button className="primary-btn" onClick={capture}>Capture</button></div>}{cameraImage&&<div className="camera-note"><Check size={16}/> Photo captured</div>}</div>}
+      {step===1&&<div className="setup-content"><div className="photo-picker"><div className="avatar-preview">{photoUrl?<img src={photoUrl} alt="Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Profile photo</strong><p>Choose one from your device or use your camera</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>fileRef.current?.click()}>Upload</button><button className="secondary-btn" onClick={startCamera}><Camera size={17}/> Camera</button>{photoUrl&&<button className="secondary-btn photo-remove-btn" onClick={removePhoto}>Remove photo</button>}</div></div><input ref={fileRef} hidden type="file" accept="image/*" onChange={e=>chooseFile(e.target.files?.[0])}/></div><label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="What should people call you?"/></label>{camera&&<div className="camera-box"><video key={camera ? 'camera-active' : 'camera-idle'} ref={videoRef} muted playsInline autoPlay/><button className="primary-btn" onClick={capture}>Capture</button></div>}{cameraImage&&<div className="camera-note"><Check size={16}/> Photo captured</div>}</div>}
       {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>setCity(e.target.value==='__other__'?'':e.target.value)}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
       {step===3&&<div className="setup-content"><div className="verification-placeholder"><Shield size={28}/><div><strong>Identity verification</strong><p>The DigiLocker and live-camera verification connection will be plugged in here</p></div><span>Integration point</span></div><label>Bio<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={500} placeholder="A little about you"/></label><div><strong>Interests</strong><div className="chip-grid">{interestOptions.map(x=><button key={x} className={interests.includes(x)?'chip active':'chip'} onClick={()=>toggleInterest(x)}>{x}</button>)}</div></div></div>}
       {step===4&&<div className="setup-content"><label>What are you looking for<select value={intent} onChange={e=>setIntent(e.target.value)}><option value="">Choose one</option><option>Something meaningful</option><option>Open to seeing where it goes</option><option>New connections</option></select></label><label>Preferences<input value={preference} onChange={e=>setPreference(e.target.value)} placeholder="What matters to you?"/></label></div>}

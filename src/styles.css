@@ -2689,3 +2689,70 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 /* KNOT v22 refinement: the final setup star is a clean floating glyph, never a boxed element. */
 .profile-page .ready-star { border: 0 !important; outline: 0 !important; background-color: transparent !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; display: block !important; }
 .profile-page .ready-state { border: 0 !important; outline: 0 !important; }
+
+/* v25 — onboarding readability and selected-theme persistence */
+.knot-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.knot-loading .loader-heart {
+  width: 42px;
+  height: 42px;
+  margin: 0;
+}
+
+.knot-loading .knot-logo {
+  margin: 0;
+  line-height: 1;
+}
+
+.profile-page.light .chip {
+  color: #111111 !important;
+  border-color: rgba(36,32,59,.14) !important;
+  background: rgba(255,255,255,.72) !important;
+}
+
+.profile-page.light .chip.active {
+  color: #111111 !important;
+  border-color: rgba(153,111,232,.52) !important;
+  background: linear-gradient(135deg, rgba(192,132,252,.20), rgba(96,165,250,.14)) !important;
+}
+
+.profile-page.light .theme-choice,
+.profile-page.light .theme-choice.active {
+  color: #111111 !important;
+  border-color: rgba(36,32,59,.14) !important;
+  background: rgba(255,255,255,.72) !important;
+}
+
+.profile-page.light .theme-choice.active {
+  border-color: rgba(153,111,232,.52) !important;
+  background: linear-gradient(135deg, rgba(192,132,252,.20), rgba(96,165,250,.14)) !important;
+  box-shadow: 0 0 0 2px rgba(153,111,232,.10) !important;
+}
+
+.profile-page.light .setup-reference-star {
+  text-shadow: 0 0 14px currentColor !important;
+}
+
+/* The selected star colour remains the source of truth after entering Discover. */
+.app-shell {
+  --star: #c084fc;
+}
+.app-shell .knot-word::after {
+  content: "✦";
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--star) !important;
+  text-shadow: 0 0 12px var(--star);
+  font-size: .78em;
+  vertical-align: .08em;
+}
+.app-shell.light .knot-word::after {
+  text-shadow: 0 0 9px color-mix(in srgb, var(--star) 45%, transparent);
+}

@@ -2756,3 +2756,68 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .app-shell.light .knot-word::after {
   text-shadow: 0 0 9px color-mix(in srgb, var(--star) 45%, transparent);
 }
+
+/* v25.1 corrections */
+.knot-loading-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+.loader-heart {
+  order: 2 !important;
+}
+
+.knot-logo {
+  order: 1 !important;
+}
+
+/* Keep the profile setup light through the theme-selection page.
+   The chosen theme takes effect only on the final ready page and beyond. */
+.profile-page:not(.light) .setup-reference-star {
+  width: 28px !important;
+  height: 28px !important;
+  margin: -2px auto 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center !important;
+}
+
+.profile-page.light .setup-reference-star {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Theme choices remain readable on the light theme-selection page. */
+.profile-page.light .theme-choice,
+.profile-page.light .theme-choice.active {
+  color: #111 !important;
+}
+
+/* Once the selected theme is actually active, keep the final star centered. */
+.profile-page:not(.light) .setup-reference-star {
+  color: var(--star, #c084fc) !important;
+  text-shadow: 0 0 14px currentColor !important;
+}
+
+/* v25.1 selected-star correction: do not replace the user's chosen colour with a fixed gradient. */
+.profile-page .ready-star {
+  color: var(--star, #c084fc) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 35px currentColor) !important;
+}
+
+.profile-page .setup-reference-star {
+  width: 28px !important;
+  height: 28px !important;
+  margin: -2px auto 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  justify-self: center !important;
+  text-align: center !important;
+}

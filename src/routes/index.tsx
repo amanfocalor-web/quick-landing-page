@@ -17,7 +17,7 @@ export const Route = createFileRoute('/')({
 type Screen = 'welcome' | 'auth' | 'profile' | 'home' | 'creator' | 'blocked'
 type HomeTab = 'discover' | 'matches' | 'chats' | 'profile' | 'notifications'
 
-const interestOptions = ['Music','Photography','Movies','Coffee','Sports','Gaming','Art','Books','Dance','Travel','Tech','Food','Fitness','Writing','Design','Volunteering','Others']
+const interestOptions = ['Music','Photography','Movies','Coffee','Sports','Gaming','Art','Books','Dance','Travel','Tech','Food','Fitness','Writing','Design','Others']
 const cities = ['Chennai','Bengaluru','Delhi','Kochi','Mumbai','Hyderabad','Pune','Kolkata','Ahmedabad','Jaipur','Vellore','Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tirunelveli','Erode','Thoothukudi','Thanjavur','Hosur','Tiruppur','Bengaluru','Mysuru','Mangaluru','Hubballi','New Delhi','Noida','Gurugram','Ghaziabad','Lucknow','Kanpur','Varanasi','Agra','Prayagraj','Kochi','Thiruvananthapuram','Kozhikode','Kollam','Mumbai','Nashik','Nagpur','Aurangabad','Hyderabad','Visakhapatnam','Vijayawada','Pune','Kolkata','Ahmedabad','Surat','Vadodara','Jaipur','Jodhpur','Udaipur','Bhopal','Indore','Patna','Bhubaneswar','Guwahati','Chandigarh','Amritsar','Dehradun','Ranchi']
 
 function KnotApp() {
@@ -56,7 +56,7 @@ function KnotApp() {
 
   useEffect(() => { void load() }, [])
 
-  if (busy) return <div className="knot-loading"><div className="knot-loading-inner"><Heart className="loader-heart" aria-hidden="true" /><div className="knot-logo">Knot</div></div></div>
+  if (busy) return <div className="knot-loading"><div className="knot-loading-inner"><div className="knot-logo">Knot</div><Heart className="loader-heart" aria-hidden="true" /></div></div>
   if (screen === 'blocked') return <Blocked />
   if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
     {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} /></div>}
@@ -188,7 +188,8 @@ function ProfileSetup({ existing,preAuth=false,error,setError,onDone,onLogout,on
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 
   const stepTitle=['','Let’s set up your profile','A couple of basics','Your interests','What are you looking for','Your discovery preferences','Your look','Your Knot is ready'][step]
-  return <div className={`profile-page ${theme==='light'?'light':''} ${finishing?'profile-finishing':''}`}>
+  const effectiveTheme = step >= 7 ? theme : 'light'
+  return <div className={`profile-page ${effectiveTheme==='light'?'light':''} ${finishing?'profile-finishing':''}`} style={{'--star':starColor} as any}>
     {finishing&&<div className="profile-complete-transition" aria-hidden="true"><div className="transition-star" style={{color:starColor}}>✦</div></div>}
     <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/7</span></header>
     <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/7)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
@@ -224,7 +225,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const pointerDown=(e:PointerEvent<HTMLDivElement>)=>{if(!flipped||animation)return;e.currentTarget.setPointerCapture(e.pointerId);setDragging(true)}
   const pointerMove=(e:PointerEvent<HTMLDivElement>)=>{if(!dragging)return;const r=e.currentTarget.getBoundingClientRect();setDragX(Math.max(-180,Math.min(180,e.clientX-(r.left+r.width/2))))}
   const pointerUp=()=>{if(!dragging)return;setDragging(false);if(dragX<-90)void act('pass');else if(dragX>90)void act('interested');else setDragX(0)}
-  return <div className={`app-shell ${profile.theme==='light'?'light':''}`} style={{'--star':profile.starColor} as any}>
+  return <div className={`app-shell ${profile.theme==='dark'?'':'light'}`} style={{'--star':profile.starColor || '#c084fc'} as any}>
     <header className="app-header"><button className="knot-word" onClick={()=>setTab('discover')}>Knot</button><div className="header-actions">{creator&&<button className="header-pill creator-pill" onClick={onCreator}><Sparkles size={16}/> Cupid</button>}<button className="icon-btn" onClick={()=>setTab('notifications')}><Bell size={19}/>{notifications.some(n=>!n.read_at)&&<i/>}</button><button className="icon-btn" onClick={()=>setTab('profile')}><UserRound size={19}/></button></div></header>
     <main className="app-main">
       {tab==='discover'&&<section className="discover-section"><div className="section-heading"><div><span>Discover</span><h1>Someone you might know</h1></div><div className="privacy-chip"><Lock size={13}/> Private by design</div></div>{error&&<div className="error-box">{error}</div>}{current?<div className="card-wrap"><div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:`translateX(${dragX}px) rotate(${dragX/18}deg)`}} onClick={()=>{if(Math.abs(dragX)<10)setFlipped(!flipped)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}><div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-name">{current.name}<span>{current.age}</span></div></div><div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">Interests and preferences</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="cupid-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush">💘</button></div></div>{animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart">💘</div>}</div>:<div className="empty-state"><div>✦</div><h2>That’s everyone for now</h2><p>Try again later or adjust your discovery preferences</p></div>}</section>}

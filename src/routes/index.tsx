@@ -18,7 +18,7 @@ type Screen = 'welcome' | 'auth' | 'profile' | 'home' | 'creator' | 'blocked'
 type HomeTab = 'discover' | 'matches' | 'chats' | 'profile' | 'notifications'
 
 const interestOptions = ['Music','Photography','Movies','Coffee','Sports','Gaming','Art','Books','Dance','Travel','Tech','Food','Fitness','Writing','Design','Others']
-const cities = ['Chennai','Bengaluru','Delhi','Kochi','Mumbai','Hyderabad','Pune','Kolkata','Ahmedabad','Jaipur','Vellore','Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tirunelveli','Erode','Thoothukudi','Thanjavur','Hosur','Tiruppur','Bengaluru','Mysuru','Mangaluru','Hubballi','New Delhi','Noida','Gurugram','Ghaziabad','Lucknow','Kanpur','Varanasi','Agra','Prayagraj','Kochi','Thiruvananthapuram','Kozhikode','Kollam','Mumbai','Nashik','Nagpur','Aurangabad','Hyderabad','Visakhapatnam','Vijayawada','Pune','Kolkata','Ahmedabad','Surat','Vadodara','Jaipur','Jodhpur','Udaipur','Bhopal','Indore','Patna','Bhubaneswar','Guwahati','Chandigarh','Amritsar','Dehradun','Ranchi']
+const cities = ['Ahmedabad','Agra','Ajmer','Aligarh','Amritsar','Aurangabad','Bengaluru','Bhopal','Bhubaneswar','Chandigarh','Chennai','Coimbatore','Cuttack','Dehradun','Delhi','Dhanbad','Durgapur','Erode','Faridabad','Gandhinagar','Ghaziabad','Gorakhpur','Gurugram','Guwahati','Gwalior','Hubballi','Hyderabad','Indore','Jabalpur','Jaipur','Jalandhar','Jammu','Jamshedpur','Jhansi','Jodhpur','Kanpur','Kochi','Kolhapur','Kolkata','Kota','Kozhikode','Lucknow','Ludhiana','Madurai','Mangaluru','Meerut','Moradabad','Mumbai','Mysuru','Nagpur','Nashik','Navi Mumbai','New Delhi','Noida','Patna','Pondicherry','Prayagraj','Pune','Raipur','Rajkot','Ranchi','Salem','Siliguri','Solapur','Srinagar','Surat','Thane','Thanjavur','Thiruvananthapuram','Thoothukudi','Tiruchirappalli','Tirunelveli','Tiruppur','Udaipur','Vadodara','Varanasi','Vasai-Virar','Vellore','Vijayawada','Visakhapatnam','Warangal']
 
 function KnotApp() {
   const [screen, setScreen] = useState<Screen>('welcome')
@@ -32,6 +32,8 @@ function KnotApp() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [welcomePreview, setWelcomePreview] = useState(false)
+  const [authTheme, setAuthTheme] = useState<'light'|'dark'>('light')
+  const [returnToReady, setReturnToReady] = useState(false)
 
   const load = async () => {
     setBusy(true); setError('')
@@ -62,8 +64,8 @@ function KnotApp() {
     {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setScreen('welcome') }} /></div>}
     <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} />
   </div>
-  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} onDone={load} />
-  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!profile} error={error} setError={setError} onAuthNeeded={() => { setAuthMode('signup'); setScreen('auth') }} onDone={async () => { await load() }} onLogout={async () => { await signOut(); setScreen('welcome') }} />
+  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={load} onBack={() => { setReturnToReady(true); setScreen('profile') }} />
+  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!profile} initialStep={returnToReady ? 7 : 1} error={error} setError={setError} onAuthNeeded={(selectedTheme: 'light'|'dark') => { setAuthTheme(selectedTheme); setAuthMode('signup'); setReturnToReady(false); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load() }} onLogout={async () => { setReturnToReady(false); await signOut(); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setProfile(null); setScreen('welcome') }} />
 }
@@ -127,7 +129,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
   </div>
 }
 
-function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,onDone }: any) {
+function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,theme='light',onDone,onBack }: any) {
   const submit = async (e: FormEvent) => {
     e.preventDefault(); setError(''); setMessage('')
     try {
@@ -137,8 +139,8 @@ function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,
       else await onDone()
     } catch (e:any) { setError(e?.message || 'Something went wrong') }
   }
-  return <div className="auth-page knot-welcome"><div className="auth-card">
-    <button className="ghost-back" onClick={() => setMode('signup')}>Knot</button>
+  return <div className={`auth-page ${theme==='light'?'light':''}`}><div className="auth-card">
+    <button className="ghost-back" onClick={onBack} aria-label="Back to Your Knot is ready"><ArrowLeft size={18}/><span>Knot</span></button>
     <div className="auth-icon"><Lock size={22}/></div>
     <h1>{mode==='signup' ? 'Make your Knot' : 'Welcome back'}</h1>
     <p>{mode==='signup' ? 'Your account comes first, then the rest' : 'Pick up where you left off'}</p>
@@ -152,8 +154,8 @@ function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,
   </div></div>
 }
 
-function ProfileSetup({ existing,preAuth=false,error,setError,onDone,onLogout,onAuthNeeded }: any) {
-  const [step,setStep]=useState(1)
+function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDone,onLogout,onAuthNeeded }: any) {
+  const [step,setStep]=useState(initialStep)
   const [finishing,setFinishing]=useState(false)
   const draft = (() => { if (existing || typeof window === 'undefined') return null; try { return JSON.parse(window.sessionStorage.getItem('knot_profile_draft') || 'null') } catch { return null } })()
   const [name,setName]=useState(existing?.name||draft?.name||'')
@@ -183,18 +185,18 @@ function ProfileSetup({ existing,preAuth=false,error,setError,onDone,onLogout,on
   const chooseFile=async(file?:File)=>{ if(!file)return; try{ if(preAuth){setPhotoPath(null);setPhotoUrl(URL.createObjectURL(file));setError('');return} const p=await uploadProfilePhoto(file);setPhotoPath(p);setError('') }catch(e:any){setError(e?.message||'Photo upload failed')} }
   const startCamera=async()=>{try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});streamRef.current=stream;if(videoRef.current){videoRef.current.srcObject=stream;await videoRef.current.play()}setCamera(true)}catch{setError('Camera permission was not granted') }}
   const capture=async()=>{const video=videoRef.current;if(!video)return;const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){setCameraImage(canvas.toDataURL('image/jpeg'));if(preAuth){setPhotoPath(null);setPhotoUrl(canvas.toDataURL('image/jpeg'))}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());setCamera(false)}
-  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito}));onAuthNeeded?.();return}const saved=await saveProfile({name,photoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
+  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito}));onAuthNeeded?.(theme);return}const saved=await saveProfile({name,photoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
   const next=()=>setStep(s=>Math.min(7,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 
   const stepTitle=['','Let’s set up your profile','A couple of basics','Your interests','What are you looking for','Your discovery preferences','Your look','Your Knot is ready'][step]
-  const effectiveTheme = step >= 7 ? theme : 'light'
+  const effectiveTheme = step >= 6 ? theme : 'light'
   return <div className={`profile-page ${effectiveTheme==='light'?'light':''} ${finishing?'profile-finishing':''}`} style={{'--star':starColor} as any}>
     {finishing&&<div className="profile-complete-transition" aria-hidden="true"><div className="transition-star" style={{color:starColor}}>✦</div></div>}
     <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/7</span></header>
     <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/7)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
       {step===1&&<div className="setup-content"><div className="photo-picker"><div className="avatar-preview">{photoUrl?<img src={photoUrl} alt="Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Profile photo</strong><p>Choose one from your device or use your camera</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>fileRef.current?.click()}>Upload</button><button className="secondary-btn" onClick={startCamera}><Camera size={17}/> Camera</button></div></div><input ref={fileRef} hidden type="file" accept="image/*" onChange={e=>chooseFile(e.target.files?.[0])}/></div><label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="What should people call you?"/></label>{camera&&<div className="camera-box"><video ref={videoRef} muted playsInline/><button className="primary-btn" onClick={capture}>Capture</button></div>}{cameraImage&&<div className="camera-note"><Check size={16}/> Photo captured</div>}</div>}
-      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>City<input list="knot-city-list" value={city} onChange={e=>setCity(e.target.value)} placeholder="Search or type your city"/><datalist id="knot-city-list">{cities.map((c,i)=><option key={`${c}-${i}`} value={c}/>)}</datalist><small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
+      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>setCity(e.target.value==='__other__'?'':e.target.value)}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
       {step===3&&<div className="setup-content"><div className="verification-placeholder"><Shield size={28}/><div><strong>Identity verification</strong><p>The DigiLocker and live-camera verification connection will be plugged in here</p></div><span>Integration point</span></div><label>Bio<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={500} placeholder="A little about you"/></label><div><strong>Interests</strong><div className="chip-grid">{interestOptions.map(x=><button key={x} className={interests.includes(x)?'chip active':'chip'} onClick={()=>toggleInterest(x)}>{x}</button>)}</div></div></div>}
       {step===4&&<div className="setup-content"><label>What are you looking for<select value={intent} onChange={e=>setIntent(e.target.value)}><option value="">Choose one</option><option>Something meaningful</option><option>Open to seeing where it goes</option><option>New connections</option></select></label><label>Preferences<input value={preference} onChange={e=>setPreference(e.target.value)} placeholder="What matters to you?"/></label></div>}
       {step===5&&<div className="setup-content"><div><strong>Preferred age range</strong><div className="range-row"><select value={ageMin} onChange={e=>setAgeMin(Number(e.target.value))}>{[18,19,20,21].map(x=><option key={x}>{x}</option>)}</select><span>to</span><select value={ageMax} onChange={e=>setAgeMax(Number(e.target.value))}>{[18,19,20,21].filter(x=>x>=ageMin).map(x=><option key={x}>{x}</option>)}</select></div></div><div className="privacy-box"><Lock size={18}/><div><strong>Incognito mode</strong><p>Stay out of Discover until you turn it off</p></div><button className={`toggle ${incognito?'on':''}`} onClick={()=>setIncognito(!incognito)}><span/></button></div></div>}

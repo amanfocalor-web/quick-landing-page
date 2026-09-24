@@ -2821,3 +2821,60 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   justify-self: center !important;
   text-align: center !important;
 }
+
+/* KNOT v25.2 — theme-aware auth, readable privacy controls, and star separation */
+.auth-page {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 112, 190, .28), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(125, 91, 255, .32), transparent 30%),
+    radial-gradient(circle at 52% 88%, rgba(44, 126, 255, .25), transparent 32%),
+    linear-gradient(145deg, #160d2e, #26145b 45%, #07152f);
+  background-size: 140% 140%;
+  animation: knot-night-sway 16s ease-in-out infinite alternate;
+}
+.auth-page.light {
+  color: #28233e;
+  background: linear-gradient(145deg, #fff9fc, #f3efff 55%, #edf3ff);
+}
+.auth-page.light .auth-card {
+  border-color: rgba(133,111,190,.14);
+  background: rgba(255,253,255,.82);
+  box-shadow: 0 26px 80px rgba(103,87,157,.13), 0 4px 20px rgba(255,255,255,.7) inset;
+}
+.auth-page.light .ghost-back { color: #5d5685; }
+.auth-page.light .auth-icon { color: #7957a9; background: rgba(192,132,252,.12); }
+.auth-page.light .auth-card h1 { color: #202052; }
+.auth-page.light .auth-card > p { color: rgba(56,54,107,.62); }
+.auth-page.light .stack label { color: #38366b; }
+.auth-page.light .stack input {
+  color: #34325f;
+  border-color: rgba(120,101,175,.16);
+  background: rgba(255,255,255,.66);
+}
+.auth-page.light .stack input::placeholder { color: rgba(67,61,111,.42); }
+.auth-page.light .switch-link { color: #71589a; }
+
+.profile-page.light .privacy-box strong,
+.profile-page.light .privacy-box p,
+.profile-page.light .privacy-box,
+.profile-page.light .privacy-box .toggle { color: #111 !important; }
+.profile-page.light .privacy-box p { color: #444 !important; }
+.profile-page.light .privacy-box svg { color: #72529b !important; }
+.profile-page.light .toggle { background: rgba(17,17,17,.16); }
+.profile-page.light .toggle span { background: #111; }
+.profile-page.light .toggle.on { background: #a875e8; }
+.profile-page.light .toggle.on span { background: #fff; }
+
+/* The large ready star keeps its original multicolour gradient.
+   The selected star colour is used only by the small star above it. */
+.profile-page .ready-star,
+.profile-page .transition-star {
+  color: transparent !important;
+  background: linear-gradient(145deg, #fff 0%, #d8b5ff 25%, #9c8cff 52%, #62aaff 76%, #ff9bd6 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,.85)) drop-shadow(0 0 35px rgba(151,119,255,.85)) !important;
+}
+
+.profile-page.light .ready-state p { color: rgba(56,54,107,.62) !important; }

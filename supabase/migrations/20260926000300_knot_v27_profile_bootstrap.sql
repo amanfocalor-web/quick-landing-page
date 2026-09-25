@@ -69,5 +69,5 @@ begin
   return result;
 end $$;
 
-revoke all on function public.save_profile(text,text,date,text,text,text,text,smallint,smallint,text,text,boolean,text[],boolean) from public;
-grant execute on function public.save_profile(text,text,date,text,text,text,text,smallint,smallint,text,text,boolean,text[],boolean) to authenticated;
+revoke all on function public.save_profile(text,text,date,text,text,text,text,text,smallint,smallint,text,text,boolean,text[],boolean) from public;
+grant execute on function public.save_profile(text,text,date,text,text,text,text,text,smallint,smallint,text,text,boolean,text[],boolean) to authenticated;

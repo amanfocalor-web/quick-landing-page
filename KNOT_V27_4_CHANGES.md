@@ -11,3 +11,5 @@ Run the new migration:
 `supabase/migrations/20260926000300_knot_v27_profile_bootstrap.sql`
 
 No existing user account needs to be deleted.
+
+- Corrected the GRANT/REVOKE signature for the v27 `save_profile()` function so the bootstrap migration executes successfully.

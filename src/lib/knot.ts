@@ -7,6 +7,7 @@ export type Profile = {
   photoUrl?: string | null
   dob: string | null
   city: string
+  gender: 'man' | 'woman' | null
   bio: string
   intent: string
   preference: string
@@ -67,6 +68,7 @@ export async function getMyProfile(): Promise<Profile | null> {
     photoPath: data.profile_photo_path,
     dob: data.date_of_birth,
     city: data.city,
+    gender: data.gender ?? null,
     bio: data.bio,
     intent: data.intent,
     preference: data.preference,
@@ -91,6 +93,7 @@ export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'elig
     p_photo_path: input.photoPath,
     p_dob: input.dob,
     p_city: input.city,
+    p_gender: input.gender,
     p_bio: input.bio,
     p_intent: input.intent,
     p_preference: input.preference,

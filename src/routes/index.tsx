@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent, type PointerEvent, type ReactNode } from 'react'
-import { ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
+import { Activity, ArrowLeft, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
 import {
   acceptExclusive, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
   type DiscoverProfile, type Profile,
@@ -16,6 +16,8 @@ export const Route = createFileRoute('/')({
 
 type Screen = 'welcome' | 'auth' | 'profile' | 'home' | 'creator' | 'blocked'
 type HomeTab = 'discover' | 'matches' | 'chats' | 'profile' | 'notifications'
+
+type Gender = 'man' | 'woman'
 
 const interestOptions = ['Music','Photography','Movies','Coffee','Sports','Gaming','Art','Books','Dance','Travel','Tech','Food','Fitness','Writing','Design','Others']
 const cities = ['Ahmedabad','Agra','Ajmer','Aligarh','Amritsar','Aurangabad','Bengaluru','Bhopal','Bhubaneswar','Chandigarh','Chennai','Coimbatore','Cuttack','Dehradun','Delhi','Dhanbad','Durgapur','Erode','Faridabad','Gandhinagar','Ghaziabad','Gorakhpur','Gurugram','Guwahati','Gwalior','Hubballi','Hyderabad','Indore','Jabalpur','Jaipur','Jalandhar','Jammu','Jamshedpur','Jhansi','Jodhpur','Kanpur','Kochi','Kolhapur','Kolkata','Kota','Kozhikode','Lucknow','Ludhiana','Madurai','Mangaluru','Meerut','Moradabad','Mumbai','Mysuru','Nagpur','Nashik','Navi Mumbai','New Delhi','Noida','Patna','Pondicherry','Prayagraj','Pune','Raipur','Rajkot','Ranchi','Salem','Siliguri','Solapur','Srinagar','Surat','Thane','Thanjavur','Thiruvananthapuram','Thoothukudi','Tiruchirappalli','Tirunelveli','Tiruppur','Udaipur','Vadodara','Varanasi','Vasai-Virar','Vellore','Vijayawada','Visakhapatnam','Warangal']
@@ -164,6 +166,7 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const [photoPath,setPhotoPath]=useState<string|null>(value('photoPath', existing?.photoPath ?? null))
   const [photoUrl,setPhotoUrl]=useState<string|null>(value('photoDataUrl', null))
   const [dob,setDob]=useState(value('dob', existing?.dob ?? ''))
+  const [gender,setGender]=useState<Gender | ''>(value('gender', existing?.gender ?? ''))
   const [city,setCity]=useState(value('city', existing?.city ?? ''))
   const [bio,setBio]=useState(value('bio', existing?.bio ?? ''))
   const [interests,setInterests]=useState<string[]>(value('interests', existing?.interests ?? []))
@@ -198,7 +201,7 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const removePhoto=()=>{streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false);setCameraImage(null);setPhotoPath(null);setPhotoUrl(null);setError('')}
   const startCamera=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera is not supported in this browser');const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:720}},audio:false});streamRef.current=stream;setCamera(true);setError('')}catch(e:any){setError(e?.message||'Camera permission was not granted') }}
   const capture=async()=>{const video=videoRef.current;if(!video||video.readyState<2||!video.videoWidth){setError('Camera is still starting. Please try Capture again.');return}const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){const dataUrl=canvas.toDataURL('image/jpeg');setCameraImage(dataUrl);if(preAuth){setPhotoPath(null);setPhotoUrl(dataUrl)}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false)}
-  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito,photoPath:null,photoDataUrl:photoUrl}));onAuthNeeded?.(theme);return}let finalPhotoPath=photoPath;if(!finalPhotoPath&&photoUrl?.startsWith('data:')) finalPhotoPath=await uploadProfilePhoto(dataUrlToFile(photoUrl));const saved=await saveProfile({name,photoPath:finalPhotoPath,dob,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
+  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,gender,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito,photoPath:null,photoDataUrl:photoUrl}));onAuthNeeded?.(theme);return}let finalPhotoPath=photoPath;if(!finalPhotoPath&&photoUrl?.startsWith('data:')) finalPhotoPath=await uploadProfilePhoto(dataUrlToFile(photoUrl));const saved=await saveProfile({name,photoPath:finalPhotoPath,dob,gender,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
   const next=()=>setStep(s=>Math.min(7,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 
@@ -209,17 +212,24 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
     <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/7</span></header>
     <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/7)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
       {step===1&&<div className="setup-content"><div className="photo-picker"><div className="avatar-preview">{photoUrl?<img src={photoUrl} alt="Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Profile photo</strong><p>Choose one from your device or use your camera</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>fileRef.current?.click()}>Upload</button><button className="secondary-btn" onClick={startCamera}><Camera size={17}/> Camera</button>{photoUrl&&<button className="secondary-btn photo-remove-btn" onClick={removePhoto}>Remove photo</button>}</div></div><input ref={fileRef} hidden type="file" accept="image/*" onChange={e=>chooseFile(e.target.files?.[0])}/></div><label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="What should people call you?"/></label>{camera&&<div className="camera-box"><video key={camera ? 'camera-active' : 'camera-idle'} ref={videoRef} muted playsInline autoPlay/><button className="primary-btn" onClick={capture}>Capture</button></div>}{cameraImage&&<div className="camera-note"><Check size={16}/> Photo captured</div>}</div>}
-      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>setCity(e.target.value==='__other__'?'':e.target.value)}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
+      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>Gender<select value={gender} onChange={e=>setGender(e.target.value as Gender)}><option value="">Choose one</option><option value="man">Man</option><option value="woman">Woman</option></select><small>Knot currently supports straight matching</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>setCity(e.target.value==='__other__'?'':e.target.value)}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
       {step===3&&<div className="setup-content"><div className="verification-placeholder"><Shield size={28}/><div><strong>Identity verification</strong><p>The DigiLocker and live-camera verification connection will be plugged in here</p></div><span>Integration point</span></div><label>Bio<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={500} placeholder="A little about you"/></label><div><strong>Interests</strong><div className="chip-grid">{interestOptions.map(x=><button key={x} className={interests.includes(x)?'chip active':'chip'} onClick={()=>toggleInterest(x)}>{x}</button>)}</div></div></div>}
       {step===4&&<div className="setup-content"><label>What are you looking for<select value={intent} onChange={e=>setIntent(e.target.value)}><option value="">Choose one</option><option>Something meaningful</option><option>Open to seeing where it goes</option><option>New connections</option></select></label><label>Preferences<input value={preference} onChange={e=>setPreference(e.target.value)} placeholder="What matters to you?"/></label></div>}
       {step===5&&<div className="setup-content"><div><strong>Preferred age range</strong><div className="range-row"><select value={ageMin} onChange={e=>setAgeMin(Number(e.target.value))}>{[18,19,20,21].map(x=><option key={x}>{x}</option>)}</select><span>to</span><select value={ageMax} onChange={e=>setAgeMax(Number(e.target.value))}>{[18,19,20,21].filter(x=>x>=ageMin).map(x=><option key={x}>{x}</option>)}</select></div></div><div className="privacy-box"><Lock size={18}/><div><strong>Incognito mode</strong><p>Stay out of Discover until you turn it off</p></div><button className={`toggle ${incognito?'on':''}`} onClick={()=>setIncognito(!incognito)}><span/></button></div></div>}
       {step===6&&<div className="setup-content"><div><strong>Theme</strong><div className="theme-row"><button className={theme==='dark'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('dark')}>Dark</button><button className={theme==='light'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('light')}>Light</button></div></div><div><strong>Star colour</strong><div className="star-colors">{['#c084fc','#60a5fa','#fb7185','#facc15','#34d399'].map(c=><button key={c} style={{background:c}} className={starColor===c?'star-choice active':'star-choice'} onClick={()=>setStarColor(c)}>✦</button>)}</div></div></div>}
       {step===7&&<div className="ready-state"><div className="ready-star" style={{color:starColor}}>✦</div><h2>Your Knot is ready</h2><p>Discover people, move at your own pace, and let mutual interest reveal the connection</p></div>}
       {error&&<div className="error-box">{error}</div>}
-      <div className="setup-actions">{step>1&&<button className="secondary-btn" onClick={back}>Back</button>}<button className="primary-btn" disabled={saving||!name.trim()||(step===2&&!dob)||(step===7&&saving)} onClick={step===7?finish:next}>{saving?'Saving…':step===7?'Enter Discover':'Continue'} <ChevronRight size={18}/></button></div>
+      <div className="setup-actions">{step>1&&<button className="secondary-btn" onClick={back}>Back</button>}<button className="primary-btn" disabled={saving||!name.trim()||(step===2&&(!dob||!gender))||(step===7&&saving)} onClick={step===7?finish:next}>{saving?'Saving…':step===7?'Enter Discover':'Continue'} <ChevronRight size={18}/></button></div>
     </section></div>
   </div>
 }
+
+const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
+  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/44.jpg', interests:['Books','Music','Travel','Photography'] },
+  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/68.jpg', interests:['Art','Coffee','Movies','Dance'] },
+  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/65.jpg', interests:['Sports','Gaming','Tech','Food'] },
+  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/49.jpg', interests:['Writing','Fitness','Music','Design'] },
+]
 
 function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { profile:Profile;tab:HomeTab;setTab:(x:HomeTab)=>void;creator:boolean;onCreator:()=>void;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void> }) {
   const [discover,setDiscover]=useState<DiscoverProfile[]>([])
@@ -233,25 +243,82 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const [notifications,setNotifications]=useState<any[]>([])
   const [selectedChat,setSelectedChat]=useState<string|null>(null)
   const [error,setError]=useState('')
-  const loadData=async()=>{try{if(tab==='discover')setDiscover(await getDiscover());if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setError(e?.message||'Could not load this section')}}
-  useEffect(()=>{void loadData()},[tab])
+  const [menuOpen,setMenuOpen]=useState(false)
+  const [crushNotice,setCrushNotice]=useState(false)
+  const [crushPanel,setCrushPanel]=useState(false)
+  const [secretCrushes,setSecretCrushes]=useState(0)
+  const [demoMode,setDemoMode]=useState(false)
+  const [demoConsumed,setDemoConsumed]=useState<string[]>([])
+  const loadData=async()=>{try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setError(e?.message||'Could not load this section')}}
+  useEffect(()=>{void loadData()},[tab,demoMode,demoConsumed])
   const current=discover[index]
-  const act=async(action:'pass'|'interested'|'cupid')=>{if(!current)return;setAnimation(action);try{if(action==='cupid')await secretCrush(current.id);else await discoveryAction(current.id,action)}catch(e:any){setError(e?.message||'Action could not be saved')}setTimeout(()=>{setAnimation(null);setFlipped(false);setDragX(0);setIndex(i=>i+1)},550)}
+  const act=async(action:'pass'|'interested'|'cupid')=>{
+    if(!current)return
+    if(action==='cupid' && secretCrushes>=3){setCrushNotice(true);return}
+    setAnimation(action)
+    try{
+      if(demoMode){
+        if(action==='cupid') setSecretCrushes(c=>c+1)
+        setDemoConsumed(a=>a.includes(current.id)?a:[...a,current.id])
+      }else{
+        if(action==='cupid'){await secretCrush(current.id);setSecretCrushes(c=>c+1)}
+        else await discoveryAction(current.id,action)
+      }
+    }catch(e:any){
+      const msg=e?.message||'Action could not be saved'
+      if(action==='cupid' && (msg.includes('KNOT_SECRET_CRUSH_LIMIT') || msg.toLowerCase().includes('three'))) setCrushNotice(true)
+      else setError(msg)
+    }
+    setTimeout(()=>{setAnimation(null);setFlipped(false);setDragX(0);setIndex(i=>i+1)},550)
+  }
   const pointerDown=(e:PointerEvent<HTMLDivElement>)=>{if(!flipped||animation)return;e.currentTarget.setPointerCapture(e.pointerId);setDragging(true)}
   const pointerMove=(e:PointerEvent<HTMLDivElement>)=>{if(!dragging)return;const r=e.currentTarget.getBoundingClientRect();setDragX(Math.max(-180,Math.min(180,e.clientX-(r.left+r.width/2))))}
   const pointerUp=()=>{if(!dragging)return;setDragging(false);if(dragX<-90)void act('pass');else if(dragX>90)void act('interested');else setDragX(0)}
+  const unread=notifications.some(n=>!n.read_at)
   return <div className={`app-shell ${profile.theme==='dark'?'':'light'}`} style={{'--star':profile.starColor || '#c084fc'} as any}>
-    <header className="app-header"><button className="knot-word" onClick={()=>setTab('discover')}>Knot</button><div className="header-actions">{creator&&<button className="header-pill creator-pill" onClick={onCreator}><Sparkles size={16}/> Cupid</button>}<button className="icon-btn" onClick={()=>setTab('notifications')}><Bell size={19}/>{notifications.some(n=>!n.read_at)&&<i/>}</button><button className="icon-btn" onClick={()=>setTab('profile')}><UserRound size={19}/></button></div></header>
+    <header className="app-header">
+      <button className="icon-btn menu-btn" onClick={()=>setMenuOpen(v=>!v)} aria-label="Open menu"><Menu size={21}/></button>
+      <button className="home-top-star" aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
+      <div className="header-actions">
+        <button className="top-secret-crush" onClick={()=>setCrushPanel(true)} aria-label="Secret Crush"><CupidIcon/></button>
+        <button className="icon-btn notification-btn" onClick={()=>setTab('notifications')} aria-label="Activity"><Activity size={20}/>{unread&&<i/>}</button>
+        <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
+      </div>
+    </header>
+    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}}><Shield/> Safety</button>{creator&&<><button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button><button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button></>}<button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
     <main className="app-main">
-      {tab==='discover'&&<section className="discover-section"><div className="section-heading"><div><span>Discover</span><h1>Someone you might know</h1></div><div className="privacy-chip"><Lock size={13}/> Private by design</div></div>{error&&<div className="error-box">{error}</div>}{current?<div className="card-wrap"><div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:`translateX(${dragX}px) rotate(${dragX/18}deg)`}} onClick={()=>{if(Math.abs(dragX)<10)setFlipped(!flipped)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}><div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-name">{current.name}<span>{current.age}</span></div></div><div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">Interests and preferences</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="cupid-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush">💘</button></div></div>{animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart">💘</div>}</div>:<div className="empty-state"><div>✦</div><h2>That’s everyone for now</h2><p>Try again later or adjust your discovery preferences</p></div>}</section>}
+      {tab==='discover'&&<section className="discover-section">
+        <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline"/>{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>
+        {error&&<div className="error-box">{error}</div>}
+        {current?<>
+          <div className="card-stack" aria-hidden="true">
+            {discover.slice(index+1,index+3).map((p,i)=><div key={p.id} className={`stack-card stack-${i+2}`}><img src={p.photoUrl||'/favicon.ico'} alt=""/><div/></div>)}
+          </div>
+          <div className="card-wrap">
+            <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:`translateX(${dragX}px) rotate(${dragX/18}deg)`}} onClick={()=>{if(Math.abs(dragX)<10)setFlipped(!flipped)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
+              <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-name">{current.name}<span>{current.age}</span></div></div>
+              <div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">Interests and preferences</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="cupid-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush"><CupidIcon/></button></div>
+            </div>
+            {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart"><CupidIcon/></div>}
+          </div>
+          <div className="discover-actions"><button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button><button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>{flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}</div>
+          <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
+          <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>{setMenuOpen(true)}}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
+        </>:<div className="empty-state"><div>✦</div><h2>{demoMode?'Demo profiles completed':'That’s everyone for now'}</h2><p>{demoMode?'Restart the preview to test the Discover flow again':'Try again later or adjust your discovery preferences'}</p>{demoMode&&<button className="primary-btn" onClick={()=>{setDemoConsumed([]);setIndex(0);setFlipped(false);setSecretCrushes(0)}}>Restart Preview</button>}</div>}
+      </section>}
       {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 
       {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat}/>} 
       {tab==='notifications'&&<Notifications items={notifications} onRead={async(id)=>{await markNotificationRead(id);await loadData()}}/>}
       {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>} 
     </main>
     <nav className="bottom-nav"><NavButton active={tab==='discover'} onClick={()=>setTab('discover')} icon={<Sparkles/>} label="Discover"/><NavButton active={tab==='matches'} onClick={()=>setTab('matches')} icon={<Heart/>} label="Matches"/><NavButton active={tab==='chats'} onClick={()=>setTab('chats')} icon={<MessageCircle/>} label="Chats"/><NavButton active={tab==='profile'} onClick={()=>setTab('profile')} icon={<UserRound/>} label="Profile"/></nav>
+    {crushPanel&&<div className="modal-backdrop" onClick={()=>setCrushPanel(false)}><div className="limit-modal crush-panel" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Secret Crush</h2><p>Your Secret Crushes stay private until the feeling is mutual</p><div className="crush-slots"><span className={secretCrushes>0?'filled':''}></span><span className={secretCrushes>1?'filled':''}></span><span className={secretCrushes>2?'filled':''}></span></div><small>{secretCrushes} of 3 active in this session</small><button className="primary-btn" onClick={()=>setCrushPanel(false)}>Back to Discover</button></div></div>}
+    {crushNotice&&<div className="modal-backdrop" onClick={()=>setCrushNotice(false)}><div className="limit-modal" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Your Secret Crush list is full</h2><p>You can have up to 3 Secret Crushes at a time</p><button className="primary-btn" onClick={()=>setCrushNotice(false)}>Got it</button></div></div>}
   </div>
 }
+
+function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff"/><stop offset=".35" stopColor="#f6ecff"/><stop offset=".62" stopColor={color}/><stop offset="1" stopColor={color}/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
+function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M31 50C20 43 11 36 11 25c0-7 5-12 12-12 4 0 7 2 9 6 2-4 5-6 9-6 7 0 12 5 12 12 0 5-2 9-6 13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M14 51L48 17" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M42 17h9v9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){return <button className={active?'nav-item active':'nav-item'} onClick={onClick}>{icon}<span>{label}</span></button>}
 
@@ -287,7 +354,7 @@ function ProfileView({profile,onRefresh,onLogout}:{profile:Profile;onRefresh:()=
   const save=async()=>{
     setSaving(true)
     try{
-      await saveProfile({name:profile.name,photoPath:profile.photoPath,dob:profile.dob,city,bio:profile.bio,intent:profile.intent,preference:profile.preference,ageMin:profile.ageMin,ageMax:profile.ageMax,theme:profile.theme,starColor:profile.starColor,incognito,interests:profile.interests,complete:true})
+      await saveProfile({name:profile.name,photoPath:profile.photoPath,dob:profile.dob,gender:profile.gender,city,bio:profile.bio,intent:profile.intent,preference:profile.preference,ageMin:profile.ageMin,ageMax:profile.ageMax,theme:profile.theme,starColor:profile.starColor,incognito,interests:profile.interests,complete:true})
       await onRefresh()
     }finally{setSaving(false)}
   }

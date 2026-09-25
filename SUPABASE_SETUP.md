@@ -30,3 +30,10 @@ The Knot frontend and database layer are wired for Supabase Auth, Postgres, Stor
 Do not put a Supabase service-role key in the frontend.
 
 The v27 migration is required because it adds the explicit gender field and the server-side Secret Crush limit. Applying only the original core migration leaves the frontend/backend contract incomplete. The `auth.users` trigger creates the corresponding Knot profile automatically, while `save_profile` stores the profile fields and interests without allowing the client to self-mark as verified.
+
+## v27.4 repair migration
+
+If a profile save reports `profile_interests_profile_id_fkey`, run:
+`supabase/migrations/20260926000300_knot_v27_profile_bootstrap.sql`
+
+This creates the missing `profiles` parent row for older authenticated accounts before saving interests.

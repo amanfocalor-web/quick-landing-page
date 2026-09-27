@@ -38,11 +38,22 @@ function KnotApp() {
   const [returnToReady, setReturnToReady] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
 
-  const load = async () => {
+  const load = async (afterLogin = false) => {
     setBusy(true); setError('')
     try {
       const { data } = await getSession()
       if (!data.session) { setAuthenticated(false); setScreen('welcome'); return }
+      // A cached browser session must not silently unlock an account on a fresh app start.
+      // Once the user has explicitly signed in during this app session, continue to their profile.
+      if (!afterLogin) {
+        setAuthenticated(false)
+        setProfile(null)
+        setError('')
+        setMessage('')
+        setAuthMode('signin')
+        setScreen('auth')
+        return
+      }
       setAuthenticated(true)
       const me = await getMyProfile()
       setProfile(me)
@@ -65,13 +76,13 @@ function KnotApp() {
   if (busy) return <div className="knot-loading"><div className="knot-loading-inner"><div className="knot-logo">Knot</div><Heart className="loader-heart" aria-hidden="true" /></div></div>
   if (screen === 'blocked') return <Blocked />
   if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
-    {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!authenticated} initialStep={authenticated ? 7 : 1} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setAuthenticated(false); setScreen('welcome') }} /></div>}
+    {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!authenticated} initialStep={authenticated ? 7 : 1} error={error} setError={setError} onAuthNeeded={async () => { await signOut().catch(() => {}); setWelcomePreview(false); setAuthenticated(false); setProfile(null); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load(true) }} onLogout={async () => { setWelcomePreview(false); setAuthenticated(false); setScreen('welcome') }} /></div>}
     <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} onLogin={() => { setError(''); setMessage(''); setEmail(''); setPassword(''); setAuthMode('signin'); setAuthTheme('light'); setScreen('auth') }} />
   </div>
-  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={load} onBack={() => { setReturnToReady(true); setScreen('profile') }} />
-  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={(selectedTheme: 'light'|'dark') => { setAuthTheme(selectedTheme); setAuthMode('signup'); setReturnToReady(false); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load() }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); await signOut(); setScreen('welcome') }} />
+  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={() => load(true)} onBack={() => { setReturnToReady(true); setScreen('profile') }} />
+  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={async (selectedTheme: 'light'|'dark') => { await signOut().catch(() => {}); setAuthenticated(false); setProfile(null); setAuthTheme(selectedTheme); setAuthMode('signup'); setReturnToReady(false); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load(true) }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); await signOut(); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
-  return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
+  return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={() => load(true)} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
 }
 
 function Welcome({ onBegin, onComplete, onLogin }: { onBegin: () => void; onComplete: () => void; onLogin: () => void }) {
@@ -232,6 +243,12 @@ const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
   { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/68.jpg', interests:['Art','Coffee','Movies','Dance'] },
   { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/65.jpg', interests:['Sports','Gaming','Tech','Food'] },
   { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/49.jpg', interests:['Writing','Fitness','Music','Design'] },
+  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/32.jpg', interests:['Cinema','Travel','Art','Books'] },
+  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/21.jpg', interests:['Dance','Music','Food','Photography'] },
+  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/12.jpg', interests:['Science','Reading','Coffee','Design'] },
+  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/17.jpg', interests:['Fitness','Movies','Travel','Music'] },
+  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/28.jpg', interests:['Gaming','Tech','Drawing','Food'] },
+  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/51.jpg', interests:['Fashion','Music','Writing','Photography'] },
 ]
 
 function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { profile:Profile;tab:HomeTab;setTab:(x:HomeTab)=>void;creator:boolean;onCreator:()=>void;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void> }) {
@@ -253,6 +270,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const [secretCrushes,setSecretCrushes]=useState(0)
   const [demoMode,setDemoMode]=useState(false)
   const [demoConsumed,setDemoConsumed]=useState<string[]>([])
+  const [demoNotifications,setDemoNotifications]=useState(false)
   const loadData=async()=>{setSectionError('');try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setSectionError(e?.message||'Could not load this section')}}
   useEffect(()=>{void loadData()},[tab,demoMode,demoConsumed])
   const current=discover[index]
@@ -289,10 +307,10 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
       </div>
     </header>
-    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>{creator&&<><button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button><button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button></>}<button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
+    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setDemoNotifications(false);setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>{creator&&<button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button>}<button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button><button onClick={()=>{setMenuOpen(false);setDemoNotifications(true);setTab('notifications')}}><Bell/> Preview Notifications</button><button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
     <main className="app-main">
       {tab==='discover'&&<section className="discover-section">
-        <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline"/>{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>
+        <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline" />{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>
         {error&&<div className="error-box">{error}</div>}
         {current?<>
           <div className="card-stack" aria-hidden="true">
@@ -312,7 +330,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
       </section>}
       {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 
       {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat}/>} 
-      {tab==='notifications'&&<Notifications items={notifications} onRead={async(id)=>{await markNotificationRead(id);await loadData()}}/>}
+      {tab==='notifications'&&<Notifications items={notifications} demo={demoNotifications} onExitDemo={()=>setDemoNotifications(false)} onRead={async(id)=>{if(!demoNotifications){await markNotificationRead(id);await loadData()}}} /> }
       {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>}
       {tab==='security'&&<SecurityCenter profile={profile} onOpenProfile={()=>setTab('profile')} onOpenNotifications={()=>setTab('notifications')} />} 
     </main>
@@ -322,7 +340,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   </div>
 }
 
-function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff"/><stop offset=".35" stopColor="#f6ecff"/><stop offset=".62" stopColor={color}/><stop offset="1" stopColor={color}/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
+function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
 function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M31 50C20 43 11 36 11 25c0-7 5-12 12-12 4 0 7 2 9 6 2-4 5-6 9-6 7 0 12 5 12 12 0 5-2 9-6 13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M14 51L48 17" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M42 17h9v9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){return <button className={active?'nav-item active':'nav-item'} onClick={onClick}>{icon}<span>{label}</span></button>}
@@ -333,7 +351,12 @@ function Chats({chats,selected,setSelected}:{chats:any[];selected:string|null;se
 
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
-function Notifications({items,onRead}:{items:any[];onRead:(id:string)=>Promise<void>}){return <section className="normal-section"><div className="section-heading"><div><span>Updates</span><h1>Notifications</h1></div></div>{items.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{items.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div></button>)}</div>}</section>}
+const DEMO_NOTIFICATIONS = [
+  {id:'demo-notification-1',type:'match',title:'A mutual interest is waiting',body:'Someone you were interested in has returned the interest',read_at:null},
+  {id:'demo-notification-2',type:'message',title:'New trial chat',body:'Your mutual connection is ready to start a conversation',read_at:null},
+  {id:'demo-notification-3',type:'system',title:'Your privacy is protected',body:'Secret Crush activity stays private until the feeling is mutual',read_at:new Date().toISOString()},
+]
+function Notifications({items,onRead,demo=false,onExitDemo}:{items:any[];onRead:(id:string)=>Promise<void>;demo?:boolean;onExitDemo?:()=>void}){const shown=demo?DEMO_NOTIFICATIONS:items;return <section className="normal-section"><div className="section-heading"><div><span>{demo?'Preview':'Updates'}</span><h1>Notifications</h1></div></div>{demo&&<div className="demo-toolbar"><span className="demo-badge">Preview Notifications</span><button className="small-btn" onClick={onExitDemo}>View real notifications</button></div>}{shown.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{shown.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div></button>)}</div>}</section>}
 
 function SecurityCenter({profile,onOpenProfile,onOpenNotifications}:{profile:Profile;onOpenProfile:()=>void;onOpenNotifications:()=>void}){
   return <section className="normal-section security-section">

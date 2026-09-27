@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent, type PointerEvent, type ReactNode } from 'react'
-import { Activity, ArrowLeft, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
+import { Activity, ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
 import {
   acceptExclusive, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
   type DiscoverProfile, type Profile,
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/')({
 })
 
 type Screen = 'welcome' | 'auth' | 'profile' | 'home' | 'creator' | 'blocked'
-type HomeTab = 'discover' | 'matches' | 'chats' | 'profile' | 'notifications'
+type HomeTab = 'discover' | 'matches' | 'chats' | 'profile' | 'notifications' | 'security'
 
 type Gender = 'man' | 'woman'
 
@@ -220,7 +220,7 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
       {step===5&&<div className="setup-content"><div><strong>Preferred age range</strong><div className="range-row"><select value={ageMin} onChange={e=>setAgeMin(Number(e.target.value))}>{[18,19,20,21].map(x=><option key={x}>{x}</option>)}</select><span>to</span><select value={ageMax} onChange={e=>setAgeMax(Number(e.target.value))}>{[18,19,20,21].filter(x=>x>=ageMin).map(x=><option key={x}>{x}</option>)}</select></div></div><div className="privacy-box"><Lock size={18}/><div><strong>Incognito mode</strong><p>Stay out of Discover until you turn it off</p></div><button className={`toggle ${incognito?'on':''}`} onClick={()=>setIncognito(!incognito)}><span/></button></div></div>}
       {step===6&&<div className="setup-content"><div><strong>Theme</strong><div className="theme-row"><button className={theme==='dark'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('dark')}>Dark</button><button className={theme==='light'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('light')}>Light</button></div></div><div><strong>Star colour</strong><div className="star-colors">{['#c084fc','#60a5fa','#fb7185','#facc15','#34d399'].map(c=><button key={c} style={{background:c}} className={starColor===c?'star-choice active':'star-choice'} onClick={()=>setStarColor(c)}>✦</button>)}</div></div></div>}
       {step===7&&<div className="ready-state"><div className="ready-star" style={{color:starColor}}>✦</div><h2>Your Knot is ready</h2><p>Discover people, move at your own pace, and let mutual interest reveal the connection</p></div>}
-      {error&&<div className="error-box">{error}</div>}
+      {(error||sectionError)&&<div className="error-box">{error||sectionError}</div>}
       <div className="setup-actions">{step>1&&<button className="secondary-btn" onClick={back}>Back</button>}<button className="primary-btn" disabled={saving||!name.trim()||(step===2&&(!dob||!gender))||(step===7&&saving)} onClick={step===7?finish:next}>{saving?'Saving…':step===7?'Enter Discover':'Continue'} <ChevronRight size={18}/></button></div>
     </section></div>
   </div>
@@ -245,13 +245,14 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const [notifications,setNotifications]=useState<any[]>([])
   const [selectedChat,setSelectedChat]=useState<string|null>(null)
   const [error,setError]=useState('')
+  const [sectionError,setSectionError]=useState('')
   const [menuOpen,setMenuOpen]=useState(false)
   const [crushNotice,setCrushNotice]=useState(false)
   const [crushPanel,setCrushPanel]=useState(false)
   const [secretCrushes,setSecretCrushes]=useState(0)
   const [demoMode,setDemoMode]=useState(false)
   const [demoConsumed,setDemoConsumed]=useState<string[]>([])
-  const loadData=async()=>{try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setError(e?.message||'Could not load this section')}}
+  const loadData=async()=>{setSectionError('');try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setSectionError(e?.message||'Could not load this section')}}
   useEffect(()=>{void loadData()},[tab,demoMode,demoConsumed])
   const current=discover[index]
   const act=async(action:'pass'|'interested'|'cupid')=>{
@@ -280,14 +281,14 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   return <div className={`app-shell ${profile.theme==='dark'?'':'light'}`} style={{'--star':profile.starColor || '#c084fc'} as any}>
     <header className="app-header">
       <button className="icon-btn menu-btn" onClick={()=>setMenuOpen(v=>!v)} aria-label="Open menu"><Menu size={21}/></button>
-      <button className="home-top-star" aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
+      <button className="home-top-star" onClick={()=>setTab('discover')} aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
       <div className="header-actions">
         <button className="top-secret-crush" onClick={()=>setCrushPanel(true)} aria-label="Secret Crush"><CupidIcon/></button>
         <button className="icon-btn notification-btn" onClick={()=>setTab('notifications')} aria-label="Activity"><Activity size={20}/>{unread&&<i/>}</button>
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
       </div>
     </header>
-    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setMenuOpen(false);window.scrollTo({top:0,behavior:'smooth'})}}><Shield/> Safety</button>{creator&&<><button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button><button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button></>}<button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
+    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>{creator&&<><button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button><button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button></>}<button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
     <main className="app-main">
       {tab==='discover'&&<section className="discover-section">
         <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline"/>{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>
@@ -311,7 +312,8 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
       {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 
       {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat}/>} 
       {tab==='notifications'&&<Notifications items={notifications} onRead={async(id)=>{await markNotificationRead(id);await loadData()}}/>}
-      {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>} 
+      {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>}
+      {tab==='security'&&<SecurityCenter profile={profile} onOpenProfile={()=>setTab('profile')} onOpenNotifications={()=>setTab('notifications')} />} 
     </main>
     <nav className="bottom-nav"><NavButton active={tab==='discover'} onClick={()=>setTab('discover')} icon={<Sparkles/>} label="Discover"/><NavButton active={tab==='matches'} onClick={()=>setTab('matches')} icon={<Heart/>} label="Matches"/><NavButton active={tab==='chats'} onClick={()=>setTab('chats')} icon={<MessageCircle/>} label="Chats"/><NavButton active={tab==='profile'} onClick={()=>setTab('profile')} icon={<UserRound/>} label="Profile"/></nav>
     {crushPanel&&<div className="modal-backdrop" onClick={()=>setCrushPanel(false)}><div className="limit-modal crush-panel" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Secret Crush</h2><p>Your Secret Crushes stay private until the feeling is mutual</p><div className="crush-slots"><span className={secretCrushes>0?'filled':''}></span><span className={secretCrushes>1?'filled':''}></span><span className={secretCrushes>2?'filled':''}></span></div><small>{secretCrushes} of 3 active in this session</small><button className="primary-btn" onClick={()=>setCrushPanel(false)}>Back to Discover</button></div></div>}
@@ -331,6 +333,19 @@ function Chats({chats,selected,setSelected}:{chats:any[];selected:string|null;se
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
 function Notifications({items,onRead}:{items:any[];onRead:(id:string)=>Promise<void>}){return <section className="normal-section"><div className="section-heading"><div><span>Updates</span><h1>Notifications</h1></div></div>{items.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{items.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div></button>)}</div>}</section>}
+
+function SecurityCenter({profile,onOpenProfile,onOpenNotifications}:{profile:Profile;onOpenProfile:()=>void;onOpenNotifications:()=>void}){
+  return <section className="normal-section security-section">
+    <div className="section-heading"><div><span>Privacy & control</span><h1>Safety & Security</h1></div></div>
+    <div className="security-grid">
+      <div className="security-card"><div className="security-icon"><Shield/></div><div><h2>Your account</h2><p>Your account is protected by Supabase authentication and server-side profile access</p></div><span className="status-pill">Active</span></div>
+      <button className="security-card security-button" onClick={onOpenProfile}><div className="security-icon"><Lock/></div><div><h2>Privacy controls</h2><p>Manage Incognito mode and your profile visibility</p></div><ChevronRight/></button>
+      <button className="security-card security-button" onClick={onOpenNotifications}><div className="security-icon"><Bell/></div><div><h2>Notifications</h2><p>Open your Knot activity and notification settings</p></div><ChevronRight/></button>
+      <div className="security-card"><div className="security-icon"><Check/></div><div><h2>Age & identity verification</h2><p>{profile.verificationStatus==='verified'?'Verification complete':'Verification will be connected here before launch'}</p></div><span className="status-pill">{profile.verificationStatus==='verified'?'Verified':'Pending'}</span></div>
+      <div className="security-card"><div className="security-icon"><UserRound/></div><div><h2>Discover visibility</h2><p>{profile.incognito?'Incognito is currently on':'Your profile can appear in Discover'}</p></div><span className="status-pill">{profile.incognito?'Hidden':'Visible'}</span></div>
+    </div>
+  </section>
+}
 
 function ProfileView({profile,onRefresh,onLogout}:{profile:Profile;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void>}){
   const [city,setCity]=useState(profile.city)

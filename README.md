@@ -22,3 +22,10 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Knot current flow
+Welcome → Login → Homepage for an existing account.
+
+New here? Create an account → email/password → profile setup → Discover/Homepage.
+
+Founder-only local test tools include Discover Preview (10 demo profiles) and Preview Notifications. These demo actions do not write to Supabase.

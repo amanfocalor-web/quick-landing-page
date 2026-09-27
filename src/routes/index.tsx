@@ -71,21 +71,36 @@ function KnotApp() {
     } finally { setBusy(false) }
   }
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => {
+    // Every fresh app launch starts at the public welcome screen.
+    // A cached Supabase session must never silently open somebody else's Knot account.
+    void (async () => {
+      await signOut().catch(() => {})
+      setAuthenticated(false)
+      setProfile(null)
+      setCreator(false)
+      setScreen('welcome')
+      setBusy(false)
+    })()
+  }, [])
+
+  const openLogin = () => {
+    setError(''); setMessage(''); setEmail(''); setPassword(''); setAuthMode('signin'); setAuthTheme('light'); setReturnToReady(false); setScreen('auth')
+  }
+  const openSignup = () => {
+    setError(''); setMessage(''); setEmail(''); setPassword(''); setAuthMode('signup'); setAuthTheme('light'); setReturnToReady(false); setScreen('auth')
+  }
 
   if (busy) return <div className="knot-loading"><div className="knot-loading-inner"><div className="knot-logo">Knot</div><Heart className="loader-heart" aria-hidden="true" /></div></div>
   if (screen === 'blocked') return <Blocked />
-  if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
-    {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!authenticated} initialStep={authenticated ? 7 : 1} error={error} setError={setError} onAuthNeeded={async () => { await signOut().catch(() => {}); setWelcomePreview(false); setAuthenticated(false); setProfile(null); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load(true) }} onLogout={async () => { setWelcomePreview(false); setAuthenticated(false); setScreen('welcome') }} /></div>}
-    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} onLogin={() => { setError(''); setMessage(''); setEmail(''); setPassword(''); setAuthMode('signin'); setAuthTheme('light'); setScreen('auth') }} />
-  </div>
-  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={() => load(true)} onBack={() => { setReturnToReady(true); setScreen('profile') }} />
-  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={async (selectedTheme: 'light'|'dark') => { await signOut().catch(() => {}); setAuthenticated(false); setProfile(null); setAuthTheme(selectedTheme); setAuthMode('signup'); setReturnToReady(false); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load(true) }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); await signOut(); setScreen('welcome') }} />
+  if (screen === 'welcome') return <Welcome onLogin={openLogin} />
+  if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={() => load(true)} onSignupCreated={async (hasSession: boolean) => { setAuthenticated(hasSession); setProfile(null); setReturnToReady(false); setScreen('profile') }} onBack={() => { setReturnToReady(false); setScreen('welcome') }} />
+  if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={async (selectedTheme: 'light'|'dark') => { setAuthenticated(false); setProfile(null); setAuthTheme(selectedTheme); setAuthMode('signin'); setReturnToReady(false); setMessage('Your profile is saved. Log in to finish opening Discover.'); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load(true) }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); setProfile(null); await signOut().catch(() => {}); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={() => load(true)} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onBegin, onComplete, onLogin }: { onBegin: () => void; onComplete: () => void; onLogin: () => void }) {
+function Welcome({ onLogin }: { onLogin: () => void }) {
   const [expanding, setExpanding] = useState(false)
   const [starGlows, setStarGlows] = useState<Record<number, 'white' | 'pink' | 'navy'>>({})
 
@@ -110,8 +125,7 @@ function Welcome({ onBegin, onComplete, onLogin }: { onBegin: () => void; onComp
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    window.requestAnimationFrame(() => onBegin())
-    window.setTimeout(onComplete, 1180)
+    window.setTimeout(onLogin, 1180)
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
@@ -140,23 +154,26 @@ function Welcome({ onBegin, onComplete, onLogin }: { onBegin: () => void; onComp
           <path className="welcome-star-shape" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" />
         </svg>
       </button>
-      <button className="welcome-login" onClick={onLogin}>Already have an account? <strong>Log in</strong></button>
     </main>
   </div>
 }
 
-function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,theme='light',onDone,onBack }: any) {
+function Auth({ mode,setMode,email,setEmail,password,setPassword,error,setError,message,setMessage,theme='light',onDone,onSignupCreated,onBack }: any) {
   const submit = async (e: FormEvent) => {
     e.preventDefault(); setError(''); setMessage('')
     try {
       const result = mode==='signup' ? await signUp(email,password) : await signIn(email,password)
       if (result.error) throw result.error
-      if (mode==='signup' && !result.data.session) setMessage('Check your email to confirm your Knot account')
-      else await onDone()
+      if (mode==='signup') {
+        if (!result.data.session) setMessage('Account created. Complete your profile, then confirm your email if prompted.')
+        await onSignupCreated?.(!!result.data.session)
+      } else {
+        await onDone()
+      }
     } catch (e:any) { setError(e?.message || 'Something went wrong') }
   }
   return <div className={`auth-page ${theme==='light'?'light':''}`}><div className="auth-card">
-    <button className="ghost-back" onClick={onBack} aria-label="Back to Your Knot is ready"><ArrowLeft size={18}/><span>Knot</span></button>
+    <button className="ghost-back" onClick={onBack} aria-label="Back to welcome"><ArrowLeft size={18}/><span>Knot</span></button>
     <div className="auth-icon"><Lock size={22}/></div>
     <h1>{mode==='signup' ? 'Make your Knot' : 'Welcome back'}</h1>
     <p>{mode==='signup' ? 'Your account comes first, then the rest' : 'Pick up where you left off'}</p>

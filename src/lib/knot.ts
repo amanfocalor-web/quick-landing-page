@@ -22,6 +22,8 @@ export type Profile = {
   relationshipState: string
   partnerId: string | null
   interests: string[]
+  school?: string
+  tag?: string
 }
 
 export type DiscoverProfile = {
@@ -31,6 +33,8 @@ export type DiscoverProfile = {
   photoPath: string | null
   photoUrl?: string | null
   interests: string[]
+  school?: string
+  tag?: string
 }
 
 export async function getSession() {

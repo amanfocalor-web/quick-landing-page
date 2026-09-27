@@ -125,7 +125,7 @@ function Welcome({ onLogin }: { onLogin: () => void }) {
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    window.setTimeout(onLogin, 760)
+    window.setTimeout(onLogin, 1080)
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
@@ -256,16 +256,16 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
 }
 
 const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
-  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/44.jpg', interests:['Books','Music','Travel','Photography'] },
-  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/68.jpg', interests:['Art','Coffee','Movies','Dance'] },
-  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/65.jpg', interests:['Sports','Gaming','Tech','Food'] },
-  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/49.jpg', interests:['Writing','Fitness','Music','Design'] },
-  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/32.jpg', interests:['Cinema','Travel','Art','Books'] },
-  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/21.jpg', interests:['Dance','Music','Food','Photography'] },
-  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/12.jpg', interests:['Science','Reading','Coffee','Design'] },
-  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/17.jpg', interests:['Fitness','Movies','Travel','Music'] },
-  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/28.jpg', interests:['Gaming','Tech','Drawing','Food'] },
-  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/51.jpg', interests:['Fashion','Music','Writing','Photography'] },
+  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/44.jpg', interests:['Books','Music','Travel','Photography'], school:'Delhi University', tag:'New here' },
+  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/68.jpg', interests:['Art','Coffee','Movies','Dance'], school:'Ashoka University', tag:'New here' },
+  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/65.jpg', interests:['Sports','Gaming','Tech','Food'], school:'BITS Pilani', tag:'New here' },
+  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/49.jpg', interests:['Writing','Fitness','Music','Design'], school:'St Xavier’s', tag:'New here' },
+  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/32.jpg', interests:['Cinema','Travel','Art','Books'], school:'Christ University', tag:'New here' },
+  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/21.jpg', interests:['Dance','Music','Food','Photography'], school:'Loyola College', tag:'New here' },
+  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/12.jpg', interests:['Science','Reading','Coffee','Design'], school:'IIT Delhi', tag:'New here' },
+  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/17.jpg', interests:['Fitness','Movies','Travel','Music'], school:'Symbiosis', tag:'New here' },
+  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/28.jpg', interests:['Gaming','Tech','Drawing','Food'], school:'Manipal University', tag:'New here' },
+  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/51.jpg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
 ]
 
 function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { profile:Profile;tab:HomeTab;setTab:(x:HomeTab)=>void;creator:boolean;onCreator:()=>void;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void> }) {
@@ -285,9 +285,9 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const [crushNotice,setCrushNotice]=useState(false)
   const [crushPanel,setCrushPanel]=useState(false)
   const [secretCrushes,setSecretCrushes]=useState(0)
-  const [demoMode,setDemoMode]=useState(false)
+  const [demoMode,setDemoMode]=useState(true)
   const [demoConsumed,setDemoConsumed]=useState<string[]>([])
-  const [demoNotifications,setDemoNotifications]=useState(false)
+  const [demoNotifications,setDemoNotifications]=useState(true)
   const loadData=async()=>{setSectionError('');try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setSectionError(e?.message||'Could not load this section')}}
   useEffect(()=>{void loadData()},[tab,demoMode,demoConsumed])
   const current=discover[index]
@@ -345,7 +345,7 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
           </div>
           <div className="card-wrap">
             <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:`translateX(${dragX}px) rotate(${dragX/18}deg)`}} onClick={()=>{if(Math.abs(dragX)<10)setFlipped(!flipped)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
-              <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-name">{current.name}<span>{current.age}</span></div></div>
+              <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-top-row"><span className="new-here-chip">✦ {(current as any).tag || 'New here'}</span><span className="card-count">{index + 1}/{demoMode ? DEMO_DISCOVER_PROFILES.length : discover.length}</span></div><div className="card-profile-info"><div className="card-name">{current.name}<span>{current.age}</span></div>{(current as any).school&&<div className="card-school">Psychology · {(current as any).school}</div>}<div className="card-interest-chips">{current.interests.slice(0,3).map((x,i)=><span key={x}>{['📖','♫','✈'][i]} {x}</span>)}{current.interests.length>3&&<span>+{current.interests.length-3}</span>}</div></div></div>
               <div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">Interests and preferences</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="cupid-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush"><CupidIcon/></button></div>
             </div>
             {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart"><CupidIcon/></div>}
@@ -353,14 +353,10 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
           <div className="discover-actions"><button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button><button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>{flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}</div>
           <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
           <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>{setMenuOpen(true)}}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
-          <div className="preview-strip">
-            <button className="preview-card" onClick={()=>{setDemoMode(true);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}>
-              <div className="preview-card-icon"><Sparkles/></div><div><span>Discover Preview</span><strong>Ira · Zoya · and more</strong><small>Try the full card flow with demo profiles</small></div><ChevronRight/>
-            </button>
-            <button className="preview-card" onClick={()=>{setDemoNotifications(true);setTab('notifications')}}>
-              <div className="preview-card-icon notification-preview-icon"><Bell/></div><div><span>Notification Preview</span><strong>Matches · trial chats · updates</strong><small>See how your Knot notifications will look</small></div><ChevronRight/>
-            </button>
-          </div>
+          <section className="homepage-activity-preview">
+            <div className="homepage-preview-head"><div><span>Activity</span><h2>Notifications</h2></div><button onClick={()=>setTab('notifications')}>View all <ChevronRight size={16}/></button></div>
+            <div className="homepage-notification-list">{DEMO_NOTIFICATIONS.slice(0,3).map(n=><div key={n.id} className={`notification-row ${n.read_at?'':'unread'}`}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div></div>)}</div>
+          </section>
         </>:<div className="empty-state"><div>✦</div><h2>{demoMode?'Demo profiles completed':'That’s everyone for now'}</h2><p>{demoMode?'Restart the preview to test the Discover flow again':'Try again later or adjust your discovery preferences'}</p>{demoMode&&<button className="primary-btn" onClick={()=>{setDemoConsumed([]);setIndex(0);setFlipped(false);setSecretCrushes(0)}}>Restart Preview</button>}</div>}
       </section>}
       {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 

@@ -324,7 +324,17 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
       </div>
     </header>
-    {menuOpen&&<div className="app-menu"><button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button><button onClick={()=>{setDemoNotifications(false);setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button><button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>{creator&&<button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button>}<button onClick={()=>{setMenuOpen(false);setDemoMode(v=>!v);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> {demoMode?'Exit Discover Preview':'Preview Discover'}</button><button onClick={()=>{setMenuOpen(false);setDemoNotifications(true);setTab('notifications')}}><Bell/> Preview Notifications</button><button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button></div>}
+    {menuOpen&&<div className="app-menu">
+      <button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button>
+      <button onClick={()=>{setDemoNotifications(false);setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button>
+      <button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>
+      {creator&&<button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button>}
+      <div className="preview-menu-label">Preview tools</div>
+      <button className="preview-menu-button" onClick={()=>{setMenuOpen(false);setDemoMode(true);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> Discover Preview <span className="preview-menu-check">10</span></button>
+      <button className="preview-menu-button" onClick={()=>{setMenuOpen(false);setDemoNotifications(true);setTab('notifications')}}><Bell/> Notification Preview</button>
+      {demoMode&&<button onClick={()=>{setMenuOpen(false);setDemoMode(false);setIndex(0);setFlipped(false);setDemoConsumed([]);setTab('discover')}}><X/> Exit Discover Preview</button>}
+      <button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button>
+    </div>}
     <main className="app-main">
       {tab==='discover'&&<section className="discover-section">
         <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline" />{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>

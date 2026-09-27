@@ -2979,3 +2979,12 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .welcome-login:focus-visible { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; border-radius: 999px; }
 
 .demo-toolbar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:10px 0 16px}
+
+/* v29.1 — make founder testing tools impossible to miss while keeping them inside the menu */
+.preview-menu-label{margin:7px 8px 3px;padding-top:9px;border-top:1px solid rgba(255,255,255,.10);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.52}
+.app-shell.light .preview-menu-label{border-top-color:rgba(36,32,59,.10)}
+.preview-menu-button{font-weight:700 !important}
+.preview-menu-button svg{color:#ff9fcb !important}
+.preview-menu-check{margin-left:auto;min-width:22px;padding:2px 6px;border-radius:999px;background:rgba(216,180,254,.13);font-size:10px;text-align:center;opacity:.8}
+/* Keep the original navy → pink → purple → orange underline palette */
+.discover-underline{background:linear-gradient(90deg,#182b59 0%,#e85f9e 34%,#8b5cf6 62%,#f59a52 100%) !important;}

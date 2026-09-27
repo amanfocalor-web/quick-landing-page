@@ -2961,3 +2961,19 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .app-menu button{white-space:nowrap}
 
 .security-grid{display:grid;gap:14px;max-width:760px;margin:0 auto}.security-card{display:flex;align-items:center;gap:14px;width:100%;padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.055);color:inherit;text-align:left}.light .security-card{border-color:rgba(20,12,40,.1);background:rgba(255,255,255,.72)}.security-button{cursor:pointer}.security-button:hover{transform:translateY(-1px)}.security-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:rgba(192,132,252,.14);color:var(--star,#c084fc);flex:0 0 auto}.security-card h2{margin:0 0 4px;font-size:16px}.security-card p{margin:0;opacity:.68;font-size:13px;line-height:1.45}.security-card>div:nth-child(2){flex:1}.status-pill{margin-left:auto;border:1px solid currentColor;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700;opacity:.72;white-space:nowrap}.security-button>svg{opacity:.6;flex:0 0 auto}
+
+
+.welcome-login {
+  margin-top: 18px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.72);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: .01em;
+  transition: color .2s ease, transform .2s ease;
+}
+.welcome-login strong { color: #fff; font-weight: 700; }
+.welcome-login:hover { color: #fff; transform: translateY(-1px); }
+.welcome-login:focus-visible { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; border-radius: 999px; }

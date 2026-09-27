@@ -66,7 +66,7 @@ function KnotApp() {
   if (screen === 'blocked') return <Blocked />
   if (screen === 'welcome') return <div className={welcomePreview ? 'welcome-stage transitioning' : 'welcome-stage'}>
     {welcomePreview && <div className="welcome-destination"><ProfileSetup existing={profile} preAuth={!authenticated} initialStep={authenticated ? 7 : 1} error={error} setError={setError} onAuthNeeded={() => { setWelcomePreview(false); setAuthMode('signup'); setScreen('auth') }} onDone={async () => { setWelcomePreview(false); await load() }} onLogout={async () => { setWelcomePreview(false); setAuthenticated(false); setScreen('welcome') }} /></div>}
-    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} />
+    <Welcome onBegin={() => setWelcomePreview(true)} onComplete={() => { setScreen('profile') }} onLogin={() => { setError(''); setMessage(''); setEmail(''); setPassword(''); setAuthMode('signin'); setAuthTheme('light'); setScreen('auth') }} />
   </div>
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={load} onBack={() => { setReturnToReady(true); setScreen('profile') }} />
   if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={(selectedTheme: 'light'|'dark') => { setAuthTheme(selectedTheme); setAuthMode('signup'); setReturnToReady(false); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load() }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); await signOut(); setScreen('welcome') }} />
@@ -74,7 +74,7 @@ function KnotApp() {
   return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={load} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
 }
 
-function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () => void }) {
+function Welcome({ onBegin, onComplete, onLogin }: { onBegin: () => void; onComplete: () => void; onLogin: () => void }) {
   const [expanding, setExpanding] = useState(false)
   const [starGlows, setStarGlows] = useState<Record<number, 'white' | 'pink' | 'navy'>>({})
 
@@ -109,7 +109,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
     <main className="welcome-center">
       <h1>You might be closer<br />than you think<span className="title-dot">.</span></h1>
       <div className="welcome-kicker">Welcome to Knot<span>.</span></div>
-      <button className="welcome-star" onClick={begin} aria-label="Begin Knot">
+      <button className="welcome-star" onClick={begin} aria-label="Create your Knot account">
         <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
           <defs>
             <radialGradient id="knotStarFill" cx="50%" cy="50%" r="58%">
@@ -129,6 +129,7 @@ function Welcome({ onBegin, onComplete }: { onBegin: () => void; onComplete: () 
           <path className="welcome-star-shape" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" />
         </svg>
       </button>
+      <button className="welcome-login" onClick={onLogin}>Already have an account? <strong>Log in</strong></button>
     </main>
   </div>
 }

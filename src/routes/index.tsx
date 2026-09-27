@@ -125,7 +125,7 @@ function Welcome({ onLogin }: { onLogin: () => void }) {
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    window.setTimeout(onLogin, 1080)
+    window.setTimeout(onLogin, 820)
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
@@ -256,16 +256,16 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
 }
 
 const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
-  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/44.jpg', interests:['Books','Music','Travel','Photography'], school:'Delhi University', tag:'New here' },
-  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/68.jpg', interests:['Art','Coffee','Movies','Dance'], school:'Ashoka University', tag:'New here' },
-  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/65.jpg', interests:['Sports','Gaming','Tech','Food'], school:'BITS Pilani', tag:'New here' },
-  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/49.jpg', interests:['Writing','Fitness','Music','Design'], school:'St Xavier’s', tag:'New here' },
-  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/32.jpg', interests:['Cinema','Travel','Art','Books'], school:'Christ University', tag:'New here' },
-  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/21.jpg', interests:['Dance','Music','Food','Photography'], school:'Loyola College', tag:'New here' },
-  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/12.jpg', interests:['Science','Reading','Coffee','Design'], school:'IIT Delhi', tag:'New here' },
-  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/17.jpg', interests:['Fitness','Movies','Travel','Music'], school:'Symbiosis', tag:'New here' },
-  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/28.jpg', interests:['Gaming','Tech','Drawing','Food'], school:'Manipal University', tag:'New here' },
-  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'https://randomuser.me/api/portraits/women/51.jpg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
+  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'/discover/ira.jpg', interests:['Books','Music','Travel','Photography'], school:'Delhi University', tag:'New here' },
+  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'/discover/maya.svg', interests:['Art','Coffee','Movies','Dance'], school:'Ashoka University', tag:'New here' },
+  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'/discover/anika.svg', interests:['Sports','Gaming','Tech','Food'], school:'BITS Pilani', tag:'New here' },
+  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'/discover/sara.svg', interests:['Writing','Fitness','Music','Design'], school:'St Xavier’s', tag:'New here' },
+  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'/discover/nila.svg', interests:['Cinema','Travel','Art','Books'], school:'Christ University', tag:'New here' },
+  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'/discover/meera.svg', interests:['Dance','Music','Food','Photography'], school:'Loyola College', tag:'New here' },
+  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'/discover/tara.svg', interests:['Science','Reading','Coffee','Design'], school:'IIT Delhi', tag:'New here' },
+  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'/discover/rhea.svg', interests:['Fitness','Movies','Travel','Music'], school:'Symbiosis', tag:'New here' },
+  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'/discover/isha.svg', interests:['Gaming','Tech','Drawing','Food'], school:'Manipal University', tag:'New here' },
+  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'/discover/zoya.svg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
 ]
 
 function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { profile:Profile;tab:HomeTab;setTab:(x:HomeTab)=>void;creator:boolean;onCreator:()=>void;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void> }) {
@@ -329,22 +329,18 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
       <button onClick={()=>{setDemoNotifications(false);setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button>
       <button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>
       {creator&&<button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button>}
-      <div className="preview-menu-label">Preview tools</div>
-      <button className="preview-menu-button" onClick={()=>{setMenuOpen(false);setDemoMode(true);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}><Sparkles/> Discover Preview <span className="preview-menu-check">10</span></button>
-      <button className="preview-menu-button" onClick={()=>{setMenuOpen(false);setDemoNotifications(true);setTab('notifications')}}><Bell/> Notification Preview</button>
-      {demoMode&&<button onClick={()=>{setMenuOpen(false);setDemoMode(false);setIndex(0);setFlipped(false);setDemoConsumed([]);setTab('discover')}}><X/> Exit Discover Preview</button>}
       <button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button>
     </div>}
     <main className="app-main">
       {tab==='discover'&&<section className="discover-section">
-        <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline" />{demoMode&&<span className="demo-badge">Discover Preview</span>}</div>
+        <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline" /></div>
         {error&&<div className="error-box">{error}</div>}
         {current?<>
           <div className="card-stack" aria-hidden="true">
             {discover.slice(index+1,index+3).map((p,i)=><div key={p.id} className={`stack-card stack-${i+2}`}><img src={p.photoUrl||'/favicon.ico'} alt=""/><div/></div>)}
           </div>
           <div className="card-wrap">
-            <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:`translateX(${dragX}px) rotate(${dragX/18}deg)`}} onClick={()=>{if(Math.abs(dragX)<10)setFlipped(!flipped)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
+            <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:(dragX!==0?`translateX(${dragX}px) rotate(${dragX/18}deg)${flipped?' rotateY(180deg)':''}`:undefined)}} onClick={()=>{if(!animation && Math.abs(dragX)<10)setFlipped(v=>!v)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
               <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-top-row"><span className="new-here-chip">✦ {(current as any).tag || 'New here'}</span><span className="card-count">{index + 1}/{demoMode ? DEMO_DISCOVER_PROFILES.length : discover.length}</span></div><div className="card-profile-info"><div className="card-name">{current.name}<span>{current.age}</span></div>{(current as any).school&&<div className="card-school">Psychology · {(current as any).school}</div>}<div className="card-interest-chips">{current.interests.slice(0,3).map((x,i)=><span key={x}>{['📖','♫','✈'][i]} {x}</span>)}{current.interests.length>3&&<span>+{current.interests.length-3}</span>}</div></div></div>
               <div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">Interests and preferences</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="cupid-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush"><CupidIcon/></button></div>
             </div>

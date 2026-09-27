@@ -3034,3 +3034,60 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 @keyframes knot-star-portal-v31 { 0%{transform:scale(1);opacity:1} 24%{transform:scale(1.18);opacity:1} 62%{transform:scale(6.5);opacity:1} 100%{transform:scale(32);opacity:1} }
 @keyframes knot-star-brighten-v31 { 0%{filter:url(#knotStarGlow) drop-shadow(0 0 18px rgba(190,126,255,.9)) drop-shadow(0 0 44px rgba(143,107,255,.65))} 55%{filter:url(#knotStarGlow) drop-shadow(0 0 32px rgba(255,255,255,1)) drop-shadow(0 0 100px rgba(190,126,255,1))} 100%{filter:url(#knotStarGlow) drop-shadow(0 0 55px rgba(255,255,255,1)) drop-shadow(0 0 180px rgba(174,123,255,.95))} }
 @keyframes knot-star-glow-v31 { 0%{opacity:.72;transform:scale(1)} 45%{opacity:1;transform:scale(1.5)} 100%{opacity:1;transform:scale(28)} }
+
+/* KNOT v32 — reference-matched desktop Discover + seamless portal */
+.discover-underline {
+  width: 54px !important;
+  height: 4px !important;
+  margin: 12px auto 0 !important;
+  border-radius: 99px !important;
+  background: linear-gradient(90deg,#182b59 0%,#e85f9e 34%,#8b5cf6 62%,#f59a52 100%) !important;
+  box-shadow: 0 0 18px rgba(216,180,254,.35) !important;
+}
+
+.card-stack,
+.card-wrap,
+.discover-actions,
+.homepage-privacy { width: min(650px, 100%) !important; }
+.card-stack { aspect-ratio: .93 !important; margin-bottom: -18px !important; }
+.card-wrap { margin-top: 18px !important; }
+.discover-card { aspect-ratio: .93 !important; }
+.card-face { border-radius: 34px !important; }
+.discover-actions { gap: clamp(28px, 6vw, 62px) !important; margin-top: 26px !important; }
+.action-btn svg { width: 60px !important; height: 60px !important; padding: 16px !important; }
+.card-profile-info { left: 30px !important; right: 30px !important; bottom: 28px !important; }
+.card-name { font-size: clamp(2.2rem, 4vw, 3.5rem) !important; }
+.card-school { font-size: 1rem !important; }
+.card-interest-chips span { padding: 9px 13px !important; font-size: .82rem !important; }
+.card-top-row { top: 22px !important; left: 22px !important; right: 22px !important; }
+.new-here-chip,.card-count { min-height: 38px !important; padding-inline: 14px !important; font-size: .78rem !important; }
+
+/* The demo is the working Discover surface for now — no preview/debug labels. */
+.demo-badge,.demo-toolbar,.preview-menu-label,.preview-menu-button,.preview-menu-check { display:none !important; }
+
+/* The homepage Activity block is the working Notifications surface for now. */
+.homepage-activity-preview { width: min(650px, 100%); margin: 32px auto 120px !important; padding: 24px !important; }
+.homepage-notification-list .notification-row { min-height: 68px; }
+
+/* Never expose the old animated auth gradient as a transition frame. */
+.welcome.welcome-expanding { animation: none !important; opacity: 1 !important; }
+.welcome.welcome-expanding .welcome-center h1,
+.welcome.welcome-expanding .welcome-kicker,
+.welcome.welcome-expanding .star-field,
+.welcome.welcome-expanding .welcome-nebula { animation: none !important; opacity: 0 !important; }
+.welcome.welcome-expanding .welcome-star { animation:knot-star-portal-v32 .82s cubic-bezier(.62,0,.12,1) forwards !important; z-index:30; }
+.welcome.welcome-expanding .welcome-star-shape { animation:knot-star-brighten-v32 .82s cubic-bezier(.62,0,.12,1) forwards !important; }
+.welcome.welcome-expanding .welcome-star-glow { animation:knot-star-glow-v32 .82s cubic-bezier(.62,0,.12,1) forwards !important; }
+@keyframes knot-star-portal-v32 { 0%{transform:scale(1);opacity:1} 30%{transform:scale(1.35);opacity:1} 68%{transform:scale(9);opacity:1} 100%{transform:scale(42);opacity:1} }
+@keyframes knot-star-brighten-v32 { 0%{filter:url(#knotStarGlow) drop-shadow(0 0 18px rgba(190,126,255,.9)) drop-shadow(0 0 44px rgba(143,107,255,.65))} 55%{filter:url(#knotStarGlow) drop-shadow(0 0 32px rgba(255,255,255,1)) drop-shadow(0 0 100px rgba(190,126,255,1))} 100%{filter:url(#knotStarGlow) drop-shadow(0 0 55px rgba(255,255,255,1)) drop-shadow(0 0 180px rgba(174,123,255,.95))} }
+@keyframes knot-star-glow-v32 { 0%{opacity:.72;transform:scale(1)} 45%{opacity:1;transform:scale(1.5)} 100%{opacity:1;transform:scale(36)} }
+.auth-page { animation:none !important; }
+
+@media (min-width: 1100px) {
+  .app-main { width: min(1120px, calc(100% - 56px)); }
+  .discover-welcome { margin-top: 10px; margin-bottom: 22px; }
+}
+@media (max-width: 720px) {
+  .card-stack,.card-wrap,.discover-actions,.homepage-privacy,.homepage-activity-preview { width: 100% !important; }
+  .discover-card,.card-stack { aspect-ratio: .88 !important; }
+}

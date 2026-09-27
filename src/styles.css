@@ -1736,7 +1736,7 @@ button.notification-row { cursor: pointer; }
 }
 
 /* Make the actual setup screen continue the same reveal instead of popping in. */
-.profile-page:not(.profile-finishing) .setup-card { animation: setup-reveal .72s cubic-bezier(.2,.8,.2,1) both; }
+.profile-page:not(.profile-finishing) .setup-card { animation: none !important; opacity: 1 !important; transform: none !important; }
 @keyframes setup-reveal { from { opacity: 0; transform: translateY(22px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
 
@@ -2912,7 +2912,7 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .notification-btn { border-radius:50%; }
 .discover-welcome { text-align:center; margin:16px auto 24px; }
 .discover-welcome h1 { margin:0; font-family:"Pacifico",ui-sans-serif,system-ui,sans-serif; font-size:clamp(1.9rem,5vw,3rem); letter-spacing:-.04em; }
-.discover-underline { width:54px; height:4px; margin:12px auto 0; border-radius:99px; background:linear-gradient(90deg,#182b59 0%,#e85f9e 34%,#8b5cf6 62%,#f59a52 100%); box-shadow:0 0 18px rgba(216,180,254,.35); }
+.discover-underline { width:54px; height:4px; margin:12px auto 0; border-radius:99px; background:linear-gradient(90deg,#e85f9e 0%,#8b5cf6 55%,#f59a52 100%); box-shadow:0 0 18px rgba(216,180,254,.35); }
 .card-stack { position:relative; width:min(430px,100%); margin:0 auto -12px; aspect-ratio:3/4.35; pointer-events:none; }
 .stack-card { position:absolute; inset:0; overflow:hidden; border:1px solid rgba(255,255,255,.11); border-radius:30px; background:#12142c; box-shadow:0 24px 60px rgba(3,5,28,.28); }
 .stack-card img { width:100%; height:100%; object-fit:cover; opacity:.48; filter:saturate(.85) brightness(.72); }
@@ -2987,4 +2987,19 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .preview-menu-button svg{color:#ff9fcb !important}
 .preview-menu-check{margin-left:auto;min-width:22px;padding:2px 6px;border-radius:999px;background:rgba(216,180,254,.13);font-size:10px;text-align:center;opacity:.8}
 /* Keep the original navy → pink → purple → orange underline palette */
-.discover-underline{background:linear-gradient(90deg,#182b59 0%,#e85f9e 34%,#8b5cf6 62%,#f59a52 100%) !important;}
+.discover-underline{background:linear-gradient(90deg,#e85f9e 0%,#8b5cf6 55%,#f59a52 100%) !important;}
+
+
+/* v30 — visible homepage previews */
+.preview-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 110px}
+.preview-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:15px 16px;border:1px solid rgba(216,180,254,.18);border-radius:18px;color:inherit;background:rgba(255,255,255,.035);text-align:left;cursor:pointer;box-shadow:0 12px 35px rgba(0,0,0,.08);transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.preview-card:hover{transform:translateY(-2px);border-color:rgba(216,180,254,.38);background:rgba(255,255,255,.055)}
+.preview-card-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;color:#ff9fcb;background:rgba(255,159,203,.09)}
+.notification-preview-icon{color:#b99cff;background:rgba(185,156,255,.1)}
+.preview-card div:nth-child(2){min-width:0;display:grid;gap:3px}
+.preview-card span{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
+.preview-card strong{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-card small{font-size:.72rem;opacity:.48;line-height:1.3}
+.preview-card>svg{width:17px;opacity:.55}
+.app-shell.light .preview-card{background:rgba(255,255,255,.56);border-color:rgba(144,103,186,.16)}
+@media(max-width:700px){.preview-strip{grid-template-columns:1fr;margin-bottom:95px}.preview-card{padding:14px}}

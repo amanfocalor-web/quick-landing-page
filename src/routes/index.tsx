@@ -125,7 +125,7 @@ function Welcome({ onLogin }: { onLogin: () => void }) {
   const begin = () => {
     if (expanding) return
     setExpanding(true)
-    window.setTimeout(onLogin, 1180)
+    window.setTimeout(onLogin, 760)
   }
 
   return <div className={`welcome knot-welcome ${expanding ? 'welcome-expanding' : ''}`}>
@@ -353,6 +353,14 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
           <div className="discover-actions"><button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button><button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>{flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}</div>
           <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
           <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>{setMenuOpen(true)}}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
+          <div className="preview-strip">
+            <button className="preview-card" onClick={()=>{setDemoMode(true);setIndex(0);setFlipped(false);setDragX(0);setDemoConsumed([]);setSecretCrushes(0);setTab('discover')}}>
+              <div className="preview-card-icon"><Sparkles/></div><div><span>Discover Preview</span><strong>Ira · Zoya · and more</strong><small>Try the full card flow with demo profiles</small></div><ChevronRight/>
+            </button>
+            <button className="preview-card" onClick={()=>{setDemoNotifications(true);setTab('notifications')}}>
+              <div className="preview-card-icon notification-preview-icon"><Bell/></div><div><span>Notification Preview</span><strong>Matches · trial chats · updates</strong><small>See how your Knot notifications will look</small></div><ChevronRight/>
+            </button>
+          </div>
         </>:<div className="empty-state"><div>✦</div><h2>{demoMode?'Demo profiles completed':'That’s everyone for now'}</h2><p>{demoMode?'Restart the preview to test the Discover flow again':'Try again later or adjust your discovery preferences'}</p>{demoMode&&<button className="primary-btn" onClick={()=>{setDemoConsumed([]);setIndex(0);setFlipped(false);setSecretCrushes(0)}}>Restart Preview</button>}</div>}
       </section>}
       {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 

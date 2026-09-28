@@ -3237,3 +3237,46 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .stack-card img { filter:saturate(.8) brightness(.76) !important; }
 .card-face { box-shadow:0 20px 48px rgba(3,5,28,.32) !important; }
 .quick-grid button { backdrop-filter:blur(7px) !important; }
+
+/* KNOT v36 — image reliability + centered actions + clearer reciprocal-chat testing */
+.discover-actions {
+  width: min(520px, 100%) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: clamp(18px, 5vw, 48px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.discover-actions .action-btn {
+  flex: 0 0 92px !important;
+  width: 92px !important;
+  min-width: 92px !important;
+  justify-items: center !important;
+  text-align: center !important;
+}
+.discover-actions .action-btn svg { margin: 0 auto !important; }
+.discover-actions .action-btn span { width: 100%; text-align:center !important; white-space:nowrap; }
+.card-face > img,
+.back-large-photo,
+.stack-card img,
+.secret-crush-card > img,
+.person-notification-modal > img { image-rendering:auto; }
+.card-face > img,
+.back-large-photo { object-position:center center; }
+.secret-crush-heading {
+  position:relative !important;
+  justify-content:center !important;
+  text-align:center !important;
+  min-height:72px;
+}
+.secret-crush-heading > div { text-align:center !important; }
+.secret-crush-heading > .icon-btn {
+  position:absolute !important;
+  left:0 !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+}
+.secret-crush-heading h1 { margin-left:0 !important; }
+.demo-reply-row { display:flex; justify-content:flex-end; margin:0 0 10px; }
+.demo-reply-row .secondary-btn { font-size:.76rem; padding:8px 12px; }

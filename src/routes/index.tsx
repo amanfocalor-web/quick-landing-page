@@ -292,6 +292,15 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   const [demoNotificationClicks,setDemoNotificationClicks]=useState<Record<string,number>>({})
   const [selectedPerson,setSelectedPerson]=useState<DiscoverProfile|null>(null)
 
+  useEffect(()=>{
+    // Warm every demo portrait once so moving through the stack does not wait on image decoding.
+    DEMO_DISCOVER_PROFILES.forEach(p=>{
+      const img=new Image()
+      img.decoding='async'
+      img.src=p.photoUrl || ''
+    })
+  },[])
+
   const loadData=async()=>{
     setSectionError('')
     try{
@@ -370,6 +379,8 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   }
   const openPersonChat=(person:DiscoverProfile)=>{
     const chatId=`demo-chat-${person.id}`
+    const chat={chat_id:chatId,other_id:person.id,other_name:person.name,other_photo_path:person.photoUrl,last_message:'Start the conversation'}
+    setChats(old=>old.some(x=>x.chat_id===chatId)?old:[...old,chat])
     setSelectedChat(chatId)
     setTab('chats')
     setSelectedPerson(null)
@@ -408,13 +419,13 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
             </div>
             <div className="card-wrap">
               <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:(dragX!==0?`translateX(${dragX}px) rotate(${dragX/18}deg)${flipped?' rotateY(180deg)':''}`:undefined)}} onClick={()=>{if(!animation && Math.abs(dragX)<10)setFlipped(v=>!v)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
-                <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
+                <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile" loading="eager" decoding="async" onError={e=>{e.currentTarget.src='/discover/ira.jpg'}}/><div className="photo-shade"/><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
                 <div className="card-face card-back">
-                  <img className="back-large-photo" src={current.photoUrl||'/favicon.ico'} alt=""/>
+                  <img className="back-large-photo" src={current.photoUrl||'/favicon.ico'} alt="" loading="eager" decoding="async" onError={e=>{e.currentTarget.src='/discover/ira.jpg'}}/>
                   <div className="back-info-panel"><h2>{current.name}, {current.age}</h2><p>{(current as any).school || 'Student'}</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div></div>
                 </div>
               </div>
-              {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart"><CupidIcon/></div>}
+              {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{(animation==='interested'||animation==='cupid')&&<div className="anim-overlay half-heart">♥</div>}
             </div>
           </div>
           <div className="discover-actions">
@@ -453,7 +464,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
 
 function SecretCrushPage({profiles,crushIds,onRemove,onBack,onOpenProfile}:{profiles:DiscoverProfile[];crushIds:string[];onRemove:(id:string)=>void;onBack:()=>void;onOpenProfile:(p:DiscoverProfile)=>void}){
   const crushes=profiles.filter(p=>crushIds.includes(p.id))
-  return <section className="secret-crush-page normal-section"><div className="section-heading"><button className="icon-btn" onClick={onBack}><ArrowLeft/></button><div><span>Private</span><h1>Secret Crushes</h1></div></div>{crushes.length===0?<div className="empty-state"><CupidIcon/><h2>No Secret Crushes yet</h2><p>Secret Crushes you add from Discover will appear here</p></div>:<div className="secret-crush-grid">{crushes.map(p=><article className="secret-crush-card" key={p.id}><img src={p.photoUrl||'/favicon.ico'} alt={p.name}/><div className="secret-crush-card-body"><h2>{p.name}, {p.age}</h2><p>{p.school}</p><div className="back-chips">{p.interests.map(x=><span key={x}>{x}</span>)}</div><div className="secret-crush-card-actions"><button className="secondary-btn" onClick={()=>onOpenProfile(p)}>View card</button><button className="danger-btn" onClick={()=>onRemove(p.id)}><Trash2 size={16}/> Remove</button></div></div></article>)}</div>}</section>
+  return <section className="secret-crush-page normal-section"><div className="section-heading secret-crush-heading"><button className="icon-btn" onClick={onBack}><ArrowLeft/></button><div><span>Private</span><h1>Secret Crushes</h1></div></div>{crushes.length===0?<div className="empty-state"><CupidIcon/><h2>No Secret Crushes yet</h2><p>Secret Crushes you add from Discover will appear here</p></div>:<div className="secret-crush-grid">{crushes.map(p=><article className="secret-crush-card" key={p.id}><img src={p.photoUrl||'/favicon.ico'} alt={p.name}/><div className="secret-crush-card-body"><h2>{p.name}, {p.age}</h2><p>{p.school}</p><div className="back-chips">{p.interests.map(x=><span key={x}>{x}</span>)}</div><div className="secret-crush-card-actions"><button className="secondary-btn" onClick={()=>onOpenProfile(p)}>View card</button><button className="danger-btn" onClick={()=>onRemove(p.id)}><Trash2 size={16}/> Remove</button></div></div></article>)}</div>}</section>
 }
 
 function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
@@ -465,7 +476,7 @@ function Matches({matches,refresh,demo,onOpenChat}:{matches:any[];refresh:()=>Pr
 
 function Chats({chats,selected,setSelected,demo}:{chats:any[];selected:string|null;setSelected:(x:string|null)=>void;demo:boolean}){const chat=chats.find(x=>x.chat_id===selected);return <section className="normal-section"><div className="section-heading"><div><span>Mutual connections</span><h1>Trial chats</h1></div></div>{chat?<>{demo?<DemoChat chat={chat} back={()=>setSelected(null)}/>:<Chat chat={chat} back={()=>setSelected(null)}/>}</>:chats.length===0?<div className="empty-state"><MessageCircle/><h2>No chats yet</h2><p>A mutual connection opens a text-only trial chat</p></div>:<div className="list-grid">{chats.map(c=><button className="person-row chat-row" key={c.chat_id} onClick={()=>setSelected(c.chat_id)}><Avatar path={c.other_photo_path}/><div><strong>{c.other_name}</strong><span>{c.last_message||'Start the conversation'}</span></div><ChevronRight/></button>)}</div>}</section>}
 
-function DemoChat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([{id:'welcome',sender_id:chat.other_id,body:'Hey — looks like we both wanted to connect ✨'},{id:'starter',sender_id:'me',body:'Hey!'}]);const [body,setBody]=useState('');const send=()=>{if(!body.trim())return;setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:'me',body:body.trim()}]);setBody('')};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
+function DemoChat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([{id:'welcome',sender_id:chat.other_id,body:'Hey — looks like we both wanted to connect ✨'},{id:'starter',sender_id:'me',body:'Hey!'}]);const [body,setBody]=useState('');const send=()=>{if(!body.trim())return;setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:'me',body:body.trim()}]);setBody('')};const simulateReply=()=>setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:chat.other_id,body:'Hey! I can text here too ✨'}]);return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="demo-reply-row"><button className="secondary-btn" onClick={simulateReply}>Simulate their reply</button></div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 

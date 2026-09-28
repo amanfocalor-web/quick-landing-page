@@ -4,9 +4,11 @@ export type Profile = {
   id: string
   name: string
   photoPath: string | null
+  discoverPhotoPath: string | null
   photoUrl?: string | null
   dob: string | null
   city: string
+  university: string
   gender: 'man' | 'woman' | null
   bio: string
   intent: string
@@ -70,8 +72,10 @@ export async function getMyProfile(): Promise<Profile | null> {
     id: data.id,
     name: data.name,
     photoPath: data.profile_photo_path,
+    discoverPhotoPath: data.discover_photo_path ?? data.profile_photo_path,
     dob: data.date_of_birth,
     city: data.city,
+    university: data.university ?? '',
     gender: data.gender ?? null,
     bio: data.bio,
     intent: data.intent,
@@ -87,6 +91,7 @@ export async function getMyProfile(): Promise<Profile | null> {
     relationshipState: data.relationship_state,
     partnerId: data.partner_id,
     interests: (interests ?? []).map((x) => x.interest),
+    school: data.university ?? '',
   }
 }
 
@@ -95,8 +100,10 @@ export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'elig
   const { data, error } = await client.rpc('save_profile', {
     p_name: input.name,
     p_photo_path: input.photoPath,
+    p_discover_photo_path: input.discoverPhotoPath,
     p_dob: input.dob,
     p_city: input.city,
+    p_university: input.university,
     p_gender: input.gender,
     p_bio: input.bio,
     p_intent: input.intent,
@@ -113,12 +120,12 @@ export async function saveProfile(input: Omit<Profile, 'id' | 'photoUrl' | 'elig
   return data as Profile
 }
 
-export async function uploadProfilePhoto(file: File) {
+export async function uploadProfilePhoto(file: File, kind: 'profile' | 'discover' = 'profile') {
   const client = assertSupabase()
   const { data: userData } = await client.auth.getUser()
   if (!userData.user) throw new Error('Authentication required')
   const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const path = `${userData.user.id}/avatar.${extension}`
+  const path = `${userData.user.id}/${kind === 'discover' ? 'discover-avatar' : 'avatar'}.${extension}`
   const { error } = await client.storage.from('profile-photos').upload(path, file, {
     upsert: true,
     contentType: file.type || 'image/jpeg',
@@ -146,6 +153,7 @@ export async function getDiscover(): Promise<DiscoverProfile[]> {
     photoPath: p.profile_photo_path,
     photoUrl: await getPhotoUrl(p.profile_photo_path),
     interests: p.interests ?? [],
+    school: p.university ?? '',
   })))
 }
 

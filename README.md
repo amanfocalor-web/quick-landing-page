@@ -29,3 +29,11 @@ Welcome → Login → Homepage for an existing account.
 New here? Create an account → email/password → profile setup → Discover/Homepage.
 
 The homepage currently uses local demo Discover profiles and demo Activity notifications as the working frontend experience. These demo actions do not write to Supabase.
+
+
+## Knot v37 additions
+- Separate Discover Profile photo required before entering Discover
+- City-aware university selection with Other fallback
+- Secret Crush also records Interested for potential mutual connection
+- Demo trial chat messages persist in browser storage
+- Discover portrait loading state prevents blank cards while photos decode

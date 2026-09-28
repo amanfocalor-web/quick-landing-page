@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     const { path } = await req.json()
     if (typeof path !== 'string' || !path.startsWith(`${userData.user.id}/`)) {
       const { data: discover } = await userClient.rpc('get_discover_profiles')
-      const allowed = (discover ?? []).some((row: any) => row.profile_photo_path === path)
+      const allowed = (discover ?? []).some((row: any) => row.profile_photo_path === path || row.discover_photo_path === path)
       if (!allowed) return new Response('Not allowed', { status: 403 })
     }
 

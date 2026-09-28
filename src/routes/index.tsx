@@ -21,6 +21,53 @@ type Gender = 'man' | 'woman'
 
 const interestOptions = ['Music','Photography','Movies','Coffee','Sports','Gaming','Art','Books','Dance','Travel','Tech','Food','Fitness','Writing','Design','Others']
 const cities = ['Ahmedabad','Agra','Ajmer','Aligarh','Amritsar','Aurangabad','Bengaluru','Bhopal','Bhubaneswar','Chandigarh','Chennai','Coimbatore','Cuttack','Dehradun','Delhi','Dhanbad','Durgapur','Erode','Faridabad','Gandhinagar','Ghaziabad','Gorakhpur','Gurugram','Guwahati','Gwalior','Hubballi','Hyderabad','Indore','Jabalpur','Jaipur','Jalandhar','Jammu','Jamshedpur','Jhansi','Jodhpur','Kanpur','Kochi','Kolhapur','Kolkata','Kota','Kozhikode','Lucknow','Ludhiana','Madurai','Mangaluru','Meerut','Moradabad','Mumbai','Mysuru','Nagpur','Nashik','Navi Mumbai','New Delhi','Noida','Patna','Pondicherry','Prayagraj','Pune','Raipur','Rajkot','Ranchi','Salem','Siliguri','Solapur','Srinagar','Surat','Thane','Thanjavur','Thiruvananthapuram','Thoothukudi','Tiruchirappalli','Tirunelveli','Tiruppur','Udaipur','Vadodara','Varanasi','Vasai-Virar','Vellore','Vijayawada','Visakhapatnam','Warangal']
+const universitiesByCity: Record<string,string[]> = {
+  Ahmedabad:['Ahmedabad University','Gujarat University','CEPT University','Nirma University','IIM Ahmedabad'],
+  Bengaluru:['Indian Institute of Science','Christ University','Bangalore University','Manipal Academy of Higher Education','RV University'],
+  Bhopal:['Barkatullah University','MANIT Bhopal','LNCT University','Jagran University'],
+  Bhubaneswar:['Utkal University','KIIT University','SOA University','XIM University'],
+  Chandigarh:['Panjab University','Chandigarh University','Punjab Engineering College'],
+  Chennai:['Anna University','University of Madras','IIT Madras','SRM Institute of Science and Technology','Loyola College'],
+  Coimbatore:['Bharathiar University','Amrita Vishwa Vidyapeetham','PSG College of Technology','Tamil Nadu Agricultural University'],
+  Delhi:['Delhi University','Jawaharlal Nehru University','Jamia Millia Islamia','IIT Delhi','Ambedkar University Delhi'],
+  Gurugram:['Ashoka University','GD Goenka University','BML Munjal University','Amity University Gurugram'],
+  Hyderabad:['University of Hyderabad','Osmania University','IIT Hyderabad','BITS Pilani Hyderabad Campus','IIIT Hyderabad'],
+  Jaipur:['University of Rajasthan','Manipal University Jaipur','JECRC University','MNIT Jaipur'],
+  Kochi:['Cochin University of Science and Technology','Mahatma Gandhi University','Amrita Vishwa Vidyapeetham Kochi'],
+  Kolkata:['University of Calcutta','Jadavpur University','Presidency University','IIM Calcutta','St Xavier’s University Kolkata'],
+  Lucknow:['University of Lucknow','Babasaheb Bhimrao Ambedkar University','Amity University Lucknow','IIM Lucknow'],
+  Mumbai:['University of Mumbai','IIT Bombay','NMIMS','Tata Institute of Social Sciences','St Xavier’s College Mumbai'],
+  Pune:['Savitribai Phule Pune University','Symbiosis International University','MIT World Peace University','FLAME University'],
+  Vellore:['Vellore Institute of Technology','Voorhees College','Christian Medical College Vellore'],
+  Visakhapatnam:['Andhra University','GITAM University','IIM Visakhapatnam'],
+  Vijayawada:['KL University','Andhra Loyola College','SRK Institute of Technology'],
+  Mysuru:['University of Mysore','JSS Academy of Higher Education & Research','SJCE Mysuru'],
+  Madurai:['Madurai Kamaraj University','Thiagarajar College','The American College'],
+  Thiruvananthapuram:['University of Kerala','IISER Thiruvananthapuram','College of Engineering Trivandrum'],
+  Noida:['Amity University Noida','Sharda University','Jaypee Institute of Information Technology'],
+  'New Delhi':['Delhi University','Jawaharlal Nehru University','Jamia Millia Islamia','IIT Delhi','Ambedkar University Delhi'],
+  Nagpur:['Rashtrasant Tukadoji Maharaj Nagpur University','VNIT Nagpur','Symbiosis International Nagpur'],
+  Indore:['Devi Ahilya Vishwavidyalaya','IIT Indore','Medi-Caps University'],
+  Patna:['Patna University','IIT Patna','National Institute of Technology Patna'],
+  Ranchi:['Ranchi University','BIT Mesra','Central University of Jharkhand'],
+  Surat:['Veer Narmad South Gujarat University','SVNIT Surat','AURO University'],
+  Vadodara:['The Maharaja Sayajirao University of Baroda','Parul University','Navrachana University'],
+  Nashik:['Savitribai Phule Pune University Nashik Campus','K K Wagh Institute of Engineering Education and Research'],
+  Thanjavur:['Tamil University','SASTRA Deemed University'],
+  Tiruchirappalli:['Bharathidasan University','NIT Tiruchirappalli','St Joseph’s College Tiruchirappalli'],
+  Tirunelveli:['Manonmaniam Sundaranar University','Francis Xavier Engineering College'],
+  Tiruppur:['NIFT-TEA College of Knitwear Fashion','Avinashilingam Institute Tiruppur'],
+  Salem:['Periyar University','Sona College of Technology'],
+  Pondicherry:['Pondicherry University','Sri Aurobindo International Centre of Education'],
+  Amritsar:['Guru Nanak Dev University','Khalsa College Amritsar'],
+  Jalandhar:['Lovely Professional University','DAV University'],
+  Jodhpur:['Jai Narain Vyas University','IIT Jodhpur','National Law University Jodhpur'],
+  Kanpur:['IIT Kanpur','Chhatrapati Shahu Ji Maharaj University'],
+  Varanasi:['Banaras Hindu University','IIT BHU','Mahatma Gandhi Kashi Vidyapith'],
+  Agra:['Agra University','Dayalbagh Educational Institute'],
+  Dehradun:['University of Petroleum and Energy Studies','Doon University','Graphic Era University'],
+  Guwahati:['Gauhati University','IIT Guwahati','Assam Down Town University'],
+}
 
 function KnotApp() {
   const [screen, setScreen] = useState<Screen>('welcome')
@@ -196,9 +243,12 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const [name,setName]=useState(value('name', existing?.name ?? ''))
   const [photoPath,setPhotoPath]=useState<string|null>(value('photoPath', existing?.photoPath ?? null))
   const [photoUrl,setPhotoUrl]=useState<string|null>(value('photoDataUrl', null))
+  const [discoverPhotoPath,setDiscoverPhotoPath]=useState<string|null>(value('discoverPhotoPath', existing?.discoverPhotoPath ?? null))
+  const [discoverPhotoUrl,setDiscoverPhotoUrl]=useState<string|null>(value('discoverPhotoDataUrl', null))
   const [dob,setDob]=useState(value('dob', existing?.dob ?? ''))
   const [gender,setGender]=useState<Gender | ''>(value('gender', existing?.gender ?? ''))
   const [city,setCity]=useState(value('city', existing?.city ?? ''))
+  const [university,setUniversity]=useState(value('university', existing?.university ?? ''))
   const [bio,setBio]=useState(value('bio', existing?.bio ?? ''))
   const [interests,setInterests]=useState<string[]>(value('interests', existing?.interests ?? []))
   const [intent,setIntent]=useState(value('intent', existing?.intent ?? ''))
@@ -214,8 +264,11 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const streamRef=useRef<MediaStream|null>(null)
   const [camera,setCamera]=useState(false)
   const [cameraImage,setCameraImage]=useState<string|null>(null)
+  const discoverFileRef=useRef<HTMLInputElement>(null)
 
   useEffect(()=>{ if(photoPath) void getPhotoUrl(photoPath).then(setPhotoUrl) },[photoPath])
+  useEffect(()=>{ if(discoverPhotoPath) void getPhotoUrl(discoverPhotoPath).then(setDiscoverPhotoUrl) },[discoverPhotoPath])
+  useEffect(()=>{ const options=universitiesByCity[city]||[]; if(options.length && university && !options.includes(university)) setUniversity('') },[city])
   useEffect(()=>()=>streamRef.current?.getTracks().forEach(t=>t.stop()),[])
   useEffect(()=>{
     if(!camera || !streamRef.current || !videoRef.current) return
@@ -229,28 +282,30 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
   const fileToDataUrl=async(file:File)=>await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(file)})
   const dataUrlToFile=(dataUrl:string)=>{const [meta,data]=dataUrl.split(',');const mime=meta.match(/data:(.*?);base64/)?.[1]||'image/jpeg';const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));return new File([bytes],'profile.jpg',{type:mime})}
   const chooseFile=async(file?:File)=>{ if(!file)return; try{ const dataUrl=await fileToDataUrl(file); if(preAuth){setPhotoPath(null);setPhotoUrl(dataUrl);setCameraImage(null);setError('');return} const p=await uploadProfilePhoto(file);setPhotoPath(p);setPhotoUrl(dataUrl);setError('') }catch(e:any){setError(e?.message||'Photo upload failed')} }
+
+  const chooseDiscoverFile=async(file?:File)=>{ if(!file)return; try{ const dataUrl=await fileToDataUrl(file); if(preAuth){setDiscoverPhotoPath(null);setDiscoverPhotoUrl(dataUrl);setError('');return} const p=await uploadProfilePhoto(file,'discover');setDiscoverPhotoPath(p);setDiscoverPhotoUrl(dataUrl);setError('') }catch(e:any){setError(e?.message||'Discover Profile photo upload failed')} }
   const removePhoto=()=>{streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false);setCameraImage(null);setPhotoPath(null);setPhotoUrl(null);setError('')}
   const startCamera=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera is not supported in this browser');const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:720}},audio:false});streamRef.current=stream;setCamera(true);setError('')}catch(e:any){setError(e?.message||'Camera permission was not granted') }}
   const capture=async()=>{const video=videoRef.current;if(!video||video.readyState<2||!video.videoWidth){setError('Camera is still starting. Please try Capture again.');return}const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d')?.drawImage(video,0,0);const blob=await new Promise<Blob|null>(r=>canvas.toBlob(r,'image/jpeg',.9));if(blob){const dataUrl=canvas.toDataURL('image/jpeg');setCameraImage(dataUrl);if(preAuth){setPhotoPath(null);setPhotoUrl(dataUrl)}else{await chooseFile(new File([blob],'camera.jpg',{type:'image/jpeg'}))}}streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;setCamera(false)}
-  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,gender,city,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito,photoPath:null,photoDataUrl:photoUrl}));onAuthNeeded?.(theme);return}let finalPhotoPath=photoPath;if(!finalPhotoPath&&photoUrl?.startsWith('data:')) finalPhotoPath=await uploadProfilePhoto(dataUrlToFile(photoUrl));const saved=await saveProfile({name,photoPath:finalPhotoPath,dob,gender,city,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
-  const next=()=>setStep(s=>Math.min(7,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
+  const finish=async()=>{setSaving(true);setError('');try{if(preAuth){window.sessionStorage.setItem('knot_profile_draft',JSON.stringify({name,dob,gender,city,university,bio,interests,intent,preference,ageMin,ageMax,theme,starColor,incognito,photoPath:null,photoDataUrl:photoUrl,discoverPhotoPath:null,discoverPhotoDataUrl:discoverPhotoUrl}));onAuthNeeded?.(theme);return}let finalPhotoPath=photoPath;if(!finalPhotoPath&&photoUrl?.startsWith('data:')) finalPhotoPath=await uploadProfilePhoto(dataUrlToFile(photoUrl));let finalDiscoverPhotoPath=discoverPhotoPath;if(!finalDiscoverPhotoPath&&discoverPhotoUrl?.startsWith('data:')) finalDiscoverPhotoPath=await uploadProfilePhoto(dataUrlToFile(discoverPhotoUrl),'discover');const saved=await saveProfile({name,photoPath:finalPhotoPath,discoverPhotoPath:finalDiscoverPhotoPath,dob,gender,city,university,bio,intent,preference,ageMin,ageMax,theme,starColor,incognito,interests,complete:true});window.sessionStorage.removeItem('knot_profile_draft');if((saved as any).eligibility==='ineligible'){onDone();return}setFinishing(true);window.setTimeout(()=>void onDone(),900)}catch(e:any){setError(e?.message?.includes('KNOT_AGE_INELIGIBLE')?'Sorry, Knot isn\'t available for you yet':e?.message||'Could not save your profile');setSaving(false)}}
+  const next=()=>setStep(s=>Math.min(8,s+1)), back=()=>setStep(s=>Math.max(1,s-1))
   const toggleInterest=(x:string)=>setInterests(a=>a.includes(x)?a.filter(v=>v!==x):a.length<8?[...a,x]:a)
 
-  const stepTitle=['','Let’s set up your profile','A couple of basics','Your interests','What are you looking for','Your discovery preferences','Your look','Your Knot is ready'][step]
+  const stepTitle=['','Let’s set up your profile','A couple of basics','Your interests','What are you looking for','Your discovery preferences','Your look','Your Discover Profile','Your Knot is ready'][step]
   const effectiveTheme = step >= 6 ? theme : 'light'
   return <div className={`profile-page ${effectiveTheme==='light'?'light':''} ${finishing?'profile-finishing':''}`} style={{'--star':starColor} as any}>
     {finishing&&<div className="profile-complete-transition" aria-hidden="true"><div className="transition-star" style={{color:starColor}}>✦</div></div>}
-    <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/7</span></header>
-    <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/7)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
+    <header className="setup-header"><button className="knot-word" onClick={onLogout}>Knot</button><span>{step}/8</span></header>
+    <div className="setup-wrap"><div className="setup-progress"><span style={{width:`${(step/8)*100}%`}}/></div><section className="setup-card"><div className="setup-reference-star" style={{color:starColor}} aria-hidden="true">✦</div><div className="setup-eyebrow">Profile setup</div><h1>{stepTitle}</h1>{step===1&&<p className="setup-subtitle">Tell us a bit about you</p>}
       {step===1&&<div className="setup-content"><div className="photo-picker"><div className="avatar-preview">{photoUrl?<img src={photoUrl} alt="Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Profile photo</strong><p>Choose one from your device or use your camera</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>fileRef.current?.click()}>Upload</button><button className="secondary-btn" onClick={startCamera}><Camera size={17}/> Camera</button>{photoUrl&&<button className="secondary-btn photo-remove-btn" onClick={removePhoto}>Remove photo</button>}</div></div><input ref={fileRef} hidden type="file" accept="image/*" onChange={e=>chooseFile(e.target.files?.[0])}/></div><label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="What should people call you?"/></label>{camera&&<div className="camera-box"><video key={camera ? 'camera-active' : 'camera-idle'} ref={videoRef} muted playsInline autoPlay/><button className="primary-btn" onClick={capture}>Capture</button></div>}{cameraImage&&<div className="camera-note"><Check size={16}/> Photo captured</div>}</div>}
-      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>Gender<select value={gender} onChange={e=>setGender(e.target.value as Gender)}><option value="">Choose one</option><option value="man">Man</option><option value="woman">Woman</option></select><small>Knot currently supports straight matching</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>setCity(e.target.value==='__other__'?'':e.target.value)}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label></div>}
+      {step===2&&<div className="setup-content two-col"><label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)}/><small>Knot is currently available only to people aged 18 through 21</small></label><label>Gender<select value={gender} onChange={e=>setGender(e.target.value as Gender)}><option value="">Choose one</option><option value="man">Man</option><option value="woman">Woman</option></select><small>Knot currently supports straight matching</small></label><label>City<select value={cities.includes(city)?city:'__other__'} onChange={e=>{setCity(e.target.value==='__other__'?'':e.target.value);setUniversity('')}}>{cities.map(c=><option key={c} value={c}>{c}</option>)}<option value="__other__">Other city</option></select>{!cities.includes(city)&&<input value={city} onChange={e=>{setCity(e.target.value);setUniversity('')}} placeholder="Type your city"/>}<small>Your city is used for Discover and is not shown on suggestion cards</small></label><label>University<select value={university} onChange={e=>setUniversity(e.target.value)}><option value="">Choose your university</option>{(universitiesByCity[city]||[]).map(u=><option key={u} value={u}>{u}</option>)}{university && university!=='__other__' && !(universitiesByCity[city]||[]).includes(university)&&<option value={university}>{university}</option>}<option value="__other__">Other university</option></select>{university==='__other__'||(university && !(universitiesByCity[city]||[]).includes(university))?<input value={university==='__other__'?'':university} onChange={e=>setUniversity(e.target.value)} placeholder="Enter university name"/>:null}<small>Universities adjust to your city. Choose Other if yours is not listed</small></label></div>}
       {step===3&&<div className="setup-content"><div className="verification-placeholder"><Shield size={28}/><div><strong>Identity verification</strong><p>The DigiLocker and live-camera verification connection will be plugged in here</p></div><span>Integration point</span></div><label>Bio<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={500} placeholder="A little about you"/></label><div><strong>Interests</strong><div className="chip-grid">{interestOptions.map(x=><button key={x} className={interests.includes(x)?'chip active':'chip'} onClick={()=>toggleInterest(x)}>{x}</button>)}</div></div></div>}
       {step===4&&<div className="setup-content"><label>What are you looking for<select value={intent} onChange={e=>setIntent(e.target.value)}><option value="">Choose one</option><option>Something meaningful</option><option>Open to seeing where it goes</option><option>New connections</option></select></label><label>Preferences<input value={preference} onChange={e=>setPreference(e.target.value)} placeholder="What matters to you?"/></label></div>}
       {step===5&&<div className="setup-content"><div><strong>Preferred age range</strong><div className="range-row"><select value={ageMin} onChange={e=>setAgeMin(Number(e.target.value))}>{[18,19,20,21].map(x=><option key={x}>{x}</option>)}</select><span>to</span><select value={ageMax} onChange={e=>setAgeMax(Number(e.target.value))}>{[18,19,20,21].filter(x=>x>=ageMin).map(x=><option key={x}>{x}</option>)}</select></div></div><div className="privacy-box"><Lock size={18}/><div><strong>Incognito mode</strong><p>Stay out of Discover until you turn it off</p></div><button className={`toggle ${incognito?'on':''}`} onClick={()=>setIncognito(!incognito)}><span/></button></div></div>}
       {step===6&&<div className="setup-content"><div><strong>Theme</strong><div className="theme-row"><button className={theme==='dark'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('dark')}>Dark</button><button className={theme==='light'?'theme-choice active':'theme-choice'} onClick={()=>setTheme('light')}>Light</button></div></div><div><strong>Star colour</strong><div className="star-colors">{['#c084fc','#60a5fa','#fb7185','#facc15','#34d399'].map(c=><button key={c} style={{background:c}} className={starColor===c?'star-choice active':'star-choice'} onClick={()=>setStarColor(c)}>✦</button>)}</div></div></div>}
-      {step===7&&<div className="ready-state"><div className="ready-star" style={{color:starColor}}>✦</div><h2>Your Knot is ready</h2><p>Discover people, move at your own pace, and let mutual interest reveal the connection</p></div>}
+      {step===7&&<div className="setup-content"><div className="discover-profile-prompt"><div className="discover-profile-preview">{discoverPhotoUrl?<img src={discoverPhotoUrl} alt="Discover Profile preview"/>:<UserRound size={42}/>}</div><div><strong>Give yourself a Discover Profile</strong><p>This is the photo other people will see on your Discover card</p><div className="inline-actions"><button className="secondary-btn" onClick={()=>discoverFileRef.current?.click()}>Upload photo</button>{discoverPhotoUrl&&<button className="secondary-btn" onClick={()=>{setDiscoverPhotoPath(null);setDiscoverPhotoUrl(null)}}>Change photo</button>}</div></div><input ref={discoverFileRef} hidden type="file" accept="image/*" onChange={e=>chooseDiscoverFile(e.target.files?.[0])}/></div><div className="privacy-box"><Lock size={18}/><div><strong>Only your Discover Profile is shown</strong><p>Your setup photo stays separate from this display photo</p></div></div></div>}{step===8&&<div className="ready-state"><div className="ready-star" style={{color:starColor}}>✦</div><h2>Your Knot is ready</h2><p>Discover people, move at your own pace, and let mutual interest reveal the connection</p></div>}
       {error&&<div className="error-box">{error}</div>}
-      <div className="setup-actions">{step>1&&<button className="secondary-btn" onClick={back}>Back</button>}<button className="primary-btn" disabled={saving||!name.trim()||(step===2&&(!dob||!gender))||(step===7&&saving)} onClick={step===7?finish:next}>{saving?'Saving…':step===7?'Enter Discover':'Continue'} <ChevronRight size={18}/></button></div>
+      <div className="setup-actions">{step>1&&<button className="secondary-btn" onClick={back}>Back</button>}<button className="primary-btn" disabled={saving||!name.trim()||(step===2&&(!dob||!gender||!city||!university))||(step===7&&!discoverPhotoUrl)||(step===8&&saving)} onClick={step===8?finish:next}>{saving?'Saving…':step===8?'Enter Discover':'Continue'} <ChevronRight size={18}/></button></div>
     </section></div>
   </div>
 }
@@ -291,14 +346,17 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   const [demoNotifications,setDemoNotifications]=useState<any[]>(DEMO_NOTIFICATIONS)
   const [demoNotificationClicks,setDemoNotificationClicks]=useState<Record<string,number>>({})
   const [selectedPerson,setSelectedPerson]=useState<DiscoverProfile|null>(null)
+  const [loadedPhotos,setLoadedPhotos]=useState<Record<string,boolean>>({})
 
   useEffect(()=>{
-    // Warm every demo portrait once so moving through the stack does not wait on image decoding.
-    DEMO_DISCOVER_PROFILES.forEach(p=>{
+    const loaders=DEMO_DISCOVER_PROFILES.map(p=>{
       const img=new Image()
       img.decoding='async'
+      img.onload=()=>setLoadedPhotos(old=>old[p.id]?old:{...old,[p.id]:true})
       img.src=p.photoUrl || ''
+      return img
     })
+    return()=>loaders.forEach(img=>{img.onload=null})
   },[])
 
   const loadData=async()=>{
@@ -331,7 +389,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
     setAnimation(action)
     try{
       if(demoMode){
-        if(action==='cupid') setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])
+        if(action==='cupid'){ setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id]); if(current.id==='demo-maya') addDemoMutual() }
         if(action==='interested') addDemoMutual()
       }else{
         if(action==='cupid'){await secretCrush(current.id);setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])}
@@ -419,13 +477,13 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
             </div>
             <div className="card-wrap">
               <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:(dragX!==0?`translateX(${dragX}px) rotate(${dragX/18}deg)${flipped?' rotateY(180deg)':''}`:undefined)}} onClick={()=>{if(!animation && Math.abs(dragX)<10)setFlipped(v=>!v)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
-                <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile" loading="eager" decoding="async" onError={e=>{e.currentTarget.src='/discover/ira.jpg'}}/><div className="photo-shade"/><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
+                <div className={`card-face card-front ${loadedPhotos[current.id]?'photo-ready':'photo-loading'}`}><div className="card-photo-placeholder"><span>{loadedPhotos[current.id]?'':'Loading photo…'}</span></div><img src={current.photoUrl||'/favicon.ico'} alt="Profile" loading="eager" decoding="async" onLoad={()=>setLoadedPhotos(old=>({...old,[current.id]:true}))} onError={e=>{e.currentTarget.style.opacity='0'}}/><div className="photo-shade"/><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
                 <div className="card-face card-back">
-                  <img className="back-large-photo" src={current.photoUrl||'/favicon.ico'} alt="" loading="eager" decoding="async" onError={e=>{e.currentTarget.src='/discover/ira.jpg'}}/>
+                  <img className="back-large-photo" src={current.photoUrl||'/favicon.ico'} alt="" loading="eager" decoding="async" onError={e=>{e.currentTarget.style.opacity='0'}}/>
                   <div className="back-info-panel"><h2>{current.name}, {current.age}</h2><p>{(current as any).school || 'Student'}</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div></div>
                 </div>
               </div>
-              {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{(animation==='interested'||animation==='cupid')&&<div className="anim-overlay half-heart">♥</div>}
+              {animation==='pass'&&<div className="anim-overlay half-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-pop">♥</div>}
             </div>
           </div>
           <div className="discover-actions">
@@ -476,7 +534,7 @@ function Matches({matches,refresh,demo,onOpenChat}:{matches:any[];refresh:()=>Pr
 
 function Chats({chats,selected,setSelected,demo}:{chats:any[];selected:string|null;setSelected:(x:string|null)=>void;demo:boolean}){const chat=chats.find(x=>x.chat_id===selected);return <section className="normal-section"><div className="section-heading"><div><span>Mutual connections</span><h1>Trial chats</h1></div></div>{chat?<>{demo?<DemoChat chat={chat} back={()=>setSelected(null)}/>:<Chat chat={chat} back={()=>setSelected(null)}/>}</>:chats.length===0?<div className="empty-state"><MessageCircle/><h2>No chats yet</h2><p>A mutual connection opens a text-only trial chat</p></div>:<div className="list-grid">{chats.map(c=><button className="person-row chat-row" key={c.chat_id} onClick={()=>setSelected(c.chat_id)}><Avatar path={c.other_photo_path}/><div><strong>{c.other_name}</strong><span>{c.last_message||'Start the conversation'}</span></div><ChevronRight/></button>)}</div>}</section>}
 
-function DemoChat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([{id:'welcome',sender_id:chat.other_id,body:'Hey — looks like we both wanted to connect ✨'},{id:'starter',sender_id:'me',body:'Hey!'}]);const [body,setBody]=useState('');const send=()=>{if(!body.trim())return;setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:'me',body:body.trim()}]);setBody('')};const simulateReply=()=>setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:chat.other_id,body:'Hey! I can text here too ✨'}]);return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="demo-reply-row"><button className="secondary-btn" onClick={simulateReply}>Simulate their reply</button></div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
+function DemoChat({chat,back}:{chat:any;back:()=>void}){const storageKey=`knot-demo-chat-${chat.chat_id}`;const seed=[{id:'welcome',sender_id:chat.other_id,body:'Hey — looks like we both wanted to connect ✨'},{id:'starter',sender_id:'me',body:'Hey!'}];const [messages,setMessages]=useState<any[]>(()=>{try{const raw=localStorage.getItem(storageKey);return raw?JSON.parse(raw):seed}catch{return seed}});const [body,setBody]=useState('');useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(messages))}catch{}},[messages,storageKey]);const send=()=>{if(!body.trim())return;setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:'me',body:body.trim()}]);setBody('')};const simulateReply=()=>setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:chat.other_id,body:'Hey! I can text here too ✨'}]);return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="demo-reply-row"><button className="secondary-btn" onClick={simulateReply}>Simulate their reply</button></div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
@@ -524,7 +582,7 @@ function ProfileView({profile,onRefresh,onLogout}:{profile:Profile;onRefresh:()=
   const save=async()=>{
     setSaving(true)
     try{
-      await saveProfile({name:profile.name,photoPath:profile.photoPath,dob:profile.dob,gender:profile.gender,city,bio:profile.bio,intent:profile.intent,preference:profile.preference,ageMin:profile.ageMin,ageMax:profile.ageMax,theme:profile.theme,starColor:profile.starColor,incognito,interests:profile.interests,complete:true})
+      await saveProfile({name:profile.name,photoPath:profile.photoPath,discoverPhotoPath:profile.discoverPhotoPath,dob:profile.dob,gender:profile.gender,city,university:profile.university,bio:profile.bio,intent:profile.intent,preference:profile.preference,ageMin:profile.ageMin,ageMax:profile.ageMax,theme:profile.theme,starColor:profile.starColor,incognito,interests:profile.interests,complete:true})
       await onRefresh()
     }finally{setSaving(false)}
   }

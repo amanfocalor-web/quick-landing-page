@@ -3006,7 +3006,6 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 
 
 /* KNOT v31 — homepage Discover + Activity are the working previews for now */
-.discover-underline { background: #ff70b1 !important; box-shadow: 0 0 16px rgba(255,112,177,.28) !important; }
 .preview-strip { display:none !important; }
 .card-top-row { position:absolute; top:18px; left:18px; right:18px; z-index:3; display:flex; align-items:center; justify-content:space-between; }
 .new-here-chip,.card-count { display:inline-flex; align-items:center; min-height:34px; padding:0 12px; border:1px solid rgba(255,255,255,.2); border-radius:999px; color:#f5eaff; background:rgba(10,7,27,.38); backdrop-filter:blur(12px); font-size:.72rem; font-weight:700; }
@@ -3091,3 +3090,70 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
   .card-stack,.card-wrap,.discover-actions,.homepage-privacy,.homepage-activity-preview { width: 100% !important; }
   .discover-card,.card-stack { aspect-ratio: .88 !important; }
 }
+
+/* KNOT v33 — desktop Discover is a real card stack, not a mobile page stretched vertically */
+.discover-welcome { margin-bottom: 18px !important; }
+.discover-underline { background: linear-gradient(90deg,#e85f9e 0%,#8b5cf6 55%,#f59a52 100%) !important; box-shadow: 0 0 18px rgba(216,180,254,.35) !important; }
+.card-stack { position: relative !important; width: min(660px, 100%) !important; aspect-ratio: .94 !important; margin: 8px auto 0 !important; }
+.card-stack-backdrop { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.card-stack-backdrop .stack-card { inset: 8px 0 0 !important; }
+.card-stack-backdrop .stack-2 { transform: translate(18px, 10px) rotate(1.3deg) !important; opacity: .68; }
+.card-stack-backdrop .stack-3 { transform: translate(34px, 20px) rotate(2.2deg) !important; opacity: .38; }
+.card-wrap { position: absolute !important; inset: 0 !important; z-index: 4; width: 100% !important; margin: 0 !important; perspective: 1400px; }
+.discover-card { width: 100% !important; height: 100% !important; aspect-ratio: auto !important; }
+.card-face { border-radius: 32px !important; }
+.card-profile-info { left: 34px !important; right: 34px !important; bottom: 30px !important; }
+.card-name { font-size: clamp(2.3rem, 4vw, 3.55rem) !important; }
+.card-school { font-size: 1rem !important; }
+.card-interest-chips { gap: 9px !important; }
+.card-interest-chips span { padding: 9px 13px !important; font-size: .82rem !important; }
+.card-top-row { top: 22px !important; left: 22px !important; right: 22px !important; }
+.new-here-chip,.card-count { min-height: 38px !important; padding-inline: 14px !important; font-size: .78rem !important; }
+.discover-actions,.homepage-privacy { width: min(660px,100%) !important; }
+.discover-actions { margin: 22px auto 0 !important; gap: clamp(24px,5vw,58px) !important; }
+.homepage-activity-preview { width: min(900px,100%) !important; margin: 32px auto 110px !important; }
+.homepage-notification-list .notification-row { cursor: pointer; }
+.notification-chevron { flex: 0 0 auto; opacity: .48; }
+.notification-detail { width: min(900px,100%); margin: 0 auto 16px; display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid rgba(216,180,254,.18); border-radius: 22px; background: rgba(216,180,254,.06); }
+.notification-detail .notification-icon.large { width: 52px; height: 52px; flex: 0 0 52px; border-radius: 17px; }
+.notification-detail span { display:block; color:#c7b6e9; font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.notification-detail h2 { margin:4px 0 3px; font-family:"Pacifico",cursive; font-size:1.25rem; }
+.notification-detail p { margin:0; color:rgba(255,255,255,.55); line-height:1.45; }
+.app-shell.light .notification-detail { border-color:rgba(36,32,59,.1); background:rgba(255,255,255,.48); }
+.app-shell.light .notification-detail p { color:rgba(36,32,59,.58); }
+
+.bottom-nav { width: min(720px, calc(100% - 28px)) !important; grid-template-columns: repeat(5,1fr) !important; }
+.nav-item { min-height: 56px !important; }
+.nav-icon { display:grid; place-items:center; line-height:0; }
+.nav-item.active { color: #ff70b1 !important; background: rgba(216,180,254,.10) !important; }
+.nav-item.active .nav-icon svg { stroke: url(#knotNavGradient) !important; }
+.nav-item.active span:last-child { background: linear-gradient(90deg,#ff70b1,#a56cff,#4da8ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.app-shell.light .nav-item.active { color:#ff70b1 !important; background:rgba(144,103,186,.1) !important; }
+
+/* The star portal owns the transition. Do not expose the auth background before it has covered the viewport. */
+.welcome.welcome-expanding .welcome-star { animation:knot-star-portal-v33 1.12s cubic-bezier(.62,0,.12,1) forwards !important; }
+.welcome.welcome-expanding .welcome-star-shape { animation:knot-star-brighten-v33 1.12s cubic-bezier(.62,0,.12,1) forwards !important; }
+.welcome.welcome-expanding .welcome-star-glow { animation:knot-star-glow-v33 1.12s cubic-bezier(.62,0,.12,1) forwards !important; }
+@keyframes knot-star-portal-v33 { 0%{transform:scale(1);opacity:1} 25%{transform:scale(1.35);opacity:1} 62%{transform:scale(10);opacity:1} 100%{transform:scale(60);opacity:1} }
+@keyframes knot-star-brighten-v33 { 0%{filter:url(#knotStarGlow) drop-shadow(0 0 18px rgba(190,126,255,.9)) drop-shadow(0 0 44px rgba(143,107,255,.65))} 55%{filter:url(#knotStarGlow) drop-shadow(0 0 32px rgba(255,255,255,1)) drop-shadow(0 0 100px rgba(190,126,255,1))} 100%{filter:url(#knotStarGlow) drop-shadow(0 0 70px rgba(255,255,255,1)) drop-shadow(0 0 220px rgba(174,123,255,.98))} }
+@keyframes knot-star-glow-v33 { 0%{opacity:.72;transform:scale(1)} 45%{opacity:1;transform:scale(1.6)} 100%{opacity:1;transform:scale(52)} }
+
+@media (max-width: 720px) {
+  .card-stack { width:100% !important; aspect-ratio:.88 !important; }
+  .card-profile-info { left:22px !important; right:22px !important; bottom:22px !important; }
+  .card-name { font-size:clamp(2rem,9vw,2.8rem) !important; }
+  .bottom-nav { width:calc(100% - 18px) !important; bottom:8px !important; }
+  .nav-item { min-height:50px !important; }
+}
+
+/* v33 cleanup: no preview/debug chrome on the working Activity surface */
+.demo-toolbar,.demo-badge { display:none !important; }
+.notification-row { cursor:pointer; }
+.notification-row > svg:last-child { flex:0 0 auto; opacity:.45; }
+.top-active svg { stroke:url(#knotNavGradient) !important; }
+.top-active { border-color:rgba(255,112,177,.28) !important; }
+
+/* The portal must finish before React swaps to the auth screen. */
+.welcome.welcome-expanding .welcome-star { animation-duration:1.2s !important; }
+.welcome.welcome-expanding .welcome-star-shape { animation-duration:1.2s !important; }
+.welcome.welcome-expanding .welcome-star-glow { animation-duration:1.2s !important; }

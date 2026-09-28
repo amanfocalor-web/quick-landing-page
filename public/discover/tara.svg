@@ -1,7 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 850">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient><radialGradient id="b"><stop stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
-<rect width="700" height="850" fill="#090b20"/><rect width="700" height="850" fill="url(#g)" opacity=".72"/>
-<circle cx="110" cy="130" r="210" fill="url(#b)"/><circle cx="610" cy="260" r="260" fill="url(#b)"/>
-<circle cx="350" cy="330" r="135" fill="#16152d" opacity=".95"/><path d="M135 780c18-190 120-270 215-270s197 80 215 270" fill="#16152d" opacity=".95"/>
-<circle cx="305" cy="325" r="10" fill="#fff" opacity=".65"/><circle cx="395" cy="325" r="10" fill="#fff" opacity=".65"/><path d="M300 390q50 38 100 0" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".5"/>
-<text x="350" y="790" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="46" font-weight="700">Tara</text></svg>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient><radialGradient id="light" cx="50%" cy="25%"><stop stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d9c0a6"/><stop offset="1" stop-color="#101326"/></linearGradient></defs>
+<rect width="700" height="850" fill="#0a0d20"/><rect width="700" height="850" fill="url(#bg)" opacity=".72"/><circle cx="520" cy="120" r="220" fill="url(#light)"/>
+<ellipse cx="350" cy="825" rx="260" ry="220" fill="url(#shirt)"/>
+<rect x="305" y="455" width="90" height="125" rx="40" fill="#e1b894"/>
+<ellipse cx="350" cy="345" rx="130" ry="155" fill="#e1b894"/>
+<path d="M220 380 Q205 170 350 125 Q520 100 600 250 L575 520 Q540 455 510 410 L250 520 Q205 455 220 380Z" fill="#17182b"/>
+<path d="M300 360 Q325 345 340 360" fill="none" stroke="#3b2a2a" stroke-width="9" stroke-linecap="round"/><path d="M360 360 Q375 345 400 360" fill="none" stroke="#3b2a2a" stroke-width="9" stroke-linecap="round"/>
+<circle cx="325" cy="382" r="7" fill="#17121d"/><circle cx="385" cy="382" r="7" fill="#17121d"/>
+<path d="M333 435 Q350 447 367 435" fill="none" stroke="#7a3f46" stroke-width="7" stroke-linecap="round"/>
+<path d="M280 470 Q350 505 420 470" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="18" stroke-linecap="round"/>
+<circle cx="560" cy="610" r="48" fill="#fff" fill-opacity=".08"/><circle cx="120" cy="180" r="30" fill="#fff" fill-opacity=".08"/>
+</svg>

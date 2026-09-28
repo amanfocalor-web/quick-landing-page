@@ -28,4 +28,4 @@ Welcome → Login → Homepage for an existing account.
 
 New here? Create an account → email/password → profile setup → Discover/Homepage.
 
-Founder-only local test tools include Discover Preview (10 demo profiles) and Preview Notifications. These demo actions do not write to Supabase.
+The homepage currently uses local demo Discover profiles and demo Activity notifications as the working frontend experience. These demo actions do not write to Supabase.

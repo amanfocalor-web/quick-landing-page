@@ -3157,3 +3157,33 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .welcome.welcome-expanding .welcome-star { animation-duration:1.2s !important; }
 .welcome.welcome-expanding .welcome-star-shape { animation-duration:1.2s !important; }
 .welcome.welcome-expanding .welcome-star-glow { animation-duration:1.2s !important; }
+
+/* KNOT v34 — Discover interaction, age-appropriate demo portraits, and notification destinations */
+.card-stack { pointer-events: none !important; }
+.card-wrap, .discover-card, .card-face { pointer-events: auto !important; }
+.card-stack-backdrop .stack-card { pointer-events:none !important; }
+.card-stack-backdrop .stack-2 { transform: translate(-24px, 13px) rotate(-4.2deg) !important; opacity:.72; }
+.card-stack-backdrop .stack-3 { transform: translate(25px, 27px) rotate(4.8deg) !important; opacity:.54; }
+.card-stack-backdrop .stack-4 { transform: translate(-10px, 42px) rotate(-2.4deg) !important; opacity:.34; }
+.card-stack-backdrop .stack-5 { transform: translate(39px, 52px) rotate(6deg) !important; opacity:.22; }
+.card-profile-info { bottom: 28px !important; }
+.card-name { line-height:1 !important; }
+.card-name span, .card-school, .card-interest-chips { display:none !important; }
+.back-crush-btn { margin: auto auto 0; width:min(230px,100%); display:flex; align-items:center; justify-content:center; gap:9px; padding:13px 18px; border:1px solid rgba(255,143,202,.32); border-radius:16px; color:#ffb4d7; background:rgba(255,105,160,.09); cursor:pointer; font:inherit; font-weight:700; }
+.back-crush-btn .cupid-icon { width:23px; height:23px; }
+.bottom-nav { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+.nav-item { min-width:0 !important; width:100% !important; }
+.nav-item span:last-child { white-space:nowrap !important; }
+.person-notification-modal { position:relative; width:min(430px,100%); overflow:hidden; border:1px solid rgba(255,255,255,.14); border-radius:30px; color:#f8f7ff; background:linear-gradient(155deg,#24204e,#10162f); box-shadow:0 30px 90px rgba(0,0,0,.42); }
+.person-notification-modal > img { display:block; width:100%; height:340px; object-fit:cover; }
+.person-modal-body { padding:22px 24px 24px; }
+.person-modal-kicker { color:#ff9dcb; font-size:.7rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.person-modal-body h2 { margin:5px 0 2px; font-family:"Pacifico",cursive; font-size:1.8rem; }
+.person-modal-body p { margin:0 0 14px; color:rgba(255,255,255,.58); }
+.person-modal-chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px; }
+.person-modal-chips span { padding:7px 10px; border:1px solid rgba(255,255,255,.12); border-radius:999px; background:rgba(255,255,255,.055); font-size:.76rem; }
+.person-modal-actions { display:flex; gap:10px; }
+.person-modal-actions > button { flex:1; }
+.person-modal-close { position:absolute; z-index:2; top:13px; right:13px; width:38px; height:38px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.18); border-radius:50%; color:#fff; background:rgba(10,12,31,.48); backdrop-filter:blur(10px); cursor:pointer; }
+.person-modal-close svg { width:18px; height:18px; }
+@media(max-width:720px){.person-notification-modal > img{height:300px}.card-stack-backdrop .stack-2{transform:translate(-13px,10px) rotate(-3deg) !important}.card-stack-backdrop .stack-3{transform:translate(13px,20px) rotate(3deg) !important}.card-stack-backdrop .stack-4,.card-stack-backdrop .stack-5{display:none}}

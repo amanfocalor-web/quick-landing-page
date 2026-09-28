@@ -3187,3 +3187,53 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 .person-modal-close { position:absolute; z-index:2; top:13px; right:13px; width:38px; height:38px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.18); border-radius:50%; color:#fff; background:rgba(10,12,31,.48); backdrop-filter:blur(10px); cursor:pointer; }
 .person-modal-close svg { width:18px; height:18px; }
 @media(max-width:720px){.person-notification-modal > img{height:300px}.card-stack-backdrop .stack-2{transform:translate(-13px,10px) rotate(-3deg) !important}.card-stack-backdrop .stack-3{transform:translate(13px,20px) rotate(3deg) !important}.card-stack-backdrop .stack-4,.card-stack-backdrop .stack-5{display:none}}
+
+/* KNOT v35 — faster Discover interaction + clean card backs + protected Secret Crushes */
+.discover-card { transition: transform .32s cubic-bezier(.22,.72,.2,1) !important; }
+.card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.card-front .card-profile-info { justify-content: flex-end !important; padding-bottom: 30px !important; }
+.card-front .card-name { font-size: clamp(2.1rem, 4vw, 3.4rem) !important; text-shadow: 0 5px 22px rgba(0,0,0,.35); }
+.card-front .card-top-row { display:none !important; }
+.card-back { overflow:hidden !important; padding:0 !important; }
+.back-large-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.card-back::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(9,10,25,.03) 34%,rgba(9,10,25,.35) 52%,rgba(9,10,25,.94) 100%); pointer-events:none; }
+.back-info-panel { position:absolute; z-index:2; left:28px; right:28px; bottom:28px; }
+.back-info-panel h2 { margin:0 0 6px; font-family:"Pacifico",cursive; font-size:clamp(1.5rem,3vw,2.2rem); }
+.back-info-panel p { margin:0 0 12px; color:rgba(255,255,255,.72); font-weight:700; }
+.back-info-panel .back-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.back-info-panel .back-chips span { padding:7px 11px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background:rgba(14,14,31,.48); backdrop-filter:blur(8px); }
+.swipe-hint,.back-crush-btn { display:none !important; }
+.discover-actions { display:grid !important; grid-template-columns:1fr 1.12fr 1fr !important; align-items:center; gap:14px !important; }
+.discover-actions .secret { order:2; }
+.discover-actions .pass { order:1; }
+.discover-actions .interested { order:3; }
+.homepage-activity-preview { display:none !important; }
+.card-stack-backdrop .stack-card { transition:none !important; }
+.card-stack-backdrop .stack-2 { transform:translate(-30px,17px) rotate(-5deg) !important; }
+.card-stack-backdrop .stack-3 { transform:translate(27px,31px) rotate(5.5deg) !important; }
+.card-stack-backdrop .stack-4 { transform:translate(-17px,46px) rotate(-3.3deg) !important; }
+.card-stack-backdrop .stack-5 { transform:translate(42px,58px) rotate(7deg) !important; }
+.bottom-nav { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:space-between !important; grid-template-columns:none !important; }
+.bottom-nav .nav-item { flex:1 1 0 !important; min-width:0 !important; }
+.secret-crush-page { width:min(1040px,100%); margin:0 auto; }
+.secret-crush-page .section-heading { display:flex; align-items:center; gap:16px; }
+.secret-crush-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.secret-crush-card { overflow:hidden; border:1px solid rgba(255,255,255,.12); border-radius:26px; background:rgba(17,20,48,.68); box-shadow:0 20px 50px rgba(0,0,0,.18); }
+.secret-crush-card > img { width:100%; height:300px; object-fit:cover; display:block; }
+.secret-crush-card-body { padding:18px; }
+.secret-crush-card-body h2 { margin:0 0 4px; font-family:"Pacifico",cursive; }
+.secret-crush-card-body p { margin:0 0 12px; color:rgba(255,255,255,.55); }
+.secret-crush-card-actions { display:flex; gap:9px; margin-top:16px; }
+.secret-crush-card-actions button { flex:1; }
+.danger-btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid rgba(255,100,130,.25); background:rgba(255,100,130,.08); color:#ff9bb4; border-radius:14px; padding:11px 14px; font-weight:800; cursor:pointer; }
+.modal-password-input { width:100%; box-sizing:border-box; border:1px solid rgba(255,255,255,.14); border-radius:15px; background:rgba(255,255,255,.07); color:inherit; padding:13px 14px; margin:6px 0 12px; outline:none; }
+.person-modal-actions { flex-wrap:wrap; }
+@media(max-width:800px){ .secret-crush-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:560px){ .secret-crush-grid{grid-template-columns:1fr;} .secret-crush-card > img{height:330px;} .discover-actions{gap:8px !important;} }
+
+/* v35 performance pass */
+.app-shell::before { filter:blur(10px) !important; animation-duration:32s !important; }
+.app-shell::after { animation-duration:36s !important; }
+.stack-card img { filter:saturate(.8) brightness(.76) !important; }
+.card-face { box-shadow:0 20px 48px rgba(3,5,28,.32) !important; }
+.quick-grid button { backdrop-filter:blur(7px) !important; }

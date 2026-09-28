@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { cloneElement, isValidElement, useEffect, useRef, useState, type FormEvent, type PointerEvent, type ReactNode } from 'react'
-import { Activity, ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, UserRound, X, Zap } from 'lucide-react'
+import { Activity, ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, Trash2, UserRound, X, Zap } from 'lucide-react'
 import {
   acceptExclusive, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
   type DiscoverProfile, type Profile,
@@ -97,7 +97,7 @@ function KnotApp() {
   if (screen === 'auth') return <Auth mode={authMode} setMode={setAuthMode} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={error} setError={setError} message={message} setMessage={setMessage} theme={authTheme} onDone={() => load(true)} onSignupCreated={async (hasSession: boolean) => { setAuthenticated(hasSession); setProfile(null); setReturnToReady(false); setScreen('profile') }} onBack={() => { setReturnToReady(false); setScreen('welcome') }} />
   if (screen === 'profile') return <ProfileSetup existing={profile} preAuth={!authenticated} initialStep={returnToReady ? 7 : (authenticated ? 7 : 1)} error={error} setError={setError} onAuthNeeded={async (selectedTheme: 'light'|'dark') => { setAuthenticated(false); setProfile(null); setAuthTheme(selectedTheme); setAuthMode('signin'); setReturnToReady(false); setMessage('Your profile is saved. Log in to finish opening Discover.'); setScreen('auth') }} onDone={async () => { setReturnToReady(false); await load(true) }} onLogout={async () => { setReturnToReady(false); setAuthenticated(false); setProfile(null); await signOut().catch(() => {}); setScreen('welcome') }} />
   if (screen === 'creator') return <CreatorCenter onBack={() => setScreen('home')} />
-  return <Home profile={profile!} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={() => load(true)} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
+  return <Home profile={profile!} authPassword={password} tab={tab} setTab={setTab} creator={creator} onCreator={() => setScreen('creator')} onRefresh={() => load(true)} onLogout={async () => { await signOut(); setAuthenticated(false); setProfile(null); setScreen('welcome') }} />
 }
 
 function Welcome({ onLogin }: { onLogin: () => void }) {
@@ -268,8 +268,8 @@ const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
   { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'/discover/zoya.jpg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
 ]
 
-function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { profile:Profile;tab:HomeTab;setTab:(x:HomeTab)=>void;creator:boolean;onCreator:()=>void;onRefresh:()=>Promise<void>;onLogout:()=>Promise<void> }) {
-  const [discover,setDiscover]=useState<DiscoverProfile[]>([])
+function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefresh, onLogout }: { profile:Profile; authPassword:string; tab:HomeTab; setTab:(x:HomeTab)=>void; creator:boolean; onCreator:()=>void; onRefresh:()=>Promise<void>; onLogout:()=>Promise<void> }) {
+  const [discover,setDiscover]=useState<DiscoverProfile[]>(DEMO_DISCOVER_PROFILES)
   const [index,setIndex]=useState(0)
   const [flipped,setFlipped]=useState(false)
   const [animation,setAnimation]=useState<string|null>(null)
@@ -283,26 +283,49 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
   const [sectionError,setSectionError]=useState('')
   const [menuOpen,setMenuOpen]=useState(false)
   const [crushNotice,setCrushNotice]=useState(false)
-  const [crushPanel,setCrushPanel]=useState(false)
-  const [secretCrushes,setSecretCrushes]=useState(0)
+  const [crushPasswordOpen,setCrushPasswordOpen]=useState(false)
+  const [crushUnlocked,setCrushUnlocked]=useState(false)
+  const [crushPassword,setCrushPassword]=useState('')
+  const [secretCrushIds,setSecretCrushIds]=useState<string[]>([])
   const [demoMode,setDemoMode]=useState(true)
-  const [demoConsumed,setDemoConsumed]=useState<string[]>([])
-  const [demoNotifications,setDemoNotifications]=useState(true)
-  const [selectedDemoNotification,setSelectedDemoNotification]=useState<string|null>(null)
+  const [demoNotifications,setDemoNotifications]=useState<any[]>(DEMO_NOTIFICATIONS)
+  const [demoNotificationClicks,setDemoNotificationClicks]=useState<Record<string,number>>({})
   const [selectedPerson,setSelectedPerson]=useState<DiscoverProfile|null>(null)
-  const loadData=async()=>{setSectionError('');try{if(tab==='discover'){if(demoMode){setDiscover(DEMO_DISCOVER_PROFILES)}else{setDiscover(await getDiscover())}}if(tab==='matches')setMatches(await getMatches());if(tab==='chats')setChats(await getChats());if(tab==='notifications')setNotifications(await getNotifications())}catch(e:any){setSectionError(e?.message||'Could not load this section')}}
-  useEffect(()=>{void loadData()},[tab,demoMode,demoConsumed])
+
+  const loadData=async()=>{
+    setSectionError('')
+    try{
+      if(tab==='discover' && !demoMode) setDiscover(await getDiscover())
+      if(tab==='matches' && !demoMode) setMatches(await getMatches())
+      if(tab==='chats' && !demoMode) setChats(await getChats())
+      if(tab==='notifications' && !demoMode) setNotifications(await getNotifications())
+    }catch(e:any){setSectionError(e?.message||'Could not load this section')}
+  }
+  useEffect(()=>{void loadData()},[tab,demoMode])
+
   const current=discover[index]
-  const act=async(action:'pass'|'interested'|'cupid')=>{
+  const addDemoMutual=()=>{
     if(!current)return
-    if(action==='cupid' && secretCrushes>=3){setCrushNotice(true);return}
+    const match={match_id:`demo-match-${current.id}`,other_id:current.id,other_name:current.name,other_photo_path:current.photoUrl,state:'trial'}
+    const chat={chat_id:`demo-chat-${current.id}`,other_id:current.id,other_name:current.name,other_photo_path:current.photoUrl,last_message:'Start the conversation'}
+    setMatches(old=>old.some(x=>x.match_id===match.match_id)?old:[...old,match])
+    setChats(old=>old.some(x=>x.chat_id===chat.chat_id)?old:[...old,chat])
+    setDemoNotifications(old=>old.some(x=>x.personId===current.id&&x.type==='match')?old:[
+      {id:`demo-match-notification-${current.id}`,type:'match',title:'Mutual interest',body:`${current.name} returned your interest`,personId:current.id,read_at:null},
+      ...old,
+    ])
+  }
+
+  const act=async(action:'pass'|'interested'|'cupid')=>{
+    if(!current || animation)return
+    if(action==='cupid' && secretCrushIds.length>=3){setCrushNotice(true);return}
     setAnimation(action)
     try{
       if(demoMode){
-        if(action==='cupid') setSecretCrushes(c=>c+1)
-        setDemoConsumed(a=>a.includes(current.id)?a:[...a,current.id])
+        if(action==='cupid') setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])
+        if(action==='interested') addDemoMutual()
       }else{
-        if(action==='cupid'){await secretCrush(current.id);setSecretCrushes(c=>c+1)}
+        if(action==='cupid'){await secretCrush(current.id);setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])}
         else await discoveryAction(current.id,action)
       }
     }catch(e:any){
@@ -310,64 +333,127 @@ function Home({ profile,tab,setTab,creator,onCreator,onRefresh,onLogout }: { pro
       if(action==='cupid' && (msg.includes('KNOT_SECRET_CRUSH_LIMIT') || msg.toLowerCase().includes('three'))) setCrushNotice(true)
       else setError(msg)
     }
-    setTimeout(()=>{setAnimation(null);setFlipped(false);setDragX(0);setIndex(i=>i+1)},550)
+    window.setTimeout(()=>{setAnimation(null);setFlipped(false);setDragX(0);setIndex(i=>i+1)},300)
   }
-  const pointerDown=(e:PointerEvent<HTMLDivElement>)=>{if(!flipped||animation)return;e.currentTarget.setPointerCapture(e.pointerId);setDragging(true)}
-  const pointerMove=(e:PointerEvent<HTMLDivElement>)=>{if(!dragging)return;const r=e.currentTarget.getBoundingClientRect();setDragX(Math.max(-180,Math.min(180,e.clientX-(r.left+r.width/2))))}
-  const pointerUp=()=>{if(!dragging)return;setDragging(false);if(dragX<-90)void act('pass');else if(dragX>90)void act('interested');else setDragX(0)}
-  const unread=notifications.some(n=>!n.read_at)
+
+  const pointerDown=(e:PointerEvent<HTMLDivElement>)=>{
+    if(!flipped||animation)return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }
+  const pointerMove=(e:PointerEvent<HTMLDivElement>)=>{
+    if(!dragging)return
+    const r=e.currentTarget.getBoundingClientRect()
+    setDragX(Math.max(-180,Math.min(180,e.clientX-(r.left+r.width/2))))
+  }
+  const pointerUp=()=>{
+    if(!dragging)return
+    setDragging(false)
+    if(dragX<-90)void act('pass')
+    else if(dragX>90)void act('interested')
+    else setDragX(0)
+  }
+
+  const openCrushes=()=>{
+    setCrushPassword('')
+    setCrushPasswordOpen(true)
+  }
+  const unlockCrushes=()=>{
+    if(!crushPassword.trim())return
+    if(authPassword && crushPassword===authPassword){setCrushUnlocked(true);setCrushPasswordOpen(false);setCrushPassword('');return}
+    setError('That password does not match your Knot account')
+  }
+  const openPersonInDiscover=(person:DiscoverProfile)=>{
+    const i=DEMO_DISCOVER_PROFILES.findIndex(p=>p.id===person.id)
+    if(i>=0){setIndex(i);setFlipped(true);setTab('discover')}
+    setSelectedPerson(null)
+  }
+  const openPersonChat=(person:DiscoverProfile)=>{
+    const chatId=`demo-chat-${person.id}`
+    setSelectedChat(chatId)
+    setTab('chats')
+    setSelectedPerson(null)
+  }
+
+  const unread=demoMode?demoNotifications.some(n=>!n.read_at):notifications.some(n=>!n.read_at)
+  const visibleNotifications=demoMode?demoNotifications:notifications
+
   return <div className={`app-shell ${profile.theme==='dark'?'':'light'}`} style={{'--star':profile.starColor || '#c084fc'} as any}>
     <header className="app-header">
       <button className="icon-btn menu-btn" onClick={()=>setMenuOpen(v=>!v)} aria-label="Open menu"><Menu size={21}/></button>
-      <button className="home-top-star" onClick={()=>setTab('discover')} aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
+      <button className="home-top-star" onClick={()=>{setCrushUnlocked(false);setTab('discover')}} aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
       <div className="header-actions">
-        <button className="top-secret-crush" onClick={()=>setCrushPanel(true)} aria-label="Secret Crush"><CupidIcon/></button>
+        <button className="top-secret-crush" onClick={openCrushes} aria-label="Secret Crush"><CupidIcon/></button>
         <button className={`icon-btn notification-btn ${tab==='notifications'?'top-active':''}`} onClick={()=>setTab('notifications')} aria-label="Activity"><Activity size={20}/>{unread&&<i/>}</button>
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
       </div>
     </header>
     {menuOpen&&<div className="app-menu">
       <button onClick={()=>{setTab('profile');setMenuOpen(false)}}><UserRound/> Profile</button>
-      <button onClick={()=>{setDemoNotifications(false);setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button>
+      <button onClick={()=>{setTab('notifications');setMenuOpen(false)}}><Activity/> Activity</button>
       <button onClick={()=>{setTab('security');setMenuOpen(false)}}><Shield/> Safety & Security</button>
       {creator&&<button onClick={()=>{setMenuOpen(false);onCreator()}}><Sparkles/> Creator Command Center</button>}
       <button onClick={()=>{setMenuOpen(false);void onLogout()}}><LogOut/> Sign out</button>
     </div>}
+
     <main className="app-main">
+      {crushUnlocked ? <SecretCrushPage profiles={DEMO_DISCOVER_PROFILES} crushIds={secretCrushIds} onRemove={id=>setSecretCrushIds(ids=>ids.filter(x=>x!==id))} onBack={()=>setCrushUnlocked(false)} onOpenProfile={openPersonInDiscover}/> : <>
       {tab==='discover'&&<section className="discover-section">
         <div className="discover-welcome"><h1>Welcome back, {profile.name}</h1><div className="discover-underline" /></div>
         {error&&<div className="error-box">{error}</div>}
-        {current?<>
+        {current? <>
           <div className="card-stack">
-            <div className="card-stack-backdrop" aria-hidden="true">{discover.slice(index+1,index+5).map((p,i)=><div key={p.id} className={`stack-card stack-${i+2}`}><img src={p.photoUrl||'/favicon.ico'} alt=""/><div/></div>)}</div>
+            <div className="card-stack-backdrop" aria-hidden="true">
+              {discover.slice(index+1,index+5).map((p,i)=><div key={p.id} className={`stack-card stack-${i+2}`}><img src={p.photoUrl||'/favicon.ico'} alt=""/><div/></div>)}
+            </div>
             <div className="card-wrap">
               <div className={`discover-card ${flipped?'flipped':''} ${animation?`anim-${animation}`:''}`} style={{transform:animation?undefined:(dragX!==0?`translateX(${dragX}px) rotate(${dragX/18}deg)${flipped?' rotateY(180deg)':''}`:undefined)}} onClick={()=>{if(!animation && Math.abs(dragX)<10)setFlipped(v=>!v)}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
-                <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-top-row"><span className="new-here-chip">✦ {(current as any).tag || 'New here'}</span><span className="card-count">{index + 1}/{demoMode ? DEMO_DISCOVER_PROFILES.length : discover.length}</span></div><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
-                <div className="card-face card-back"><div className="back-top"><div className="mini-avatar">{current.photoUrl?<img src={current.photoUrl} alt=""/>:<UserRound/>}</div><div><strong>{current.name}</strong><span>{current.age}</span></div></div><p className="back-bio">{(current as any).school || 'Student'} · {current.city || 'Same city'}</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div><div className="swipe-hint"><span>← SWIPE PASS</span><span>SWIPE → INTERESTED</span></div><button className="back-crush-btn" onClick={(e)=>{e.stopPropagation();void act('cupid')}}><CupidIcon/><span>Secret Crush</span></button></div>
+                <div className="card-face card-front"><img src={current.photoUrl||'/favicon.ico'} alt="Profile"/><div className="photo-shade"/><div className="card-profile-info"><div className="card-name">{current.name}</div></div></div>
+                <div className="card-face card-back">
+                  <img className="back-large-photo" src={current.photoUrl||'/favicon.ico'} alt=""/>
+                  <div className="back-info-panel"><h2>{current.name}, {current.age}</h2><p>{(current as any).school || 'Student'}</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div></div>
+                </div>
               </div>
               {animation==='pass'&&<div className="anim-overlay split-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-heart"><CupidIcon/></div>}
             </div>
           </div>
-          <div className="discover-actions"><button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button><button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>{flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}</div>
+          <div className="discover-actions">
+            <button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button>
+            {flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}
+            <button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>
+          </div>
           <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
-          <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>{setMenuOpen(true)}}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
-          <section className="homepage-activity-preview">
-            <div className="homepage-preview-head"><div><span>Activity</span><h2>Notifications</h2></div><button onClick={()=>setTab('notifications')}>View all <ChevronRight size={16}/></button></div>
-            <div className="homepage-notification-list">{DEMO_NOTIFICATIONS.slice(0,3).map(n=><button key={n.id} className={`notification-row ${n.read_at?'':'unread'}`} onClick={()=>{if(n.personId){const person=DEMO_DISCOVER_PROFILES.find(p=>p.id===n.personId);if(person)setSelectedPerson(person)}else if(n.type==='message'){setTab('chats')}else{setTab('notifications')}}}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div><ChevronRight className="notification-chevron" size={17}/></button>)}</div>
-          </section>
-        </>:<div className="empty-state"><div>✦</div><h2>{demoMode?'Demo profiles completed':'That’s everyone for now'}</h2><p>{demoMode?'Restart the preview to test the Discover flow again':'Try again later or adjust your discovery preferences'}</p>{demoMode&&<button className="primary-btn" onClick={()=>{setDemoConsumed([]);setIndex(0);setFlipped(false);setSecretCrushes(0)}}>Restart Preview</button>}</div>}
+          <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>setMenuOpen(true)}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
+        </> : <div className="empty-state"><div>✦</div><h2>That’s everyone for now</h2><p>Come back later for more Discover profiles</p><button className="primary-btn" onClick={()=>{setIndex(0);setFlipped(false)}}>Restart Discover</button></div>}
       </section>}
-      {tab==='matches'&&<Matches matches={matches} refresh={loadData}/>} 
-      {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat}/>} 
-      {tab==='notifications'&&<Notifications items={notifications} demo={demoNotifications} onRead={async(id)=>{const notice=(demoNotifications?DEMO_NOTIFICATIONS:notifications).find(n=>n.id===id);if(notice?.personId){const person=DEMO_DISCOVER_PROFILES.find(p=>p.id===notice.personId);if(person)setSelectedPerson(person)}else if(notice?.type==='message'){setTab('chats')}else if(!demoNotifications){await markNotificationRead(id);await loadData()}}} /> }
-      {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>}
-      {tab==='security'&&<SecurityCenter profile={profile} onOpenProfile={()=>setTab('profile')} onOpenNotifications={()=>setTab('notifications')} />} 
+      {tab==='matches'&&<Matches matches={matches} refresh={loadData} demo={demoMode} onOpenChat={person=>openPersonChat(person)}/>} 
+      {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat} demo={demoMode}/>} 
+      {tab==='notifications'&&<Notifications items={visibleNotifications} onRead={async(id)=>{
+        if(demoMode){
+          const notice=demoNotifications.find(n=>n.id===id)
+          setDemoNotificationClicks(old=>{const next=(old[id]||0)+1;return {...old,[id]:next}})
+          const clicks=(demoNotificationClicks[id]||0)+1
+          setDemoNotifications(old=>old.map(n=>n.id===id?{...n,read_at:new Date().toISOString()}:n))
+          if(notice?.personId){const person=DEMO_DISCOVER_PROFILES.find(p=>p.id===notice.personId);if(person)setSelectedPerson(person)}
+          else if(notice?.type==='message'){setSelectedChat(notice.chatId || `demo-chat-${notice.personId||'demo-maya'}`);setTab('chats')}
+          if(clicks>=2)setDemoNotifications(old=>old.filter(n=>n.id!==id))
+        }else{await markNotificationRead(id);await loadData()}
+      }} />}
+      {tab==='profile'&&<ProfileView profile={profile} onRefresh={onRefresh} onLogout={onLogout}/>} 
+      {tab==='security'&&<SecurityCenter profile={profile} onOpenProfile={()=>setTab('profile')} onOpenNotifications={()=>setTab('notifications')}/>} 
+      </>}
     </main>
-    <nav className="bottom-nav"><svg className="nav-gradient-defs" width="0" height="0" aria-hidden="true"><defs><linearGradient id="knotNavGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ff70b1"/><stop offset=".5" stopColor="#a56cff"/><stop offset="1" stopColor="#4da8ff"/></linearGradient></defs></svg><NavButton active={tab==='discover'} onClick={()=>setTab('discover')} icon={<Sparkles/>} label="Discover"/><NavButton active={tab==='chats'} onClick={()=>setTab('chats')} icon={<MessageCircle/>} label="Chats"/><NavButton active={tab==='matches'} onClick={()=>setTab('matches')} icon={<Heart/>} label="Matches"/><NavButton active={tab==='notifications'} onClick={()=>setTab('notifications')} icon={<Bell/>} label="Activity"/><NavButton active={tab==='profile'} onClick={()=>setTab('profile')} icon={<UserRound/>} label="Profile"/></nav>
-    {crushPanel&&<div className="modal-backdrop" onClick={()=>setCrushPanel(false)}><div className="limit-modal crush-panel" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Secret Crush</h2><p>Your Secret Crushes stay private until the feeling is mutual</p><div className="crush-slots"><span className={secretCrushes>0?'filled':''}></span><span className={secretCrushes>1?'filled':''}></span><span className={secretCrushes>2?'filled':''}></span></div><small>{secretCrushes} of 3 active in this session</small><button className="primary-btn" onClick={()=>setCrushPanel(false)}>Back to Discover</button></div></div>}
+    <nav className="bottom-nav"><svg className="nav-gradient-defs" width="0" height="0" aria-hidden="true"><defs><linearGradient id="knotNavGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ff70b1"/><stop offset=".5" stopColor="#a56cff"/><stop offset="1" stopColor="#4da8ff"/></linearGradient></defs></svg><NavButton active={tab==='discover'&&!crushUnlocked} onClick={()=>{setCrushUnlocked(false);setTab('discover')}} icon={<Sparkles/>} label="Discover"/><NavButton active={tab==='chats'&&!crushUnlocked} onClick={()=>{setCrushUnlocked(false);setTab('chats')}} icon={<MessageCircle/>} label="Chats"/><NavButton active={tab==='matches'&&!crushUnlocked} onClick={()=>{setCrushUnlocked(false);setTab('matches')}} icon={<Heart/>} label="Matches"/><NavButton active={tab==='notifications'&&!crushUnlocked} onClick={()=>{setCrushUnlocked(false);setTab('notifications')}} icon={<Bell/>} label="Activity"/><NavButton active={tab==='profile'&&!crushUnlocked} onClick={()=>{setCrushUnlocked(false);setTab('profile')}} icon={<UserRound/>} label="Profile"/></nav>
+
+    {crushPasswordOpen&&<div className="modal-backdrop" onClick={()=>setCrushPasswordOpen(false)}><div className="limit-modal crush-panel" onClick={e=>e.stopPropagation()}><div className="limit-icon"><Lock/></div><h2>Secret Crush</h2><p>Re-enter your Knot password to open your private Secret Crushes</p><input className="modal-password-input" type="password" value={crushPassword} onChange={e=>setCrushPassword(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')unlockCrushes()}} placeholder="Your password" autoFocus/><button className="primary-btn" onClick={unlockCrushes}>Unlock <ChevronRight size={18}/></button></div></div>}
     {crushNotice&&<div className="modal-backdrop" onClick={()=>setCrushNotice(false)}><div className="limit-modal" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Your Secret Crush list is full</h2><p>You can have up to 3 Secret Crushes at a time</p><button className="primary-btn" onClick={()=>setCrushNotice(false)}>Got it</button></div></div>}
-    {selectedPerson&&<PersonNotificationModal person={selectedPerson} onClose={()=>setSelectedPerson(null)} onOpenDiscover={()=>{const i=DEMO_DISCOVER_PROFILES.findIndex(p=>p.id===selectedPerson.id);if(i>=0){setIndex(i);setFlipped(true);setTab('discover')}setSelectedPerson(null)}} />}
+    {selectedPerson&&<PersonNotificationModal person={selectedPerson} onClose={()=>setSelectedPerson(null)} onOpenDiscover={()=>openPersonInDiscover(selectedPerson)} onOpenChat={()=>openPersonChat(selectedPerson)} />}
   </div>
+}
+
+function SecretCrushPage({profiles,crushIds,onRemove,onBack,onOpenProfile}:{profiles:DiscoverProfile[];crushIds:string[];onRemove:(id:string)=>void;onBack:()=>void;onOpenProfile:(p:DiscoverProfile)=>void}){
+  const crushes=profiles.filter(p=>crushIds.includes(p.id))
+  return <section className="secret-crush-page normal-section"><div className="section-heading"><button className="icon-btn" onClick={onBack}><ArrowLeft/></button><div><span>Private</span><h1>Secret Crushes</h1></div></div>{crushes.length===0?<div className="empty-state"><CupidIcon/><h2>No Secret Crushes yet</h2><p>Secret Crushes you add from Discover will appear here</p></div>:<div className="secret-crush-grid">{crushes.map(p=><article className="secret-crush-card" key={p.id}><img src={p.photoUrl||'/favicon.ico'} alt={p.name}/><div className="secret-crush-card-body"><h2>{p.name}, {p.age}</h2><p>{p.school}</p><div className="back-chips">{p.interests.map(x=><span key={x}>{x}</span>)}</div><div className="secret-crush-card-actions"><button className="secondary-btn" onClick={()=>onOpenProfile(p)}>View card</button><button className="danger-btn" onClick={()=>onRemove(p.id)}><Trash2 size={16}/> Remove</button></div></div></article>)}</div>}</section>
 }
 
 function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
@@ -375,19 +461,21 @@ function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria
 
 function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){const rendered=active&&isValidElement(icon)?cloneElement(icon as any,{stroke:'url(#knotNavGradient)' }):icon;return <button className={active?'nav-item active':'nav-item'} onClick={onClick}><span className="nav-icon">{rendered}</span><span>{label}</span></button>}
 
-function Matches({matches,refresh}:{matches:any[];refresh:()=>Promise<void>}){const [busy,setBusy]=useState('');return <section className="normal-section"><div className="section-heading"><div><span>Your connections</span><h1>Matches</h1></div></div>{matches.length===0?<div className="empty-state"><div>♥</div><h2>Nothing mutual yet</h2><p>When interest meets interest, your trial chat appears here</p></div>:<div className="list-grid">{matches.map(m=><div className="person-row" key={m.match_id}><Avatar path={m.other_photo_path}/><div><strong>{m.other_name}</strong><span>{m.state==='trial'?'Trial chat':'Coupled'}</span></div>{m.state==='trial'&&<button className="small-btn" disabled={busy===m.match_id} onClick={async()=>{setBusy(m.match_id);await requestExclusive(m.match_id);await refresh();setBusy('')}}>Go Exclusive</button>}</div>)}</div>}</section>}
+function Matches({matches,refresh,demo,onOpenChat}:{matches:any[];refresh:()=>Promise<void>;demo:boolean;onOpenChat:(p:DiscoverProfile)=>void}){const [busy,setBusy]=useState('');const list=demo?matches:matches;return <section className="normal-section"><div className="section-heading"><div><span>Your connections</span><h1>Matches</h1></div></div>{list.length===0?<div className="empty-state"><div>♥</div><h2>Nothing mutual yet</h2><p>When interest meets interest, your trial chat appears here</p></div>:<div className="list-grid">{list.map(m=>{const person=DEMO_DISCOVER_PROFILES.find(p=>p.id===m.other_id);return <div className="person-row" key={m.match_id}><Avatar path={m.other_photo_path}/><div><strong>{m.other_name}</strong><span>{m.state==='trial'?'Trial chat':'Coupled'}</span></div>{m.state==='trial'&&<button className="small-btn" onClick={()=>person&&onOpenChat(person)}>Open trial chat</button>}{!demo&&m.state!=='trial'&&<button className="small-btn" disabled={busy===m.match_id} onClick={async()=>{setBusy(m.match_id);await requestExclusive(m.match_id);await refresh();setBusy('')}}>Go Exclusive</button>}</div>})}</div>}</section>}
 
-function Chats({chats,selected,setSelected}:{chats:any[];selected:string|null;setSelected:(x:string|null)=>void}){const chat=chats.find(x=>x.chat_id===selected);return <section className="normal-section"><div className="section-heading"><div><span>Mutual connections</span><h1>Trial chats</h1></div></div>{chat?<Chat chat={chat} back={()=>setSelected(null)}/>:chats.length===0?<div className="empty-state"><MessageCircle/><h2>No chats yet</h2><p>A mutual connection opens a text-only trial chat</p></div>:<div className="list-grid">{chats.map(c=><button className="person-row chat-row" key={c.chat_id} onClick={()=>setSelected(c.chat_id)}><Avatar path={c.other_photo_path}/><div><strong>{c.other_name}</strong><span>{c.last_message||'Start the conversation'}</span></div><ChevronRight/></button>)}</div>}</section>}
+function Chats({chats,selected,setSelected,demo}:{chats:any[];selected:string|null;setSelected:(x:string|null)=>void;demo:boolean}){const chat=chats.find(x=>x.chat_id===selected);return <section className="normal-section"><div className="section-heading"><div><span>Mutual connections</span><h1>Trial chats</h1></div></div>{chat?<>{demo?<DemoChat chat={chat} back={()=>setSelected(null)}/>:<Chat chat={chat} back={()=>setSelected(null)}/>}</>:chats.length===0?<div className="empty-state"><MessageCircle/><h2>No chats yet</h2><p>A mutual connection opens a text-only trial chat</p></div>:<div className="list-grid">{chats.map(c=><button className="person-row chat-row" key={c.chat_id} onClick={()=>setSelected(c.chat_id)}><Avatar path={c.other_photo_path}/><div><strong>{c.other_name}</strong><span>{c.last_message||'Start the conversation'}</span></div><ChevronRight/></button>)}</div>}</section>}
+
+function DemoChat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([{id:'welcome',sender_id:chat.other_id,body:'Hey — looks like we both wanted to connect ✨'},{id:'starter',sender_id:'me',body:'Hey!'}]);const [body,setBody]=useState('');const send=()=>{if(!body.trim())return;setMessages(m=>[...m,{id:crypto.randomUUID(),sender_id:'me',body:body.trim()}]);setBody('')};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
 const DEMO_NOTIFICATIONS = [
   {id:'demo-notification-1',type:'match',title:'Mutual interest',body:'Maya returned your interest',personId:'demo-maya',read_at:null},
-  {id:'demo-notification-2',type:'message',title:'New trial chat',body:'Your mutual connection is ready to start a conversation',read_at:null},
-  {id:'demo-notification-3',type:'system',title:'Your privacy is protected',body:'Secret Crush activity stays private until the feeling is mutual',read_at:new Date().toISOString()},
+  {id:'demo-notification-2',type:'message',title:'New trial chat',body:'Your mutual connection is ready to start a conversation',personId:'demo-maya',chatId:'demo-chat-demo-maya',read_at:null},
 ]
-function Notifications({items,onRead,demo=false}:{items:any[];onRead:(id:string)=>Promise<void>;demo?:boolean}){const shown=demo?DEMO_NOTIFICATIONS:items;return <section className="normal-section notifications-section"><div className="section-heading"><div><span>Activity</span><h1>Notifications</h1></div></div>{shown.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{shown.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div><ChevronRight/></button>)}</div>}</section>}
-function PersonNotificationModal({person,onClose,onOpenDiscover}:{person:DiscoverProfile;onClose:()=>void;onOpenDiscover:()=>void}){return <div className="modal-backdrop" onClick={onClose}><div className="person-notification-modal" onClick={e=>e.stopPropagation()}><button className="person-modal-close" onClick={onClose} aria-label="Close"><X/></button><img src={person.photoUrl||'/favicon.ico'} alt={person.name}/><div className="person-modal-body"><span className="person-modal-kicker">Mutual interest</span><h2>{person.name}, {person.age}</h2><p>{person.school}</p><div className="person-modal-chips">{person.interests.map(x=><span key={x}>{x}</span>)}</div><div className="person-modal-actions"><button className="secondary-btn" onClick={onClose}>Close</button><button className="primary-btn" onClick={onOpenDiscover}>Open profile</button></div></div></div></div>}
+function Notifications({items,onRead}:{items:any[];onRead:(id:string)=>Promise<void>}){return <section className="normal-section notifications-section"><div className="section-heading"><div><span>Activity</span><h1>Notifications</h1></div></div>{items.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{items.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div><ChevronRight/></button>)}</div>}</section>}
+function PersonNotificationModal({person,onClose,onOpenDiscover,onOpenChat}:{person:DiscoverProfile;onClose:()=>void;onOpenDiscover:()=>void;onOpenChat:()=>void}){return <div className="modal-backdrop" onClick={onClose}><div className="person-notification-modal" onClick={e=>e.stopPropagation()}><button className="person-modal-close" onClick={onClose} aria-label="Close"><X/></button><img src={person.photoUrl||'/favicon.ico'} alt={person.name}/><div className="person-modal-body"><span className="person-modal-kicker">Mutual interest</span><h2>{person.name}, {person.age}</h2><p>{person.school}</p><div className="person-modal-chips">{person.interests.map(x=><span key={x}>{x}</span>)}</div><div className="person-modal-actions"><button className="secondary-btn" onClick={onClose}>Close</button><button className="secondary-btn" onClick={onOpenDiscover}>View card</button><button className="primary-btn" onClick={onOpenChat}>Start trial chat</button></div></div></div></div>}
+
 function SecurityCenter({profile,onOpenProfile,onOpenNotifications}:{profile:Profile;onOpenProfile:()=>void;onOpenNotifications:()=>void}){
   return <section className="normal-section security-section">
     <div className="section-heading"><div><span>Privacy & control</span><h1>Safety & Security</h1></div></div>
@@ -515,7 +603,7 @@ function CreatorCenter({onBack}:{onBack:()=>void}){
   </div>
 }
 
-function Avatar({path}:{path:string|null}){const [url,setUrl]=useState<string|null>(null);useEffect(()=>{if(path)void getPhotoUrl(path).then(setUrl)},[path]);return <div className="avatar">{url?<img src={url} alt=""/>:<UserRound size={20}/>}</div>}
+function Avatar({path}:{path:string|null}){const [url,setUrl]=useState<string|null>(null);useEffect(()=>{if(!path){setUrl(null);return}if(path.startsWith('/')||path.startsWith('http')){setUrl(path);return}void getPhotoUrl(path).then(setUrl)},[path]);return <div className="avatar">{url?<img src={url} alt=""/>:<UserRound size={20}/>}</div>}
 function Blocked(){return <div className="blocked-page knot-welcome"><div className="blocked-card"><div className="blocked-star">✦</div><h1>Sorry, Knot isn’t available for you yet</h1><p>Knot is currently available only to people aged 18 through 21</p><Shield size={18}/></div></div>}
 function urlBase64ToUint8Array(base64String:string){const padding='='.repeat((4-base64String.length%4)%4);const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');const rawData=window.atob(base64);return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)))}
 

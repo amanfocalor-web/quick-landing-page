@@ -31,9 +31,16 @@ New here? Create an account → email/password → profile setup → Discover/Ho
 The homepage currently uses local demo Discover profiles and demo Activity notifications as the working frontend experience. These demo actions do not write to Supabase.
 
 
-## Knot v37 additions
+## Knot v38 additions
 - Separate Discover Profile photo required before entering Discover
 - City-aware university selection with Other fallback
 - Secret Crush also records Interested for potential mutual connection
 - Demo trial chat messages persist in browser storage
 - Discover portrait loading state prevents blank cards while photos decode
+
+
+## v38 interaction notes
+- Discover photos use local 1280px-wide display assets and are preloaded
+- Pass, Interested, and Secret Crush have distinct action animations
+- Secret Crush is also recorded as Interested and reciprocal Interested/Secret Crush choices can create a mutual trial connection
+- Demo Discover profiles are not repeated until the full local suggestion set has been exhausted

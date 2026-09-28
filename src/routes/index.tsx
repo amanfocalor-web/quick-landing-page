@@ -323,9 +323,17 @@ const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
   { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'/discover/zoya.jpg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
 ]
 
+// Demo-only reciprocal choices let the frontend demonstrate the real mutual-interest rules
+const DEMO_RECIPROCAL_ACTIONS: Record<string, 'interested'|'cupid'|'pass'|'none'> = {
+  'demo-maya':'interested',
+  'demo-anika':'cupid',
+  'demo-zoya':'cupid',
+}
+
 function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefresh, onLogout }: { profile:Profile; authPassword:string; tab:HomeTab; setTab:(x:HomeTab)=>void; creator:boolean; onCreator:()=>void; onRefresh:()=>Promise<void>; onLogout:()=>Promise<void> }) {
   const [discover,setDiscover]=useState<DiscoverProfile[]>(DEMO_DISCOVER_PROFILES)
   const [index,setIndex]=useState(0)
+  const [seenIds,setSeenIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem(`knot-demo-seen-${profile.id}`)||'[]')}catch{return []}})
   const [flipped,setFlipped]=useState(false)
   const [animation,setAnimation]=useState<string|null>(null)
   const [dragX,setDragX]=useState(0)
@@ -347,6 +355,8 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   const [demoNotificationClicks,setDemoNotificationClicks]=useState<Record<string,number>>({})
   const [selectedPerson,setSelectedPerson]=useState<DiscoverProfile|null>(null)
   const [loadedPhotos,setLoadedPhotos]=useState<Record<string,boolean>>({})
+
+  useEffect(()=>{try{localStorage.setItem(`knot-demo-seen-${profile.id}`,JSON.stringify(seenIds))}catch{}},[profile.id,seenIds])
 
   useEffect(()=>{
     const loaders=DEMO_DISCOVER_PROFILES.map(p=>{
@@ -371,36 +381,54 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   useEffect(()=>{void loadData()},[tab,demoMode])
 
   const current=discover[index]
-  const addDemoMutual=()=>{
-    if(!current)return
-    const match={match_id:`demo-match-${current.id}`,other_id:current.id,other_name:current.name,other_photo_path:current.photoUrl,state:'trial'}
-    const chat={chat_id:`demo-chat-${current.id}`,other_id:current.id,other_name:current.name,other_photo_path:current.photoUrl,last_message:'Start the conversation'}
+  const addDemoMatch=(person:DiscoverProfile)=>{
+    const match={match_id:`demo-match-${person.id}`,other_id:person.id,other_name:person.name,other_photo_path:person.photoUrl,state:'trial'}
+    const chat={chat_id:`demo-chat-${person.id}`,other_id:person.id,other_name:person.name,other_photo_path:person.photoUrl,last_message:'Start the conversation'}
     setMatches(old=>old.some(x=>x.match_id===match.match_id)?old:[...old,match])
     setChats(old=>old.some(x=>x.chat_id===chat.chat_id)?old:[...old,chat])
-    setDemoNotifications(old=>old.some(x=>x.personId===current.id&&x.type==='match')?old:[
-      {id:`demo-match-notification-${current.id}`,type:'match',title:'Mutual interest',body:`${current.name} returned your interest`,personId:current.id,read_at:null},
+    setDemoNotifications(old=>old.some(x=>x.personId===person.id&&x.type==='match')?old:[
+      {id:`demo-match-notification-${person.id}`,type:'match',title:'Mutual interest',body:`${person.name} returned your interest`,personId:person.id,read_at:null},
       ...old,
     ])
+  }
+  const hasDemoMutual=(person:DiscoverProfile)=>DEMO_RECIPROCAL_ACTIONS[person.id]==='interested'||DEMO_RECIPROCAL_ACTIONS[person.id]==='cupid'
+  const advanceAfterAction=(personId:string)=>{
+    setSeenIds(old=>old.includes(personId)?old:[...old,personId])
+    setFlipped(false);setDragX(0)
+    const nextIndex=discover.findIndex((p,i)=>i>index&&!seenIds.includes(p.id)&&p.id!==personId)
+    const fallbackIndex=discover.findIndex(p=>!seenIds.includes(p.id)&&p.id!==personId)
+    setIndex(nextIndex>=0?nextIndex:(fallbackIndex>=0?fallbackIndex:discover.length))
   }
 
   const act=async(action:'pass'|'interested'|'cupid')=>{
     if(!current || animation)return
-    if(action==='cupid' && secretCrushIds.length>=3){setCrushNotice(true);return}
+    if(action==='cupid' && secretCrushIds.length>=3 && !secretCrushIds.includes(current.id)){setCrushNotice(true);return}
     setAnimation(action)
     try{
       if(demoMode){
-        if(action==='cupid'){ setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id]); if(current.id==='demo-maya') addDemoMutual() }
-        if(action==='interested') addDemoMutual()
+        const reciprocal=hasDemoMutual(current)
+        if(action==='cupid'){
+          setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])
+          // Secret Crush is also an Interested action; a reciprocal Interested/Crush creates a match
+          if(reciprocal) addDemoMatch(current)
+        }
+        if(action==='interested' && reciprocal) addDemoMatch(current)
       }else{
-        if(action==='cupid'){await secretCrush(current.id);setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])}
-        else await discoveryAction(current.id,action)
+        if(action==='cupid'){
+          const result=await secretCrush(current.id)
+          setSecretCrushIds(ids=>ids.includes(current.id)?ids:[...ids,current.id])
+          if((result as any)?.mutual_match) await loadData()
+        }else{
+          const result=await discoveryAction(current.id,action)
+          if(action==='interested' && (result as any)?.mutual_match) await loadData()
+        }
       }
     }catch(e:any){
       const msg=e?.message||'Action could not be saved'
       if(action==='cupid' && (msg.includes('KNOT_SECRET_CRUSH_LIMIT') || msg.toLowerCase().includes('three'))) setCrushNotice(true)
       else setError(msg)
     }
-    window.setTimeout(()=>{setAnimation(null);setFlipped(false);setDragX(0);setIndex(i=>i+1)},300)
+    window.setTimeout(()=>{setAnimation(null);advanceAfterAction(current.id)},520)
   }
 
   const pointerDown=(e:PointerEvent<HTMLDivElement>)=>{
@@ -483,7 +511,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
                   <div className="back-info-panel"><h2>{current.name}, {current.age}</h2><p>{(current as any).school || 'Student'}</p><div className="back-chips">{current.interests.map(x=><span key={x}>{x}</span>)}</div></div>
                 </div>
               </div>
-              {animation==='pass'&&<div className="anim-overlay half-heart">♥</div>}{animation==='interested'&&<div className="anim-overlay half-heart">♥</div>}{animation==='cupid'&&<div className="anim-overlay cupid-pop">♥</div>}
+              {animation==='pass'&&<div className="anim-overlay action-animation pass-animation"><CrackedHeartAnimation/></div>}{animation==='interested'&&<div className="anim-overlay action-animation interested-animation"><HeartAnimation/></div>}{animation==='cupid'&&<div className="anim-overlay action-animation cupid-animation"><CupidPierceAnimation/></div>}
             </div>
           </div>
           <div className="discover-actions">
@@ -493,7 +521,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
           </div>
           <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
           <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>setMenuOpen(true)}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
-        </> : <div className="empty-state"><div>✦</div><h2>That’s everyone for now</h2><p>Come back later for more Discover profiles</p><button className="primary-btn" onClick={()=>{setIndex(0);setFlipped(false)}}>Restart Discover</button></div>}
+        </> : <div className="empty-state"><div>✦</div><h2>That’s everyone for now</h2><p>Come back later for more Discover profiles</p><button className="primary-btn" onClick={()=>{setSeenIds([]);try{localStorage.removeItem(`knot-demo-seen-${profile.id}`)}catch{};setIndex(0);setFlipped(false);setDragX(0)}}>Start again</button></div>}
       </section>}
       {tab==='matches'&&<Matches matches={matches} refresh={loadData} demo={demoMode} onOpenChat={person=>openPersonChat(person)}/>} 
       {tab==='chats'&&<Chats chats={chats} selected={selectedChat} setSelected={setSelectedChat} demo={demoMode}/>} 
@@ -527,6 +555,10 @@ function SecretCrushPage({profiles,crushIds,onRemove,onBack,onOpenProfile}:{prof
 
 function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
 function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M31 50C20 43 11 36 11 25c0-7 5-12 12-12 4 0 7 2 9 6 2-4 5-6 9-6 7 0 12 5 12 12 0 5-2 9-6 13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M14 51L48 17" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M42 17h9v9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+
+function HeartAnimation(){return <svg className="action-heart-svg" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 101C52 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10 3-6 8-10 16-10 15 0 26 11 26 27 0 30-34 51-42 58Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M60 101C52 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10 3-6 8-10 16-10 15 0 26 11 26 27 0 30-34 51-42 58Z" fill="currentColor" opacity=".14"/></svg>}
+function CrackedHeartAnimation(){return <svg className="action-heart-svg" viewBox="0 0 120 120" aria-hidden="true"><path d="M59 101C51 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M61 101C69 94 102 73 102 43c0-16-11-27-26-27-8 0-13 4-16 10" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M57 20l-9 22 11 8-9 15 12 13-7 17M63 20l8 21-10 8 9 15-11 13 7 18" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+function CupidPierceAnimation(){return <svg className="action-cupid-svg" viewBox="0 0 160 120" aria-hidden="true"><path d="M80 102C70 94 30 70 30 42c0-15 11-26 25-26 11 0 18 6 25 17 7-11 14-17 25-17 14 0 25 11 25 26 0 28-40 52-50 60Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M8 94L132 20" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/><path d="M132 20h-17M132 20v17" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){const rendered=active&&isValidElement(icon)?cloneElement(icon as any,{stroke:'url(#knotNavGradient)' }):icon;return <button className={active?'nav-item active':'nav-item'} onClick={onClick}><span className="nav-icon">{rendered}</span><span>{label}</span></button>}
 

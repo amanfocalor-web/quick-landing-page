@@ -311,16 +311,16 @@ function ProfileSetup({ existing,preAuth=false,initialStep=1,error,setError,onDo
 }
 
 const DEMO_DISCOVER_PROFILES: DiscoverProfile[] = [
-  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'/discover/ira.jpg', interests:['Books','Music','Travel','Photography'], school:'Delhi University', tag:'New here' },
-  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'/discover/maya.jpg', interests:['Art','Coffee','Movies','Dance'], school:'Ashoka University', tag:'New here' },
-  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'/discover/anika.jpg', interests:['Sports','Gaming','Tech','Food'], school:'BITS Pilani', tag:'New here' },
-  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'/discover/sara.jpg', interests:['Writing','Fitness','Music','Design'], school:'St Xavier’s', tag:'New here' },
-  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'/discover/nila.jpg', interests:['Cinema','Travel','Art','Books'], school:'Christ University', tag:'New here' },
-  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'/discover/meera.jpg', interests:['Dance','Music','Food','Photography'], school:'Loyola College', tag:'New here' },
-  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'/discover/tara.jpg', interests:['Science','Reading','Coffee','Design'], school:'IIT Delhi', tag:'New here' },
-  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'/discover/rhea.jpg', interests:['Fitness','Movies','Travel','Music'], school:'Symbiosis', tag:'New here' },
-  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'/discover/isha.jpg', interests:['Gaming','Tech','Drawing','Food'], school:'Manipal University', tag:'New here' },
-  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'/discover/zoya.jpg', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
+  { id:'demo-ira', name:'Ira', age:21, photoPath:null, photoUrl:'/discover/ira.webp', interests:['Books','Music','Travel','Photography'], school:'Delhi University', tag:'New here' },
+  { id:'demo-maya', name:'Maya', age:20, photoPath:null, photoUrl:'/discover/maya.webp', interests:['Art','Coffee','Movies','Dance'], school:'Ashoka University', tag:'New here' },
+  { id:'demo-anika', name:'Anika', age:19, photoPath:null, photoUrl:'/discover/anika.webp', interests:['Sports','Gaming','Tech','Food'], school:'BITS Pilani', tag:'New here' },
+  { id:'demo-sara', name:'Sara', age:21, photoPath:null, photoUrl:'/discover/sara.webp', interests:['Writing','Fitness','Music','Design'], school:'St Xavier’s', tag:'New here' },
+  { id:'demo-nila', name:'Nila', age:20, photoPath:null, photoUrl:'/discover/nila.webp', interests:['Cinema','Travel','Art','Books'], school:'Christ University', tag:'New here' },
+  { id:'demo-meera', name:'Meera', age:19, photoPath:null, photoUrl:'/discover/meera.webp', interests:['Dance','Music','Food','Photography'], school:'Loyola College', tag:'New here' },
+  { id:'demo-tara', name:'Tara', age:21, photoPath:null, photoUrl:'/discover/tara.webp', interests:['Science','Reading','Coffee','Design'], school:'IIT Delhi', tag:'New here' },
+  { id:'demo-rhea', name:'Rhea', age:20, photoPath:null, photoUrl:'/discover/rhea.webp', interests:['Fitness','Movies','Travel','Music'], school:'Symbiosis', tag:'New here' },
+  { id:'demo-isha', name:'Isha', age:19, photoPath:null, photoUrl:'/discover/isha.webp', interests:['Gaming','Tech','Drawing','Food'], school:'Manipal University', tag:'New here' },
+  { id:'demo-zoya', name:'Zoya', age:21, photoPath:null, photoUrl:'/discover/zoya.webp', interests:['Fashion','Music','Writing','Photography'], school:'Delhi University', tag:'New here' },
 ]
 
 // Demo-only reciprocal choices let the frontend demonstrate the real mutual-interest rules
@@ -362,8 +362,11 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
     const loaders=DEMO_DISCOVER_PROFILES.map(p=>{
       const img=new Image()
       img.decoding='async'
+      img.fetchPriority='high'
       img.onload=()=>setLoadedPhotos(old=>old[p.id]?old:{...old,[p.id]:true})
+      img.onerror=()=>setLoadedPhotos(old=>old[p.id]?old:{...old,[p.id]:false})
       img.src=p.photoUrl || ''
+      if (img.decode) void img.decode().catch(()=>{})
       return img
     })
     return()=>loaders.forEach(img=>{img.onload=null})

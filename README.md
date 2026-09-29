@@ -44,3 +44,7 @@ The homepage currently uses local demo Discover profiles and demo Activity notif
 - Pass, Interested, and Secret Crush have distinct action animations
 - Secret Crush is also recorded as Interested and reciprocal Interested/Secret Crush choices can create a mutual trial connection
 - Demo Discover profiles are not repeated until the full local suggestion set has been exhausted
+
+
+### v40 image loading
+Demo Discover photos are stored as local 640px WebP assets and preloaded from the document head, with high-priority browser decoding. Duplicate portrait copies and unused source/reference images are removed to keep the bundle small without changing the Discover photos.

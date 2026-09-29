@@ -3,3 +3,6 @@ verify_jwt = true
 
 [functions.signed-profile-photo]
 verify_jwt = true
+
+[functions.cherub]
+verify_jwt = true

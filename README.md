@@ -46,5 +46,11 @@ The homepage currently uses local demo Discover profiles and demo Activity notif
 - Demo Discover profiles are not repeated until the full local suggestion set has been exhausted
 
 
+### v42 Cherub
+- Cherub is an in-app assistant with persistent per-account chat history and Conversation, Profile, Guide and Safety modes
+- Cherub now uses a separate self-hosted backend architecture rather than a vendor AI API
+- The browser talks to Supabase; the Supabase Cherub function forwards permitted requests to the self-hosted Cherub backend
+- Cherub backend files live in `cherub-server/` and own the assistant orchestration and inference boundary
+
 ### v40 image loading
 Demo Discover photos are stored as local 640px WebP assets and preloaded from the document head, with high-priority browser decoding. Duplicate portrait copies and unused source/reference images are removed to keep the bundle small without changing the Discover photos.

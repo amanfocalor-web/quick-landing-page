@@ -3313,3 +3313,120 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 
 /* v38 image rendering: avoid browser interpolation blur and keep the display crisp */
 .card-front > img, .back-large-photo, .stack-card img, .secret-crush-card > img { image-rendering:auto; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+
+/* KNOT v41 — floating Discover actions + reference heart */
+.discover-actions {
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 108px !important;
+  transform: translateX(-50%) !important;
+  z-index: 31 !important;
+  width: auto !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  pointer-events: none !important;
+}
+.discover-actions .action-btn {
+  flex: 0 0 auto !important;
+  width: 58px !important;
+  min-width: 58px !important;
+  height: 58px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 50% !important;
+  background: rgba(12,14,35,.72) !important;
+  backdrop-filter: blur(18px) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.24), 0 0 22px rgba(144,103,255,.12) !important;
+  color: #fff !important;
+  pointer-events: auto !important;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+.discover-actions .action-btn:hover { transform: translateY(-5px) scale(1.05) !important; box-shadow: 0 18px 38px rgba(0,0,0,.3), 0 0 28px rgba(144,103,255,.2) !important; }
+.discover-actions .action-btn:active { transform: translateY(-1px) scale(.97) !important; }
+.discover-actions .action-btn svg { width: 25px !important; height: 25px !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+.discover-actions .action-btn.pass svg { color: #c5b4ff !important; }
+.discover-actions .action-btn.interested svg { color: #ff8fca !important; }
+.discover-actions .action-btn.secret svg { color: #f2b1ff !important; }
+.app-shell.light .discover-actions .action-btn { background: rgba(255,255,255,.78) !important; border-color: rgba(36,32,59,.12) !important; }
+
+.reference-heart { display:block; width:100%; height:100%; object-fit:contain; image-rendering:auto; user-select:none; pointer-events:none; }
+.action-animation { display:grid !important; place-items:center !important; }
+.action-heart-svg, .action-cupid-svg { display:none !important; }
+.heart-pop-animation { width:150px; height:168px; filter:drop-shadow(0 0 20px rgba(210,170,255,.5)); animation:knotReferenceHeartPop .52s cubic-bezier(.2,.9,.25,1) both; }
+.cracked-reference-heart, .cupid-reference-heart { position:relative; display:block; width:150px; height:168px; }
+.cracked-reference-heart > .reference-heart { position:absolute; inset:0; filter:drop-shadow(0 0 20px rgba(210,170,255,.5)); animation:knotReferenceCrack .52s cubic-bezier(.2,.9,.25,1) both; }
+.heart-crack { position:absolute; inset:0; width:100%; height:100%; color:#fff; filter:drop-shadow(0 0 7px rgba(255,255,255,.45)); opacity:0; animation:knotCrackLine .52s ease both; }
+.cupid-reference-heart > .reference-heart { position:absolute; inset:0; filter:drop-shadow(0 0 20px rgba(210,170,255,.5)); }
+.cupid-arrow { position:absolute; left:-20px; top:16px; width:190px; height:145px; color:#f2b1ff; filter:drop-shadow(0 0 12px rgba(242,177,255,.55)); animation:knotReferenceCupid .52s cubic-bezier(.18,.9,.25,1) both; }
+@keyframes knotReferenceHeartPop { 0%{transform:scale(.45);opacity:0} 35%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:1} }
+@keyframes knotReferenceCrack { 0%{transform:scale(.65);opacity:0} 35%{transform:scale(1.08);opacity:1} 70%{transform:scale(.99) translateX(-1px)} 100%{transform:scale(1) translateX(0);opacity:.95} }
+@keyframes knotCrackLine { 0%,28%{opacity:0;transform:scale(.7)} 42%{opacity:1;transform:scale(1)} 100%{opacity:1} }
+@keyframes knotReferenceCupid { 0%{transform:translateX(-72px) translateY(28px);opacity:0} 38%{opacity:1} 70%{transform:translateX(8px) translateY(-2px)} 100%{transform:translateX(0) translateY(0)} }
+@media(max-width:720px){
+  .discover-actions { bottom: 91px !important; gap: 15px !important; }
+  .discover-actions .action-btn { width:52px !important; min-width:52px !important; height:52px !important; }
+  .discover-actions .action-btn svg { width:23px !important; height:23px !important; }
+}
+
+/* KNOT v42 — Cherub AI assistant */
+.cherub-trigger {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  color: #e7b8ff;
+  background: rgba(255,255,255,.055);
+  cursor: pointer;
+  transition: transform .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.cherub-trigger:hover,
+.cherub-trigger.active { transform: translateY(-2px); color: #fff; background: rgba(216,180,254,.12); box-shadow: 0 0 24px rgba(190,120,255,.18); }
+.app-shell.light .cherub-trigger { border-color: rgba(36,32,59,.1); background: rgba(255,255,255,.6); color: #8d64a7; }
+.cherub-wings-svg { width: 26px; height: 26px; display: block; filter: drop-shadow(0 0 8px currentColor); }
+.cherub-title-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 15px; color: #efb5ff; background: rgba(216,180,254,.09); border: 1px solid rgba(216,180,254,.18); box-shadow: 0 0 25px rgba(180,105,255,.14); }
+.cherub-title-icon .cherub-wings-svg { width: 31px; height: 31px; }
+.cherub-backdrop { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.cherub-panel { pointer-events: auto; position: absolute; top: 84px; right: max(18px, calc((100vw - 1120px) / 2)); width: min(420px, calc(100vw - 28px)); height: min(650px, calc(100vh - 108px)); display: grid; grid-template-rows: auto auto 1fr auto auto; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 28px; color: #f8f7ff; background: linear-gradient(155deg, rgba(35,28,73,.96), rgba(11,15,39,.97)); box-shadow: 0 30px 90px rgba(0,0,0,.45), 0 0 50px rgba(160,95,255,.12); backdrop-filter: blur(28px); animation: cherub-panel-in .24s ease both; }
+@keyframes cherub-panel-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.cherub-head { display: flex; align-items: center; gap: 11px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.cherub-head > div:nth-child(2) { flex: 1; }
+.cherub-head span { display: block; font-family: "Pacifico", cursive; font-size: 1.35rem; line-height: 1; color: #f6c4ff; }
+.cherub-head strong { display: block; margin-top: 4px; color: rgba(255,255,255,.46); font-size: .72rem; font-weight: 600; }
+.cherub-modes { display: flex; gap: 7px; overflow-x: auto; padding: 12px 14px 10px; scrollbar-width: none; }
+.cherub-modes::-webkit-scrollbar { display: none; }
+.cherub-modes button { flex: 0 0 auto; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; padding: 8px 11px; color: rgba(255,255,255,.58); background: rgba(255,255,255,.045); cursor: pointer; font-size: .7rem; font-weight: 700; }
+.cherub-modes button.active { color: #fff; border-color: rgba(224,173,255,.35); background: rgba(192,132,252,.15); }
+.cherub-messages { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 14px 16px; }
+.cherub-message { width: fit-content; max-width: 86%; padding: 11px 13px; border: 1px solid rgba(255,255,255,.08); border-radius: 17px 17px 17px 6px; color: rgba(255,255,255,.86); background: rgba(255,255,255,.055); font-size: .82rem; line-height: 1.5; }
+.cherub-message.mine { align-self: flex-end; border-radius: 17px 17px 6px 17px; color: #fff; background: linear-gradient(135deg, rgba(236,112,184,.26), rgba(132,92,246,.28)); border-color: rgba(232,160,255,.16); }
+.cherub-message.typing { display: flex; align-items: center; gap: 4px; padding: 13px 15px; }
+.cherub-message.typing span { width: 5px; height: 5px; border-radius: 50%; background: #d8b4fe; animation: cherub-dot 1s infinite ease-in-out; }
+.cherub-message.typing span:nth-child(2) { animation-delay: .15s; }
+.cherub-message.typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes cherub-dot { 0%,60%,100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-3px); opacity: 1; } }
+.cherub-note { margin: 0 14px 8px; padding: 8px 10px; border: 1px solid rgba(255,184,210,.14); border-radius: 12px; color: rgba(255,210,226,.7); background: rgba(255,150,190,.06); font-size: .67rem; line-height: 1.35; }
+.cherub-compose { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.12); }
+.cherub-compose input { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.1); border-radius: 15px; outline: none; padding: 12px 13px; color: #fff; background: rgba(255,255,255,.055); }
+.cherub-compose input::placeholder { color: rgba(255,255,255,.38); }
+.cherub-compose input:focus { border-color: rgba(216,180,254,.42); box-shadow: 0 0 0 3px rgba(180,110,255,.08); }
+.cherub-send { width: 46px; min-width: 46px; border: 0; border-radius: 14px; color: #24122e; background: linear-gradient(135deg,#f7b7df,#c5a0ff); cursor: pointer; }
+.cherub-send:disabled { opacity: .45; cursor: default; }
+.app-shell.light .cherub-panel { color: #2a2440; background: linear-gradient(155deg, rgba(255,250,255,.98), rgba(241,238,255,.98)); border-color: rgba(36,32,59,.1); }
+.app-shell.light .cherub-head { border-color: rgba(36,32,59,.08); }
+.app-shell.light .cherub-head strong { color: rgba(36,32,59,.5); }
+.app-shell.light .cherub-modes button { color: rgba(36,32,59,.58); border-color: rgba(36,32,59,.09); background: rgba(255,255,255,.55); }
+.app-shell.light .cherub-modes button.active { color: #684c85; border-color: rgba(132,92,180,.25); background: rgba(180,135,220,.12); }
+.app-shell.light .cherub-message { color: rgba(36,32,59,.82); border-color: rgba(36,32,59,.08); background: rgba(255,255,255,.65); }
+.app-shell.light .cherub-message.mine { color: #3a2147; background: linear-gradient(135deg, rgba(236,112,184,.17), rgba(132,92,246,.14)); }
+.app-shell.light .cherub-compose { border-color: rgba(36,32,59,.08); background: rgba(255,255,255,.35); }
+.app-shell.light .cherub-compose input { color: #2a2440; border-color: rgba(36,32,59,.1); background: rgba(255,255,255,.72); }
+@media(max-width:720px){
+  .cherub-panel { top: 70px; right: 10px; width: calc(100vw - 20px); height: min(680px, calc(100vh - 92px)); }
+}

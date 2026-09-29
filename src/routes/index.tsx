@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { cloneElement, isValidElement, useEffect, useRef, useState, type FormEvent, type PointerEvent, type ReactNode } from 'react'
 import { Activity, ArrowLeft, Bell, Camera, Check, ChevronRight, Heart, Lock, LogOut, Menu, MessageCircle, Shield, Sparkles, Star, Trash2, UserRound, X, Zap } from 'lucide-react'
 import {
-  acceptExclusive, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
+  acceptExclusive, askCherub, creatorBanUser, creatorOverview, creatorSpark, creatorUnbanUser, creatorUsers, discoveryAction, enablePushNotifications, disablePushNotifications, getChats, getDiscover, getMatches, getMessages, getMyProfile, getNotifications, getPhotoUrl, getSession, isCreator, markNotificationRead, requestExclusive, saveProfile, secretCrush, sendMessage, signIn, signOut, signUp, uploadProfilePhoto,
   type DiscoverProfile, type Profile,
 } from '../lib/knot'
 
@@ -338,8 +338,8 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   const [animation,setAnimation]=useState<string|null>(null)
   const [dragX,setDragX]=useState(0)
   const [dragging,setDragging]=useState(false)
-  const [matches,setMatches]=useState<any[]>([])
-  const [chats,setChats]=useState<any[]>([])
+  const [matches,setMatches]=useState<any[]>(()=>{try{return JSON.parse(localStorage.getItem(`knot-demo-matches-${profile.id}`)||'[]')}catch{return []}})
+  const [chats,setChats]=useState<any[]>(()=>{try{return JSON.parse(localStorage.getItem(`knot-demo-chats-${profile.id}`)||'[]')}catch{return []}})
   const [notifications,setNotifications]=useState<any[]>([])
   const [selectedChat,setSelectedChat]=useState<string|null>(null)
   const [error,setError]=useState('')
@@ -349,14 +349,32 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
   const [crushPasswordOpen,setCrushPasswordOpen]=useState(false)
   const [crushUnlocked,setCrushUnlocked]=useState(false)
   const [crushPassword,setCrushPassword]=useState('')
-  const [secretCrushIds,setSecretCrushIds]=useState<string[]>([])
+  const [secretCrushIds,setSecretCrushIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem(`knot-demo-crushes-${profile.id}`)||'[]')}catch{return []}})
   const [demoMode,setDemoMode]=useState(true)
-  const [demoNotifications,setDemoNotifications]=useState<any[]>(DEMO_NOTIFICATIONS)
+  const [demoNotifications,setDemoNotifications]=useState<any[]>(()=>{try{const raw=localStorage.getItem(`knot-demo-notifications-${profile.id}`);return raw?JSON.parse(raw):DEMO_NOTIFICATIONS}catch{return DEMO_NOTIFICATIONS}})
   const [demoNotificationClicks,setDemoNotificationClicks]=useState<Record<string,number>>({})
   const [selectedPerson,setSelectedPerson]=useState<DiscoverProfile|null>(null)
   const [loadedPhotos,setLoadedPhotos]=useState<Record<string,boolean>>({})
+  const [cherubOpen,setCherubOpen]=useState(false)
 
   useEffect(()=>{try{localStorage.setItem(`knot-demo-seen-${profile.id}`,JSON.stringify(seenIds))}catch{}},[profile.id,seenIds])
+  useEffect(()=>{try{localStorage.setItem(`knot-demo-matches-${profile.id}`,JSON.stringify(matches))}catch{}},[profile.id,matches])
+  useEffect(()=>{try{localStorage.setItem(`knot-demo-chats-${profile.id}`,JSON.stringify(chats))}catch{}},[profile.id,chats])
+  useEffect(()=>{try{localStorage.setItem(`knot-demo-crushes-${profile.id}`,JSON.stringify(secretCrushIds))}catch{}},[profile.id,secretCrushIds])
+  useEffect(()=>{try{localStorage.setItem(`knot-demo-notifications-${profile.id}`,JSON.stringify(demoNotifications))}catch{}},[profile.id,demoNotifications])
+
+  useEffect(()=>{
+    if(tab!=='notifications') return
+    if(demoMode){
+      setDemoNotifications(old=>old.map(n=>n.read_at?n:{...n,read_at:new Date().toISOString()}))
+      return
+    }
+    const unreadIds=notifications.filter(n=>!n.read_at).map(n=>n.id)
+    if(!unreadIds.length) return
+    void Promise.all(unreadIds.map(id=>markNotificationRead(id))).then(()=>{
+      setNotifications(old=>old.map(n=>n.read_at?n:{...n,read_at:new Date().toISOString()}))
+    }).catch(()=>{})
+  },[tab,demoMode,notifications.length])
 
   useEffect(()=>{
     const loaders=DEMO_DISCOVER_PROFILES.map(p=>{
@@ -484,6 +502,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
       <button className="home-top-star" onClick={()=>{setCrushUnlocked(false);setTab('discover')}} aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
       <div className="header-actions">
         <button className="top-secret-crush" onClick={openCrushes} aria-label="Secret Crush"><CupidIcon/></button>
+        <button className={`cherub-trigger ${cherubOpen?'active':''}`} onClick={()=>setCherubOpen(v=>!v)} aria-label="Open Cherub"><CherubWings/></button>
         <button className={`icon-btn notification-btn ${tab==='notifications'?'top-active':''}`} onClick={()=>setTab('notifications')} aria-label="Activity"><Activity size={20}/>{unread&&<i/>}</button>
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
       </div>
@@ -517,10 +536,10 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
               {animation==='pass'&&<div className="anim-overlay action-animation pass-animation"><CrackedHeartAnimation/></div>}{animation==='interested'&&<div className="anim-overlay action-animation interested-animation"><HeartAnimation/></div>}{animation==='cupid'&&<div className="anim-overlay action-animation cupid-animation"><CupidPierceAnimation/></div>}
             </div>
           </div>
-          <div className="discover-actions">
-            <button className="action-btn pass" onClick={()=>void act('pass')}><X/><span>Pass</span></button>
-            {flipped&&<button className="action-btn secret" onClick={()=>void act('cupid')}><CupidIcon/><span>Secret Crush</span></button>}
-            <button className="action-btn interested" onClick={()=>void act('interested')}><Heart/><span>Interested</span></button>
+          <div className="discover-actions" aria-label="Discover actions">
+            <button className="action-btn pass" onClick={e=>{e.stopPropagation();void act('pass')}} aria-label="Pass"><X/></button>
+            {flipped&&<button className="action-btn secret" onClick={e=>{e.stopPropagation();void act('cupid')}} aria-label="Secret Crush"><CupidIcon/></button>}
+            <button className="action-btn interested" onClick={e=>{e.stopPropagation();void act('interested')}} aria-label="Interested"><Heart/></button>
           </div>
           <div className="privacy-box homepage-privacy"><Lock size={17}/><div><strong>Your moves are private</strong><span>Only mutual interest reveals the connection</span></div></div>
           <div className="quick-grid"><button onClick={()=>setTab('matches')}><Heart/><strong>Matches</strong><span>Mutual connections</span></button><button onClick={()=>setTab('chats')}><MessageCircle/><strong>Chats</strong><span>Your conversations</span></button><button onClick={()=>setTab('profile')}><UserRound/><strong>Profile</strong><span>Your space</span></button><button onClick={()=>setMenuOpen(true)}><Shield/><strong>Safety</strong><span>Stay in control</span></button></div>
@@ -548,6 +567,13 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
     {crushPasswordOpen&&<div className="modal-backdrop" onClick={()=>setCrushPasswordOpen(false)}><div className="limit-modal crush-panel" onClick={e=>e.stopPropagation()}><div className="limit-icon"><Lock/></div><h2>Secret Crush</h2><p>Re-enter your Knot password to open your private Secret Crushes</p><input className="modal-password-input" type="password" value={crushPassword} onChange={e=>setCrushPassword(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')unlockCrushes()}} placeholder="Your password" autoFocus/><button className="primary-btn" onClick={unlockCrushes}>Unlock <ChevronRight size={18}/></button></div></div>}
     {crushNotice&&<div className="modal-backdrop" onClick={()=>setCrushNotice(false)}><div className="limit-modal" onClick={e=>e.stopPropagation()}><div className="limit-icon"><CupidIcon/></div><h2>Your Secret Crush list is full</h2><p>You can have up to 3 Secret Crushes at a time</p><button className="primary-btn" onClick={()=>setCrushNotice(false)}>Got it</button></div></div>}
     {selectedPerson&&<PersonNotificationModal person={selectedPerson} onClose={()=>setSelectedPerson(null)} onOpenDiscover={()=>openPersonInDiscover(selectedPerson)} onOpenChat={()=>openPersonChat(selectedPerson)} />}
+    {cherubOpen&&<CherubPanel profileId={profile.id} profileName={profile.name} onClose={()=>setCherubOpen(false)} onTool={(tool)=>{
+      if(tool==='open_matches'){setCrushUnlocked(false);setTab('matches')}
+      else if(tool==='open_chats'){setCrushUnlocked(false);setTab('chats')}
+      else if(tool==='open_notifications'){setCrushUnlocked(false);setTab('notifications')}
+      else if(tool==='open_profile'){setCrushUnlocked(false);setTab('profile')}
+      else if(tool==='open_secret_crush'){openCrushes()}
+    }} />}
   </div>
 }
 
@@ -556,12 +582,69 @@ function SecretCrushPage({profiles,crushIds,onRemove,onBack,onOpenProfile}:{prof
   return <section className="secret-crush-page normal-section"><div className="section-heading secret-crush-heading"><button className="icon-btn" onClick={onBack}><ArrowLeft/></button><div><span>Private</span><h1>Secret Crushes</h1></div></div>{crushes.length===0?<div className="empty-state"><CupidIcon/><h2>No Secret Crushes yet</h2><p>Secret Crushes you add from Discover will appear here</p></div>:<div className="secret-crush-grid">{crushes.map(p=><article className="secret-crush-card" key={p.id}><img src={p.photoUrl||'/favicon.ico'} alt={p.name}/><div className="secret-crush-card-body"><h2>{p.name}, {p.age}</h2><p>{p.school}</p><div className="back-chips">{p.interests.map(x=><span key={x}>{x}</span>)}</div><div className="secret-crush-card-actions"><button className="secondary-btn" onClick={()=>onOpenProfile(p)}>View card</button><button className="danger-btn" onClick={()=>onRemove(p.id)}><Trash2 size={16}/> Remove</button></div></div></article>)}</div>}</section>
 }
 
+function CherubWings(){return <svg className="cherub-wings-svg" viewBox="0 0 64 44" aria-hidden="true"><path d="M30 22C25 11 19 5 10 5 6 5 4 8 5 12c2 7 8 12 18 15-7 1-11 4-13 8 8 0 16-4 20-13Z" fill="currentColor"/><path d="M34 22C39 11 45 5 54 5c4 0 6 3 5 7-2 7-8 12-18 15 7 1 11 4 13 8-8 0-16-4-20-13Z" fill="currentColor"/></svg>}
+
+function CherubPanel({profileId,profileName,onClose,onTool}:{profileId:string;profileName:string;onClose:()=>void;onTool:(tool:'open_matches'|'open_chats'|'open_notifications'|'open_profile'|'open_secret_crush')=>void}){
+  type Message={role:'user'|'assistant';content:string}
+  const storageKey=`knot-cherub-${profileId}`
+  const [messages,setMessages]=useState<Message[]>(()=>{try{const raw=localStorage.getItem(storageKey);return raw?JSON.parse(raw):[{role:'assistant',content:`Hey ${profileName} — I’m Cherub ✦\nWhat can I help you with?`}] }catch{return[{role:'assistant',content:'Hey — I’m Cherub ✦\nWhat can I help you with?'}]}})
+  const [input,setInput]=useState('')
+  const [mode,setMode]=useState<'general'|'conversation'|'profile'|'guide'|'safety'>('general')
+  const [busy,setBusy]=useState(false)
+  const [error,setError]=useState('')
+  const scrollRef=useRef<HTMLDivElement>(null)
+
+  useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(messages))}catch{}},[messages,storageKey])
+  useEffect(()=>{scrollRef.current?.scrollTo({top:scrollRef.current.scrollHeight,behavior:'smooth'})},[messages,busy])
+
+  const demoReply=(text:string)=>{
+    const q=text.toLowerCase()
+    if(mode==='guide'||q.includes('secret crush')) return 'Secret Crush is private until the connection becomes mutual. It can also count as an Interested action, so a mutual Interested or Secret Crush can create a Match'
+    if(mode==='profile') return 'Sure — paste your current bio or profile prompt here and I can help make it clearer while keeping it sounding like you'
+    if(mode==='conversation') return 'Send me the message or tell me what you want to talk about, and I’ll suggest a few natural options you can choose from'
+    if(mode==='safety') return 'If a conversation feels uncomfortable, you can stop replying, block the person, or use Knot’s reporting controls. You stay in control of what you share'
+    return 'I can help with conversations, profiles, Knot features, or staying in control of your privacy. What do you need?'
+  }
+
+  const send=async(text=input.trim())=>{
+    if(!text||busy)return
+    setInput('');setError('')
+    const next=[...messages,{role:'user' as const,content:text}]
+    setMessages(next);setBusy(true)
+    try{
+      const result=await askCherub(next.slice(-12),mode,profileId)
+      setMessages([...next,{role:'assistant',content:result.reply}])
+      if(result.tool?.name) onTool(result.tool.name)
+    }catch(e:any){
+      const fallback=demoReply(text)
+      setMessages([...next,{role:'assistant',content:fallback}])
+      if(!String(e?.message||'').toLowerCase().includes('supabase is not configured')) setError('Live Cherub is not connected yet, so this is preview mode')
+    }finally{setBusy(false)}
+  }
+
+  const prompts=[
+    ['conversation','Help me with a message'],
+    ['profile','Help with my profile'],
+    ['guide','How does Secret Crush work?'],
+    ['safety','Help me with privacy'],
+  ] as const
+
+  return <div className="cherub-backdrop" onClick={onClose}><aside className="cherub-panel" onClick={e=>e.stopPropagation()} aria-label="Cherub assistant">
+    <div className="cherub-head"><div className="cherub-title-icon"><CherubWings/></div><div><span>Cherub</span><strong>Your Knot assistant</strong></div><button className="icon-btn" onClick={onClose} aria-label="Close Cherub"><X/></button></div>
+    <div className="cherub-modes">{prompts.map(([m,label])=><button key={m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{label}</button>)}</div>
+    <div className="cherub-messages" ref={scrollRef}>{messages.map((m,i)=><div key={`${i}-${m.role}`} className={`cherub-message ${m.role==='user'?'mine':''}`}>{m.content.split('\n').map((line,j)=><span key={j}>{line}{j<m.content.split('\n').length-1&&<br/>}</span>)}</div>)}{busy&&<div className="cherub-message typing"><span/><span/><span/></div>}</div>
+    {error&&<div className="cherub-note">{error}</div>}
+    <form className="cherub-compose" onSubmit={e=>{e.preventDefault();void send()}}><input value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask Cherub…" maxLength={2000}/><button className="cherub-send" disabled={!input.trim()||busy} aria-label="Send"><ChevronRight/></button></form>
+  </aside></div>
+}
+
 function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
 function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M31 50C20 43 11 36 11 25c0-7 5-12 12-12 4 0 7 2 9 6 2-4 5-6 9-6 7 0 12 5 12 12 0 5-2 9-6 13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M14 51L48 17" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M42 17h9v9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
-function HeartAnimation(){return <svg className="action-heart-svg" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 101C52 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10 3-6 8-10 16-10 15 0 26 11 26 27 0 30-34 51-42 58Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M60 101C52 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10 3-6 8-10 16-10 15 0 26 11 26 27 0 30-34 51-42 58Z" fill="currentColor" opacity=".14"/></svg>}
-function CrackedHeartAnimation(){return <svg className="action-heart-svg" viewBox="0 0 120 120" aria-hidden="true"><path d="M59 101C51 94 18 73 18 43c0-16 11-27 26-27 8 0 13 4 16 10" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M61 101C69 94 102 73 102 43c0-16-11-27-26-27-8 0-13 4-16 10" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M57 20l-9 22 11 8-9 15 12 13-7 17M63 20l8 21-10 8 9 15-11 13 7 18" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-function CupidPierceAnimation(){return <svg className="action-cupid-svg" viewBox="0 0 160 120" aria-hidden="true"><path d="M80 102C70 94 30 70 30 42c0-15 11-26 25-26 11 0 18 6 25 17 7-11 14-17 25-17 14 0 25 11 25 26 0 28-40 52-50 60Z" fill="none" stroke="currentColor" strokeWidth="7" strokeLinejoin="round"/><path d="M8 94L132 20" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/><path d="M132 20h-17M132 20v17" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+function ReferenceHeart({className='' }:{className?:string}){return <img className={`reference-heart ${className}`} src="/heart-reference.png" alt="" aria-hidden="true"/>}
+function HeartAnimation(){return <ReferenceHeart className="heart-pop-animation"/>}
+function CrackedHeartAnimation(){return <span className="cracked-reference-heart" aria-hidden="true"><ReferenceHeart/><svg viewBox="0 0 100 110" className="heart-crack"><path d="M49 21L42 43l9 8-8 14 10 11-6 13M52 21l7 22-9 8 8 14-10 11 6 13" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>}
+function CupidPierceAnimation(){return <span className="cupid-reference-heart" aria-hidden="true"><ReferenceHeart/><svg viewBox="0 0 170 120" className="cupid-arrow"><path d="M10 102L137 25" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/><path d="M137 25h-18M137 25v18" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg></span>}
 
 function NavButton({active,onClick,icon,label}:{active:boolean;onClick:()=>void;icon:ReactNode;label:string}){const rendered=active&&isValidElement(icon)?cloneElement(icon as any,{stroke:'url(#knotNavGradient)' }):icon;return <button className={active?'nav-item active':'nav-item'} onClick={onClick}><span className="nav-icon">{rendered}</span><span>{label}</span></button>}
 
@@ -573,10 +656,7 @@ function DemoChat({chat,back}:{chat:any;back:()=>void}){const storageKey=`knot-d
 
 function Chat({chat,back}:{chat:any;back:()=>void}){const [messages,setMessages]=useState<any[]>([]);const [body,setBody]=useState('');const [sending,setSending]=useState(false);const load=async()=>setMessages(await getMessages(chat.chat_id));useEffect(()=>{void load()},[chat.chat_id]);useEffect(()=>{const timer=window.setInterval(()=>void load(),4000);return()=>window.clearInterval(timer)},[chat.chat_id]);const send=async()=>{if(!body.trim()||sending)return;setSending(true);try{await sendMessage(chat.chat_id,body);setBody('');await load()}finally{setSending(false)}};return <div className="chat-panel"><div className="chat-head"><button className="icon-btn" onClick={back}><ArrowLeft/></button><Avatar path={chat.other_photo_path}/><div><strong>{chat.other_name}</strong><span>Trial chat · text only</span></div></div><div className="messages">{messages.map(m=><div key={m.id} className={m.sender_id===chat.other_id?'bubble theirs':'bubble mine'}>{m.body}</div>)}</div><div className="chat-compose"><input value={body} onChange={e=>setBody(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void send()}} placeholder="Write a message" maxLength={4000}/><button className="primary-icon" onClick={send}><ChevronRight/></button></div></div>}
 
-const DEMO_NOTIFICATIONS = [
-  {id:'demo-notification-1',type:'match',title:'Mutual interest',body:'Maya returned your interest',personId:'demo-maya',read_at:null},
-  {id:'demo-notification-2',type:'message',title:'New trial chat',body:'Your mutual connection is ready to start a conversation',personId:'demo-maya',chatId:'demo-chat-demo-maya',read_at:null},
-]
+const DEMO_NOTIFICATIONS: any[] = []
 function Notifications({items,onRead}:{items:any[];onRead:(id:string)=>Promise<void>}){return <section className="normal-section notifications-section"><div className="section-heading"><div><span>Activity</span><h1>Notifications</h1></div></div>{items.length===0?<div className="empty-state"><Bell/><h2>You’re all caught up</h2></div>:<div className="list-grid">{items.map(n=><button key={n.id} className={n.read_at?'notification-row':'notification-row unread'} onClick={()=>void onRead(n.id)}><div className="notification-icon">{n.type==='match'?<Heart/>:n.type==='message'?<MessageCircle/>:<Star/>}</div><div><strong>{n.title}</strong><span>{n.body}</span></div><ChevronRight/></button>)}</div>}</section>}
 function PersonNotificationModal({person,onClose,onOpenDiscover,onOpenChat}:{person:DiscoverProfile;onClose:()=>void;onOpenDiscover:()=>void;onOpenChat:()=>void}){return <div className="modal-backdrop" onClick={onClose}><div className="person-notification-modal" onClick={e=>e.stopPropagation()}><button className="person-modal-close" onClick={onClose} aria-label="Close"><X/></button><img src={person.photoUrl||'/favicon.ico'} alt={person.name}/><div className="person-modal-body"><span className="person-modal-kicker">Mutual interest</span><h2>{person.name}, {person.age}</h2><p>{person.school}</p><div className="person-modal-chips">{person.interests.map(x=><span key={x}>{x}</span>)}</div><div className="person-modal-actions"><button className="secondary-btn" onClick={onClose}>Close</button><button className="secondary-btn" onClick={onOpenDiscover}>View card</button><button className="primary-btn" onClick={onOpenChat}>Start trial chat</button></div></div></div></div>}
 

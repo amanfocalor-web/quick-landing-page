@@ -1,0 +1,6 @@
+# Cherub's AI engine — no Ollama and no OpenAI SDK required
+transformers>=5.17.0
+accelerate>=1.10.0
+torch>=2.7.0
+safetensors>=0.5.3
+sentencepiece>=0.2.0

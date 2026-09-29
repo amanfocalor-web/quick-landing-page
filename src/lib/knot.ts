@@ -39,6 +39,30 @@ export type DiscoverProfile = {
   tag?: string
 }
 
+
+export type CherubMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export type CherubToolRequest = { name: 'open_matches' | 'open_chats' | 'open_notifications' | 'open_profile' | 'open_secret_crush' }
+
+export async function askCherub(messages: CherubMessage[], mode: 'general' | 'conversation' | 'profile' | 'guide' | 'safety' = 'general', userId?: string) {
+  const client = assertSupabase()
+  const { data, error } = await client.functions.invoke('cherub', {
+    body: { messages, mode, userId: userId ?? '' },
+  })
+  if (error) throw error
+  const reply = typeof data?.reply === 'string' ? data.reply.trim() : ''
+  if (!reply) throw new Error('Cherub did not return a response')
+  return {
+    reply,
+    liveInfoUsed: Boolean(data?.liveInfoUsed),
+    path: typeof data?.path === 'string' ? data.path : 'general',
+    tool: data?.tool as CherubToolRequest | null,
+  }
+}
+
 export async function getSession() {
   const client = assertSupabase()
   return client.auth.getSession()

@@ -54,8 +54,9 @@ Deno.serve(async (req) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Cherub could not respond right now'
+    const status = message === 'Authentication required' ? 401 : 502
     return new Response(JSON.stringify({ error: message }), {
-      status: 401,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }

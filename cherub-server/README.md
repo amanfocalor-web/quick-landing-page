@@ -49,9 +49,9 @@ The development database is SQLite. Production should move this to an encrypted,
 
 ## Live information
 
-Cherub can trigger lightweight web retrieval when a request is clearly time-sensitive. Retrieved material is treated as untrusted reference data and cannot override Cherub's system rules.
+Cherub can trigger generic web research for current or time-sensitive questions — not just weather. The router looks for signals such as latest/current/recent/today/news/prices/schedules/releases and similar requests. The search adapter can use Brave Search when `BRAVE_SEARCH_API_KEY` is configured and falls back to DuckDuckGo HTML for development. Cherub also fetches a small page excerpt so the engine can reason from actual retrieved material instead of seeing only search-result titles.
 
-For production, replace the basic retrieval adapter with a dedicated search/crawling service, source validation, caching and rate limits.
+Retrieved pages are untrusted reference data and can never override Cherub's system rules. The API returns source titles and URLs so Knot can show citations alongside answers.
 
 ## App tools
 
@@ -98,3 +98,13 @@ Cherub backend
 ```
 
 Cherub remains the stable product layer even when the underlying engines are upgraded or replaced.
+
+## Live weather
+
+Weather questions use Open-Meteo's geocoding and forecast endpoints so Cherub can answer location-specific current-weather questions without a fixed answer database or an AI-provider API. Cherub passes the retrieved weather data into the selected intelligence engine and does not invent values when the lookup fails.
+
+## Direct local development
+
+For a local Knot + Cherub setup, set `VITE_CHERUB_BACKEND_URL=http://localhost:8787` in the frontend environment. The frontend sends the authenticated Supabase access token to Cherub, and Cherub verifies that token against Supabase before deriving the user ID. This avoids putting a Cherub service secret in the browser.
+
+For hosted Knot deployments, leave `VITE_CHERUB_BACKEND_URL` unset and use the Supabase Cherub proxy with `CHERUB_BACKEND_URL` and `CHERUB_BACKEND_TOKEN` configured server-side.

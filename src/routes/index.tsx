@@ -501,7 +501,7 @@ function Home({ profile, authPassword, tab, setTab, creator, onCreator, onRefres
       <button className="icon-btn menu-btn" onClick={()=>setMenuOpen(v=>!v)} aria-label="Open menu"><Menu size={21}/></button>
       <button className="home-top-star" onClick={()=>{setCrushUnlocked(false);setTab('discover')}} aria-label="Discover"><KnotStar color={profile.starColor || '#c084fc'}/></button>
       <div className="header-actions">
-        <button className="top-secret-crush" onClick={openCrushes} aria-label="Secret Crush"><CupidIcon/></button>
+        <button className="top-secret-crush" onClick={openCrushes} aria-label="Secret Crush"><ReferenceHeart className="secret-crush-reference-heart"/></button>
         <button className={`cherub-trigger ${cherubOpen?'active':''}`} onClick={()=>setCherubOpen(v=>!v)} aria-label="Open Cherub"><CherubWings/></button>
         <button className={`icon-btn notification-btn ${tab==='notifications'?'top-active':''}`} onClick={()=>setTab('notifications')} aria-label="Activity"><Activity size={20}/>{unread&&<i/>}</button>
         <button className="icon-btn" onClick={()=>setTab('profile')} aria-label="Profile"><UserRound size={19}/></button>
@@ -585,26 +585,16 @@ function SecretCrushPage({profiles,crushIds,onRemove,onBack,onOpenProfile}:{prof
 function CherubWings(){return <svg className="cherub-wings-svg" viewBox="0 0 64 44" aria-hidden="true"><path d="M30 22C25 11 19 5 10 5 6 5 4 8 5 12c2 7 8 12 18 15-7 1-11 4-13 8 8 0 16-4 20-13Z" fill="currentColor"/><path d="M34 22C39 11 45 5 54 5c4 0 6 3 5 7-2 7-8 12-18 15 7 1 11 4 13 8-8 0-16-4-20-13Z" fill="currentColor"/></svg>}
 
 function CherubPanel({profileId,profileName,onClose,onTool}:{profileId:string;profileName:string;onClose:()=>void;onTool:(tool:'open_matches'|'open_chats'|'open_notifications'|'open_profile'|'open_secret_crush')=>void}){
-  type Message={role:'user'|'assistant';content:string}
+  type Message={role:'user'|'assistant';content:string;sources?:{title:string;url:string}[]}
   const storageKey=`knot-cherub-${profileId}`
-  const [messages,setMessages]=useState<Message[]>(()=>{try{const raw=localStorage.getItem(storageKey);return raw?JSON.parse(raw):[{role:'assistant',content:`Hey ${profileName} — I’m Cherub ✦\nWhat can I help you with?`}] }catch{return[{role:'assistant',content:'Hey — I’m Cherub ✦\nWhat can I help you with?'}]}})
+  const [messages,setMessages]=useState<Message[]>(()=>{try{const raw=localStorage.getItem(storageKey);return raw?JSON.parse(raw):[{role:'assistant',content:`Hey ${profileName} — I’m Cherub ✦\nAsk me anything. I can help with Knot, general questions, planning, writing, and current information.`}] }catch{return[{role:'assistant',content:'Hey — I’m Cherub ✦\nAsk me anything.'}]}})
   const [input,setInput]=useState('')
-  const [mode,setMode]=useState<'general'|'conversation'|'profile'|'guide'|'safety'>('general')
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
   const scrollRef=useRef<HTMLDivElement>(null)
 
-  useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(messages))}catch{}},[messages,storageKey])
+  useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(messages.slice(-60)))}catch{}},[messages,storageKey])
   useEffect(()=>{scrollRef.current?.scrollTo({top:scrollRef.current.scrollHeight,behavior:'smooth'})},[messages,busy])
-
-  const demoReply=(text:string)=>{
-    const q=text.toLowerCase()
-    if(mode==='guide'||q.includes('secret crush')) return 'Secret Crush is private until the connection becomes mutual. It can also count as an Interested action, so a mutual Interested or Secret Crush can create a Match'
-    if(mode==='profile') return 'Sure — paste your current bio or profile prompt here and I can help make it clearer while keeping it sounding like you'
-    if(mode==='conversation') return 'Send me the message or tell me what you want to talk about, and I’ll suggest a few natural options you can choose from'
-    if(mode==='safety') return 'If a conversation feels uncomfortable, you can stop replying, block the person, or use Knot’s reporting controls. You stay in control of what you share'
-    return 'I can help with conversations, profiles, Knot features, or staying in control of your privacy. What do you need?'
-  }
 
   const send=async(text=input.trim())=>{
     if(!text||busy)return
@@ -612,32 +602,28 @@ function CherubPanel({profileId,profileName,onClose,onTool}:{profileId:string;pr
     const next=[...messages,{role:'user' as const,content:text}]
     setMessages(next);setBusy(true)
     try{
-      const result=await askCherub(next.slice(-12),mode,profileId)
-      setMessages([...next,{role:'assistant',content:result.reply}])
+      const result=await askCherub(next.slice(-12).map(m=>({role:m.role,content:m.content})), 'general', profileId)
+      setMessages([...next,{role:'assistant',content:result.reply,sources:result.sources}])
       if(result.tool?.name) onTool(result.tool.name)
     }catch(e:any){
-      const fallback=demoReply(text)
-      setMessages([...next,{role:'assistant',content:fallback}])
-      if(!String(e?.message||'').toLowerCase().includes('supabase is not configured')) setError('Live Cherub is not connected yet, so this is preview mode')
+      const message=String(e?.message||'Cherub could not respond right now')
+      setMessages(next)
+      setError(message.toLowerCase().includes('not configured')||message.toLowerCase().includes('connection')||message.toLowerCase().includes('failed')
+        ? 'Cherub is currently offline — the Cherub backend needs to be connected'
+        : 'Cherub hit a temporary error — please try again')
     }finally{setBusy(false)}
   }
 
-  const prompts=[
-    ['conversation','Help me with a message'],
-    ['profile','Help with my profile'],
-    ['guide','How does Secret Crush work?'],
-    ['safety','Help me with privacy'],
-  ] as const
+  const starters=['What can you help me with?','What’s happening in the world right now?','Help me plan something','How does Knot work?']
 
   return <div className="cherub-backdrop" onClick={onClose}><aside className="cherub-panel" onClick={e=>e.stopPropagation()} aria-label="Cherub assistant">
-    <div className="cherub-head"><div className="cherub-title-icon"><CherubWings/></div><div><span>Cherub</span><strong>Your Knot assistant</strong></div><button className="icon-btn" onClick={onClose} aria-label="Close Cherub"><X/></button></div>
-    <div className="cherub-modes">{prompts.map(([m,label])=><button key={m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{label}</button>)}</div>
-    <div className="cherub-messages" ref={scrollRef}>{messages.map((m,i)=><div key={`${i}-${m.role}`} className={`cherub-message ${m.role==='user'?'mine':''}`}>{m.content.split('\n').map((line,j)=><span key={j}>{line}{j<m.content.split('\n').length-1&&<br/>}</span>)}</div>)}{busy&&<div className="cherub-message typing"><span/><span/><span/></div>}</div>
+    <div className="cherub-head"><div className="cherub-title-icon"><CherubWings/></div><div><span>Cherub</span><strong>Your personal Knot assistant</strong></div><button className="icon-btn" onClick={onClose} aria-label="Close Cherub"><X/></button></div>
+    <div className="cherub-starters">{starters.map(starter=><button key={starter} onClick={()=>setInput(starter)}>{starter}</button>)}</div>
+    <div className="cherub-messages" ref={scrollRef}>{messages.map((m,i)=><div key={`${i}-${m.role}`} className={`cherub-message-wrap ${m.role==='user'?'mine':''}`}><div className={`cherub-message ${m.role==='user'?'mine':''}`}>{m.content.split('\n').map((line,j)=><span key={j}>{line}{j<m.content.split('\n').length-1&&<br/>}</span>)}</div>{m.role==='assistant'&&m.sources?.length?<div className="cherub-sources"><span>Sources</span>{m.sources.slice(0,5).map((source,j)=><a key={`${source.url}-${j}`} href={source.url} target="_blank" rel="noreferrer noopener">{source.title}</a>)}</div>:null}</div>)}{busy&&<div className="cherub-message typing"><span/><span/><span/></div>}</div>
     {error&&<div className="cherub-note">{error}</div>}
-    <form className="cherub-compose" onSubmit={e=>{e.preventDefault();void send()}}><input value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask Cherub…" maxLength={2000}/><button className="cherub-send" disabled={!input.trim()||busy} aria-label="Send"><ChevronRight/></button></form>
+    <form className="cherub-compose" onSubmit={e=>{e.preventDefault();void send()}}><input value={input} onChange={e=>setInput(e.target.value)} placeholder="Ask Cherub anything…" maxLength={4000}/><button className="cherub-send" disabled={!input.trim()||busy} aria-label="Send"><ChevronRight/></button></form>
   </aside></div>
 }
-
 function KnotStar({color}:{color:string}){return <svg className="knot-star-svg" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="homeKnotStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#182b59"/><stop offset=".34" stopColor="#e85f9e"/><stop offset=".62" stopColor="#8b5cf6"/><stop offset="1" stopColor="#f59a52"/></linearGradient><filter id="homeKnotGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="homeKnotShadow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs><path className="knot-star-shadow" d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill={color} opacity=".62" filter="url(#homeKnotShadow)"/><path d="M100 4 C102 56 108 82 151 96 C166 99 181 100 196 100 C181 101 166 102 151 104 C108 118 102 144 100 196 C98 144 92 118 49 104 C34 102 19 101 4 100 C19 99 34 98 49 96 C92 82 98 56 100 4 Z" fill="url(#homeKnotStar)" filter="url(#homeKnotGlow)"/></svg>}
 function CupidIcon(){return <svg className="cupid-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M31 50C20 43 11 36 11 25c0-7 5-12 12-12 4 0 7 2 9 6 2-4 5-6 9-6 7 0 12 5 12 12 0 5-2 9-6 13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M14 51L48 17" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M42 17h9v9" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 

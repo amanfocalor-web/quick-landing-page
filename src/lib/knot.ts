@@ -46,13 +46,34 @@ export type CherubMessage = {
 }
 
 export type CherubToolRequest = { name: 'open_matches' | 'open_chats' | 'open_notifications' | 'open_profile' | 'open_secret_crush' }
+export type CherubSource = { title: string; url: string }
 
 export async function askCherub(messages: CherubMessage[], mode: 'general' | 'conversation' | 'profile' | 'guide' | 'safety' = 'general', userId?: string) {
-  const client = assertSupabase()
-  const { data, error } = await client.functions.invoke('cherub', {
-    body: { messages, mode, userId: userId ?? '' },
-  })
-  if (error) throw error
+  const directUrl = (import.meta.env.VITE_CHERUB_BACKEND_URL as string | undefined)?.replace(/\/$/, '')
+
+  let data: any
+  if (directUrl) {
+    const session = (await assertSupabase().auth.getSession()).data.session
+    if (!session?.access_token) throw new Error('Cherub requires an authenticated session')
+    const response = await fetch(`${directUrl}/chat`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages, mode, userId: userId ?? '' }),
+    })
+    data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(typeof data?.error === 'string' ? data.error : 'Cherub backend returned an error')
+  } else {
+    const client = assertSupabase()
+    const result = await client.functions.invoke('cherub', {
+      body: { messages, mode, userId: userId ?? '' },
+    })
+    if (result.error) throw result.error
+    data = result.data
+  }
+
   const reply = typeof data?.reply === 'string' ? data.reply.trim() : ''
   if (!reply) throw new Error('Cherub did not return a response')
   return {
@@ -60,6 +81,7 @@ export async function askCherub(messages: CherubMessage[], mode: 'general' | 'co
     liveInfoUsed: Boolean(data?.liveInfoUsed),
     path: typeof data?.path === 'string' ? data.path : 'general',
     tool: data?.tool as CherubToolRequest | null,
+    sources: Array.isArray(data?.sources) ? data.sources.filter((x: any) => typeof x?.title === 'string' && typeof x?.url === 'string') as CherubSource[] : [],
   }
 }
 

@@ -3430,3 +3430,36 @@ body, #root, button, input, textarea, select, .knot-loading, .profile-page, .set
 @media(max-width:720px){
   .cherub-panel { top: 70px; right: 10px; width: calc(100vw - 20px); height: min(680px, calc(100vh - 92px)); }
 }
+
+/* KNOT v47 — canonical heart reference
+   The uploaded Knot heart is the single source for heart visuals. */
+.top-secret-crush .secret-crush-reference-heart {
+  width: 22px;
+  height: 25px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(216,180,254,.28));
+}
+.top-secret-crush:hover .secret-crush-reference-heart,
+.top-secret-crush:focus-visible .secret-crush-reference-heart {
+  transform: scale(1.08);
+}
+.action-animation .reference-heart {
+  filter: drop-shadow(0 0 18px rgba(216,180,254,.35));
+}
+.cherub-note { line-height: 1.45; }
+
+/* KNOT v48 — Cherub is a general assistant, not a set of canned modes */
+.cherub-starters { display:flex; gap:7px; overflow-x:auto; padding:11px 14px 9px; scrollbar-width:none; }
+.cherub-starters::-webkit-scrollbar { display:none; }
+.cherub-starters button { flex:0 0 auto; border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:8px 11px; color:rgba(255,255,255,.62); background:rgba(255,255,255,.045); cursor:pointer; font-size:.68rem; font-weight:700; }
+.cherub-starters button:hover { color:#fff; border-color:rgba(224,173,255,.3); background:rgba(192,132,252,.12); }
+.cherub-message-wrap { display:flex; flex-direction:column; align-items:flex-start; gap:5px; }
+.cherub-message-wrap.mine { align-items:flex-end; }
+.cherub-sources { max-width:86%; display:flex; flex-wrap:wrap; gap:5px; align-items:center; padding:0 2px; }
+.cherub-sources > span { color:rgba(255,255,255,.35); font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.cherub-sources a { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(220,190,255,.78); font-size:.62rem; text-decoration:none; border:1px solid rgba(216,180,254,.12); border-radius:999px; padding:4px 7px; background:rgba(216,180,254,.045); }
+.cherub-sources a:hover { color:#fff; border-color:rgba(216,180,254,.3); }
+.app-shell.light .cherub-starters button { color:rgba(36,32,59,.58); border-color:rgba(36,32,59,.09); background:rgba(255,255,255,.55); }
+.app-shell.light .cherub-sources > span { color:rgba(36,32,59,.4); }
+.app-shell.light .cherub-sources a { color:rgba(91,65,120,.78); border-color:rgba(91,65,120,.12); background:rgba(180,135,220,.06); }
